@@ -11,6 +11,10 @@ const sections = [
     ],
   },
   {
+    title: 'Core Concepts',
+    links: [{ label: 'Layer 1: Project Knowledge Base', to: '/docs/core-concepts/layer-1' }],
+  },
+  {
     title: 'CAF Initiator',
     links: [{ label: 'CAF Initiator', to: '/docs/caf-initiator' }],
   },
