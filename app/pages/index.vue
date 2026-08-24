@@ -15,4 +15,5 @@ definePageMeta({
   <LandingFeatureGrid />
   <LandingCoreComponents />
   <LandingPipelineDiagram />
+  <LandingFaq />
 </template>
