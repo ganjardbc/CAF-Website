@@ -10,6 +10,10 @@ const sections = [
       { label: 'Konsep PIV', to: '/docs/piv' },
     ],
   },
+  {
+    title: 'CAF Initiator',
+    links: [{ label: 'CAF Initiator', to: '/docs/caf-initiator' }],
+  },
 ]
 </script>
 
