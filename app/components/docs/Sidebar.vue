@@ -1,5 +1,6 @@
 <script setup lang="ts">
 const route = useRoute()
+const router = useRouter()
 
 const sections = [
   {
@@ -44,23 +45,42 @@ const sections = [
     ],
   },
 ]
+
+const selected = computed({
+  get: () => route.path,
+  set: (to: string) => router.push(to),
+})
 </script>
 
 <template>
-  <nav class="flex flex-col gap-lg">
-    <div v-for="section in sections" :key="section.title" class="flex flex-col gap-xs">
-      <span class="text-xs font-medium uppercase tracking-wide text-mute">
-        {{ section.title }}
-      </span>
-      <NuxtLink
-        v-for="link in section.links"
-        :key="link.to"
-        :to="link.to"
-        class="text-sm"
-        :class="route.path === link.to ? 'font-medium text-ink' : 'text-body hover:text-ink'"
-      >
-        {{ link.label }}
-      </NuxtLink>
-    </div>
-  </nav>
+  <div>
+    <select
+      v-model="selected"
+      class="w-full rounded-sm border border-hairline bg-canvas-elevated px-sm py-xs text-sm text-ink lg:hidden"
+      aria-label="Navigasi docs"
+    >
+      <optgroup v-for="section in sections" :key="section.title" :label="section.title">
+        <option v-for="link in section.links" :key="link.to" :value="link.to">
+          {{ link.label }}
+        </option>
+      </optgroup>
+    </select>
+
+    <nav class="hidden flex-col gap-lg lg:flex">
+      <div v-for="section in sections" :key="section.title" class="flex flex-col gap-xs">
+        <span class="text-xs font-medium uppercase tracking-wide text-mute">
+          {{ section.title }}
+        </span>
+        <NuxtLink
+          v-for="link in section.links"
+          :key="link.to"
+          :to="link.to"
+          class="text-sm"
+          :class="route.path === link.to ? 'font-medium text-ink' : 'text-body hover:text-ink'"
+        >
+          {{ link.label }}
+        </NuxtLink>
+      </div>
+    </nav>
+  </div>
 </template>

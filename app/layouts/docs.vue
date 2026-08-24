@@ -8,8 +8,8 @@ useSeoMeta({
 <template>
   <div class="flex min-h-screen flex-col">
     <SharedNavbar />
-    <div class="mx-auto flex w-full max-w-[1200px] flex-1 gap-xl px-lg py-xl">
-      <aside class="hidden w-56 shrink-0 border-r border-hairline pr-lg lg:block">
+    <div class="mx-auto flex w-full max-w-[1200px] flex-1 flex-col gap-lg px-lg py-xl lg:flex-row lg:gap-xl">
+      <aside class="shrink-0 lg:w-56 lg:border-r lg:border-hairline lg:pr-lg">
         <DocsSidebar />
       </aside>
       <main class="min-w-0 flex-1">
