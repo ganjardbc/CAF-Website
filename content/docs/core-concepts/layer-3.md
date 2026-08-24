@@ -50,4 +50,5 @@ memahami *kenapa* sebuah keputusan diambil, bukan cuma *apa* yang berubah.
 ## Hubungan dengan layer lain
 
 Format artifact ditentukan oleh **Layer 2: Agent Definitions**. `verify-report.md` yang
-dihasilkan di layer ini menjadi input untuk **Layer 4: Quality Gates**.
+dihasilkan di layer ini menjadi input untuk
+[Layer 4: Quality Gates](/docs/core-concepts/layer-4).
