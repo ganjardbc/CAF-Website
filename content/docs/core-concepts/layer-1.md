@@ -32,6 +32,7 @@ menimpanya otomatis di run berikutnya kecuali kamu memintanya lewat `caf-initiat
 
 ## Hubungan dengan layer lain
 
-Layer 1 adalah input untuk **Layer 2: Agent Definitions** — setiap definisi agent di
+Layer 1 adalah input untuk [Layer 2: Agent Definitions](/docs/core-concepts/layer-2) —
+setiap definisi agent di
 `.claude/agents/` mengacu balik ke `PROJECT.md` supaya perilaku tiap role tetap selaras
 dengan konteks proyek yang sama.
