@@ -3,7 +3,7 @@ export default defineNuxtConfig({
   compatibilityDate: '2026-01-01',
   devtools: { enabled: true },
 
-  modules: ['@nuxtjs/tailwindcss', '@nuxt/content', '@nuxtjs/seo'],
+  modules: ['@nuxtjs/tailwindcss', '@nuxt/content', '@nuxtjs/seo', '@nuxt/icon'],
 
   css: ['~/assets/css/main.css'],
 

@@ -14,7 +14,7 @@
         -webkit-mask-image: linear-gradient(to bottom, black 0%, transparent 85%);"
     />
 
-    <div class="relative mx-auto flex max-w-[1200px] flex-col items-center px-lg py-4xl text-center sm:py-section">
+    <div class="relative mx-auto flex max-w-[1200px] flex-col items-center px-lg pt-4xl pb-2xl text-center sm:pt-section sm:pb-3xl">
       <NuxtLink
         to="/changelog"
         class="mb-lg inline-flex items-center gap-xs rounded-pill border border-hairline bg-canvas-elevated px-sm py-xxs text-xs text-body hover:text-ink"
