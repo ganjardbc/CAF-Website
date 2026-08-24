@@ -28,6 +28,14 @@ const sections = [
     title: 'CAF Orchestrator',
     links: [{ label: 'CAF Orchestrator', to: '/docs/caf-orchestrator' }],
   },
+  {
+    title: 'Integrations',
+    links: [
+      { label: 'Linear', to: '/docs/integrations/linear' },
+      { label: 'Jira', to: '/docs/integrations/jira' },
+      { label: 'GitHub / GitLab', to: '/docs/integrations/github-gitlab' },
+    ],
+  },
 ]
 </script>
 
