@@ -1,6 +1,6 @@
 # Plan Website CAF (Coderium Agent Framework) — v1.0.0
 
-Project baru, terpisah dari `coderium-web-v2`. Stack: Nuxt 3 (classic structure) + Tailwind CSS.
+Project baru, terpisah dari `coderium-web-v2`. Stack: Nuxt 4 (struktur `app/`) + Tailwind CSS.
 Gaya referensi: opencode.ai (dev-tool marketing site, teknikal, to-the-point) untuk struktur konten
 dan copywriting. Sistem visual (warna, tipografi, spacing, komponen) mengikuti spesifikasi di
 `DESIGN.md` — Vercel Geist system: canvas near-white/ink near-black, hairline border, mesh gradient
@@ -172,26 +172,29 @@ Karena CAF masih gratis dan open-ish, isi minimal yang wajib ada:
 
 ### Struktur folder Nuxt yang disarankan
 
-Nuxt 3 struktur klasik (tanpa wrapper `app/` — `compatibilityVersion` default 3, `pages/`,
-`components/`, `layouts/` langsung di root project):
+Nuxt 4 (struktur `app/` default) — `pages/`, `components/`, `layouts/`, `assets/` ada di
+dalam `app/`; `content/`, `server/`, `public/` tetap di root project:
 
 ```
 caf-website/
-├── components/
-│   ├── landing/         (Hero, FeatureGrid, PipelineDiagram, FAQ, dst)
-│   ├── docs/             (Sidebar, TocSidebar, CodeBlock)
-│   └── shared/           (Navbar, Footer, GithubStarBadge)
-├── pages/
-│   ├── index.vue
-│   ├── about.vue
-│   ├── docs/
-│   │   └── [...slug].vue
-│   └── legal/
-│       ├── terms.vue
-│       └── privacy.vue
-├── layouts/
-│   ├── default.vue
-│   └── docs.vue          (layout dengan sidebar, beda dari landing)
+├── app/
+│   ├── components/
+│   │   ├── landing/         (Hero, FeatureGrid, PipelineDiagram, FAQ, dst)
+│   │   ├── docs/             (Sidebar, TocSidebar, CodeBlock)
+│   │   └── shared/           (Navbar, Footer, GithubStarBadge)
+│   ├── pages/
+│   │   ├── index.vue
+│   │   ├── about.vue
+│   │   ├── docs/
+│   │   │   └── [...slug].vue
+│   │   └── legal/
+│   │       ├── terms.vue
+│   │       └── privacy.vue
+│   ├── layouts/
+│   │   ├── default.vue
+│   │   └── docs.vue          (layout dengan sidebar, beda dari landing)
+│   └── assets/
+│       └── css/
 ├── content/
 │   └── docs/                 (file .md untuk semua docs page)
 ├── server/
