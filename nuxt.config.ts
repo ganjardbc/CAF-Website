@@ -20,14 +20,8 @@ export default defineNuxtConfig({
 
   nitro: {
     prerender: {
-      // Fase 1: hanya '/' ada. crawlLinks + link-checker akan diaktifkan lagi
-      // begitu semua halaman di sitemap (docs, about, legal, changelog) sudah dibuat.
-      crawlLinks: false,
+      crawlLinks: true,
       routes: ['/'],
     },
-  },
-
-  linkChecker: {
-    enabled: false,
   },
 })
