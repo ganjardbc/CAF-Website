@@ -17,6 +17,14 @@ useSeoMeta({
   title: () => page.value?.title,
   description: () => page.value?.description,
 })
+
+useSchemaOrg([
+  defineArticle({
+    '@type': 'TechArticle',
+    headline: page.value?.title,
+    description: page.value?.description,
+  }),
+])
 </script>
 
 <template>
