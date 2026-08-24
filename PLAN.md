@@ -1,7 +1,11 @@
 # Plan Website CAF (Coderium Agent Framework) — v1.0.0
 
-Project baru, terpisah dari `coderium-web-v2`. Stack: Nuxt 3 + Tailwind CSS.
-Gaya referensi: opencode.ai (dev-tool marketing site, dark, teknikal, to-the-point).
+Project baru, terpisah dari `coderium-web-v2`. Stack: Nuxt 4 (struktur `app/`) + Tailwind CSS.
+Gaya referensi: opencode.ai (dev-tool marketing site, teknikal, to-the-point) untuk struktur konten
+dan copywriting. Sistem visual (warna, tipografi, spacing, komponen) mengikuti spesifikasi di
+`DESIGN.md` — Vercel Geist system: canvas near-white/ink near-black, hairline border, mesh gradient
+hanya di hero, font Geist Sans + Geist Mono. Lihat `DESIGN.md` sebagai sumber kebenaran tunggal
+untuk semua keputusan visual/komponen; PLAN.md ini fokus ke struktur, sitemap, dan urutan kerja.
 
 ---
 
@@ -161,12 +165,15 @@ Karena CAF masih gratis dan open-ish, isi minimal yang wajib ada:
 | Styling | Tailwind CSS (`@nuxtjs/tailwindcss`) |
 | Docs content | `@nuxt/content` v3 (Markdown → halaman, built-in TOC, code block syntax highlight) |
 | SEO | `@nuxtjs/seo` (gabungan sitemap, robots, OG image, schema.org, canonical — satu modul, jangan pasang modul SEO manual satu-satu) |
-| Font | Font teknikal seperti opencode: sans untuk body + monospace untuk command/code snippet |
+| Font | **Geist Sans** (body/heading, fallback: Inter, Arial) + **Geist Mono** (code, command snippet, uppercase eyebrow label; fallback: JetBrains Mono/IBM Plex Mono) — sesuai `DESIGN.md` |
 | Icon | `@iconify` atau lucide (ringan, banyak icon dev-tool) |
 | Deploy | Vercel atau Cloudflare Pages — keduanya native-support Nuxt SSG/hybrid, gratis untuk trafik awal |
 | Analytics | Plausible/Umami (privacy-friendly) — konsisten dengan pesan privacy CAF, hindari Google Analytics kalau mau selaras positioning |
 
 ### Struktur folder Nuxt yang disarankan
+
+Nuxt 4 (struktur `app/` default) — `pages/`, `components/`, `layouts/`, `assets/` ada di
+dalam `app/`; `content/`, `server/`, `public/` tetap di root project:
 
 ```
 caf-website/
@@ -183,9 +190,11 @@ caf-website/
 │   │   └── legal/
 │   │       ├── terms.vue
 │   │       └── privacy.vue
-│   └── layouts/
-│       ├── default.vue
-│       └── docs.vue          (layout dengan sidebar, beda dari landing)
+│   ├── layouts/
+│   │   ├── default.vue
+│   │   └── docs.vue          (layout dengan sidebar, beda dari landing)
+│   └── assets/
+│       └── css/
 ├── content/
 │   └── docs/                 (file .md untuk semua docs page)
 ├── server/
