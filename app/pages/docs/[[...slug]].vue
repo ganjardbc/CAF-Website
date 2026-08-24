@@ -86,4 +86,20 @@ useSeoMeta({
 .docs-prose pre code {
   @apply bg-transparent p-0;
 }
+
+.docs-prose table {
+  @apply mt-md w-full border-collapse overflow-hidden rounded-md border border-hairline text-sm;
+}
+
+.docs-prose th {
+  @apply border-b border-hairline bg-hairline-soft px-sm py-xs text-left font-medium text-ink;
+}
+
+.docs-prose td {
+  @apply border-b border-hairline px-sm py-xs text-body;
+}
+
+.docs-prose tr:last-child td {
+  @apply border-b-0;
+}
 </style>

@@ -14,6 +14,10 @@ const sections = [
     title: 'CAF Initiator',
     links: [{ label: 'CAF Initiator', to: '/docs/caf-initiator' }],
   },
+  {
+    title: 'CAF Orchestrator',
+    links: [{ label: 'CAF Orchestrator', to: '/docs/caf-orchestrator' }],
+  },
 ]
 </script>
 
