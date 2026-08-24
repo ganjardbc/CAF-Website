@@ -17,6 +17,7 @@ const sections = [
       { label: 'Layer 2: Agent Definitions', to: '/docs/core-concepts/layer-2' },
       { label: 'Layer 3: Artifact Handoff', to: '/docs/core-concepts/layer-3' },
       { label: 'Layer 4: Quality Gates', to: '/docs/core-concepts/layer-4' },
+      { label: 'Layer 5: Orchestration', to: '/docs/core-concepts/layer-5' },
     ],
   },
   {

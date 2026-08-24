@@ -44,5 +44,6 @@ membedakan CAF dari orkestrator agent yang mengejar kecepatan lewat auto-merge.
 ## Hubungan dengan layer lain
 
 Layer 4 mengonsumsi `verify-report.md` dari **Layer 3**, dan hasil keputusan gate-nya
-menentukan apakah **Layer 5: Orchestration** boleh melanjutkan pipeline ke fase berikutnya
+menentukan apakah [Layer 5: Orchestration](/docs/core-concepts/layer-5) boleh
+melanjutkan pipeline ke fase berikutnya
 atau berhenti menunggu manusia.
