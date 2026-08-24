@@ -36,6 +36,13 @@ const sections = [
       { label: 'GitHub / GitLab', to: '/docs/integrations/github-gitlab' },
     ],
   },
+  {
+    title: 'Reference',
+    links: [
+      { label: 'Environment Variables', to: '/docs/reference/environment-variables' },
+      { label: 'Troubleshooting', to: '/docs/reference/troubleshooting' },
+    ],
+  },
 ]
 </script>
 
