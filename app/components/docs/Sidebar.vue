@@ -1,8 +1,14 @@
 <script setup lang="ts">
+const route = useRoute()
+
 const sections = [
   {
     title: 'Getting Started',
-    links: [{ label: 'Introduction', to: '/docs' }],
+    links: [
+      { label: 'Introduction', to: '/docs' },
+      { label: 'Quick Start', to: '/docs/quick-start' },
+      { label: 'Konsep PIV', to: '/docs/piv' },
+    ],
   },
 ]
 </script>
@@ -17,7 +23,8 @@ const sections = [
         v-for="link in section.links"
         :key="link.to"
         :to="link.to"
-        class="text-sm text-body hover:text-ink"
+        class="text-sm"
+        :class="route.path === link.to ? 'font-medium text-ink' : 'text-body hover:text-ink'"
       >
         {{ link.label }}
       </NuxtLink>
