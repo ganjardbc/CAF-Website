@@ -14,7 +14,7 @@ export default defineNuxtConfig({
   },
 
   site: {
-    url: 'https://caf.coderium.dev',
+    url: 'https://caf-website-jade.vercel.app',
     name: 'CAF',
   },
 
