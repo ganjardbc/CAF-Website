@@ -6,6 +6,7 @@ const navLinks = [
 
 const mobileOpen = ref(false)
 const route = useRoute()
+const scrolled = ref(false)
 
 watch(
   () => route.fullPath,
@@ -13,10 +14,30 @@ watch(
     mobileOpen.value = false
   },
 )
+
+function onScroll() {
+  scrolled.value = window.scrollY > 0
+}
+
+onMounted(() => {
+  onScroll()
+  window.addEventListener('scroll', onScroll, { passive: true })
+})
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', onScroll)
+})
 </script>
 
 <template>
-  <header class="relative border-b border-hairline bg-canvas">
+  <header
+    class="sticky top-0 z-40 border-b transition-colors"
+    :class="
+      scrolled
+        ? 'border-hairline bg-canvas/80 backdrop-blur-md'
+        : 'border-transparent bg-canvas'
+    "
+  >
     <nav class="mx-auto flex max-w-[1200px] items-center justify-between px-lg py-sm">
       <NuxtLink to="/" class="font-mono text-sm font-semibold tracking-tight text-ink">
         CAF
