@@ -12,6 +12,31 @@ const nodeWidth = 160
 const nodeHeight = 80
 const nodeY = 60
 const centerY = nodeY + nodeHeight / 2
+
+const colorMode = useColorMode()
+const palette = computed(() =>
+  colorMode.value === 'dark'
+    ? {
+        canvasElevated: '#171717',
+        hairline: '#2e2e2e',
+        mute: '#8a8a8a',
+        faint: '#6b6b6b',
+        highlightBg: '#ededed',
+        highlightText: '#0a0a0a',
+        highlightSubtle: '#525252',
+        ink: '#ededed',
+      }
+    : {
+        canvasElevated: '#ffffff',
+        hairline: '#ebebeb',
+        mute: '#8f8f8f',
+        faint: '#a1a1a1',
+        highlightBg: '#171717',
+        highlightText: '#fafafa',
+        highlightSubtle: '#d1d1d1',
+        ink: '#171717',
+      },
+)
 </script>
 
 <template>
@@ -46,7 +71,7 @@ const centerY = nodeY + nodeHeight / 2
             markerHeight="7"
             orient="auto-start-reverse"
           >
-            <path d="M0,0 L10,5 L0,10 z" fill="#8f8f8f" />
+            <path d="M0,0 L10,5 L0,10 z" :fill="palette.mute" />
           </marker>
         </defs>
 
@@ -57,7 +82,7 @@ const centerY = nodeY + nodeHeight / 2
             :y1="centerY"
             :x2="stages[index + 1].x"
             :y2="centerY"
-            stroke="#8f8f8f"
+            :stroke="palette.mute"
             stroke-width="1.5"
             marker-end="url(#pipeline-arrow)"
           />
@@ -70,13 +95,13 @@ const centerY = nodeY + nodeHeight / 2
             :width="nodeWidth"
             :height="nodeHeight"
             rx="12"
-            :fill="stage.highlight ? '#171717' : '#ffffff'"
-            stroke="#ebebeb"
+            :fill="stage.highlight ? palette.highlightBg : palette.canvasElevated"
+            :stroke="palette.hairline"
           />
 
           <g v-if="stage.highlight" :transform="`translate(${stage.x + nodeWidth / 2 - 7}, ${nodeY + 14})`">
-            <rect x="0" y="6" width="14" height="10" rx="2" fill="none" stroke="#fafafa" stroke-width="1.3" />
-            <path d="M3,6 V4 a4,4 0 0 1 8,0 V6" fill="none" stroke="#fafafa" stroke-width="1.3" />
+            <rect x="0" y="6" width="14" height="10" rx="2" fill="none" :stroke="palette.highlightText" stroke-width="1.3" />
+            <path d="M3,6 V4 a4,4 0 0 1 8,0 V6" fill="none" :stroke="palette.highlightText" stroke-width="1.3" />
           </g>
           <text
             v-else
@@ -85,7 +110,7 @@ const centerY = nodeY + nodeHeight / 2
             text-anchor="middle"
             font-family="ui-monospace, monospace"
             font-size="10"
-            fill="#a1a1a1"
+            :fill="palette.faint"
           >
             {{ String(stages.indexOf(stage) + 1).padStart(2, '0') }}
           </text>
@@ -97,7 +122,7 @@ const centerY = nodeY + nodeHeight / 2
             font-family="inherit"
             font-size="16"
             font-weight="600"
-            :fill="stage.highlight ? '#fafafa' : '#171717'"
+            :fill="stage.highlight ? palette.highlightText : palette.ink"
           >
             {{ stage.title }}
           </text>
@@ -108,7 +133,7 @@ const centerY = nodeY + nodeHeight / 2
             text-anchor="middle"
             font-family="inherit"
             font-size="11"
-            :fill="stage.highlight ? '#d1d1d1' : '#8f8f8f'"
+            :fill="stage.highlight ? palette.highlightSubtle : palette.mute"
           >
             {{ stage.subtitle }}
           </text>

@@ -7,6 +7,11 @@ const navLinks = [
 const mobileOpen = ref(false)
 const route = useRoute()
 const scrolled = ref(false)
+const colorMode = useColorMode()
+
+function toggleColorMode() {
+  colorMode.preference = colorMode.value === 'dark' ? 'light' : 'dark'
+}
 
 watch(
   () => route.fullPath,
@@ -55,6 +60,23 @@ onUnmounted(() => {
       </div>
 
       <div class="flex items-center gap-sm">
+        <button
+          type="button"
+          class="flex h-8 w-8 items-center justify-center rounded-sm border border-hairline text-ink"
+          aria-label="Toggle color theme"
+          @click="toggleColorMode"
+        >
+          <ClientOnly>
+            <Icon
+              :name="colorMode.value === 'dark' ? 'lucide:sun' : 'lucide:moon'"
+              class="h-4 w-4"
+            />
+            <template #fallback>
+              <span class="block h-4 w-4" />
+            </template>
+          </ClientOnly>
+        </button>
+
         <a
           href="https://github.com"
           target="_blank"

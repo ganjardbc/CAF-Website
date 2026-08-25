@@ -4,7 +4,7 @@
 <template>
   <section class="relative overflow-hidden bg-canvas">
     <div
-      class="pointer-events-none absolute inset-x-0 top-0 h-[520px] opacity-25 blur-[100px]"
+      class="pointer-events-none absolute inset-x-0 top-0 h-[520px] opacity-25 blur-[100px] dark:opacity-40"
       style="background: radial-gradient(30% 50% at 25% 15%, #50e3c2 0%, transparent 100%),
         radial-gradient(30% 50% at 42% 5%, #0070f3 0%, transparent 100%),
         radial-gradient(30% 50% at 58% 15%, #7928ca 0%, transparent 100%),
