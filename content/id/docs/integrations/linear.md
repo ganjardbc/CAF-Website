@@ -5,7 +5,7 @@ description: Hubungkan CAF Orchestrator ke Linear supaya pipeline trigger otomat
 
 CAF Orchestrator memantau perubahan status ticket di Linear lewat webhook, lalu
 mengantrikan fase yang sesuai. Halaman ini melengkapi setup dasar di
-[CAF Orchestrator](/docs/caf-orchestrator) dengan langkah spesifik untuk Linear.
+[CAF Orchestrator](/id/docs/caf-orchestrator) dengan langkah spesifik untuk Linear.
 
 ## 1. Buat API key
 
@@ -36,6 +36,6 @@ konfigurasi orchestrator.
 
 ## Yang terjadi setelah webhook diterima
 
-Alurnya sama seperti dijelaskan di [CAF Orchestrator](/docs/caf-orchestrator): payload
+Alurnya sama seperti dijelaskan di [CAF Orchestrator](/id/docs/caf-orchestrator): payload
 diverifikasi, job masuk antrian BullMQ, lalu agent Claude Code headless untuk fase itu
 dijalankan.

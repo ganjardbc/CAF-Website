@@ -1,12 +1,14 @@
 <script setup lang="ts">
-const stages = [
-  { title: 'Ticket', subtitle: 'Linear · Jira', x: 40 },
-  { title: 'Plan', subtitle: 'Planner agent', x: 250 },
-  { title: 'Implement', subtitle: 'Coding agent', x: 460 },
-  { title: 'QA', subtitle: 'Scanner agent · read-only', x: 670 },
-  { title: 'Review', subtitle: 'Human checkpoint', x: 880, highlight: true },
-  { title: 'PR', subtitle: 'Merged', x: 1090 },
-]
+const { t } = useI18n()
+
+const stages = computed(() => [
+  { title: t('pipeline.stages.ticket.title'), subtitle: t('pipeline.stages.ticket.subtitle'), x: 40 },
+  { title: t('pipeline.stages.plan.title'), subtitle: t('pipeline.stages.plan.subtitle'), x: 250 },
+  { title: t('pipeline.stages.implement.title'), subtitle: t('pipeline.stages.implement.subtitle'), x: 460 },
+  { title: t('pipeline.stages.qa.title'), subtitle: t('pipeline.stages.qa.subtitle'), x: 670 },
+  { title: t('pipeline.stages.review.title'), subtitle: t('pipeline.stages.review.subtitle'), x: 880, highlight: true },
+  { title: t('pipeline.stages.pr.title'), subtitle: t('pipeline.stages.pr.subtitle'), x: 1090 },
+])
 
 const nodeWidth = 160
 const nodeHeight = 80
@@ -43,15 +45,20 @@ const palette = computed(() =>
   <section class="mx-auto max-w-[1200px] px-lg pt-2xl pb-4xl sm:pt-3xl sm:pb-section">
     <div class="mb-2xl text-center">
       <span class="font-mono text-xs font-medium uppercase tracking-wide text-mute">
-        Pipeline
+        {{ t('pipeline.eyebrow') }}
       </span>
       <h2 class="mt-xs text-2xl font-semibold tracking-[-1.28px] text-ink sm:text-[32px] sm:leading-[40px]">
-        Ticket sampai PR, dengan gate manusia
+        {{ t('pipeline.title') }}
       </h2>
-      <p class="mx-auto mt-sm max-w-xl text-sm text-body sm:text-base">
-        Setiap panah menuju PR melewati checkpoint <strong class="text-ink">Review</strong> —
-        tidak ada jalur yang melewatkannya.
-      </p>
+      <i18n-t
+        keypath="pipeline.description"
+        tag="p"
+        class="mx-auto mt-sm max-w-xl text-sm text-body sm:text-base"
+      >
+        <template #review>
+          <strong class="text-ink">{{ t('pipeline.reviewHighlight') }}</strong>
+        </template>
+      </i18n-t>
     </div>
 
     <div class="overflow-x-auto">
@@ -59,7 +66,7 @@ const palette = computed(() =>
         viewBox="0 0 1290 200"
         class="mx-auto block h-auto min-w-[860px] max-w-full"
         role="img"
-        aria-label="Diagram pipeline CAF: Ticket dari Linear atau Jira mengalir ke Plan, Implement, QA, lalu wajib melalui checkpoint Review oleh manusia sebelum menjadi PR."
+        :aria-label="t('pipeline.ariaLabel')"
       >
         <defs>
           <marker

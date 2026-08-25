@@ -1,8 +1,14 @@
 <script setup lang="ts">
-const navLinks = [
-  { label: 'Docs', to: '/docs' },
-  { label: 'About', to: '/about' },
-]
+const { t, locale, locales } = useI18n()
+const localePath = useLocalePath()
+const switchLocalePath = useSwitchLocalePath()
+
+const navLinks = computed(() => [
+  { label: t('nav.docs'), to: localePath('/docs') },
+  { label: t('nav.about'), to: localePath('/about') },
+])
+
+const otherLocale = computed(() => (locales.value as { code: string }[]).find((l) => l.code !== locale.value))
 
 const mobileOpen = ref(false)
 const route = useRoute()
@@ -44,7 +50,7 @@ onUnmounted(() => {
     "
   >
     <nav class="mx-auto flex max-w-[1200px] items-center justify-between px-lg py-sm">
-      <NuxtLink to="/" class="font-mono text-sm font-semibold tracking-tight text-ink">
+      <NuxtLink :to="localePath('/')" class="font-mono text-sm font-semibold tracking-tight text-ink">
         CAF
       </NuxtLink>
 
@@ -60,10 +66,18 @@ onUnmounted(() => {
       </div>
 
       <div class="flex items-center gap-sm">
+        <NuxtLink
+          v-if="otherLocale"
+          :to="switchLocalePath(otherLocale.code)"
+          class="flex h-8 items-center justify-center rounded-sm border border-hairline px-xs text-xs font-medium uppercase text-ink"
+        >
+          {{ otherLocale.code }}
+        </NuxtLink>
+
         <button
           type="button"
           class="flex h-8 w-8 items-center justify-center rounded-sm border border-hairline text-ink"
-          aria-label="Toggle color theme"
+          :aria-label="t('nav.toggleTheme')"
           @click="toggleColorMode"
         >
           <ClientOnly>
@@ -83,14 +97,14 @@ onUnmounted(() => {
           rel="noopener"
           class="rounded-sm bg-ink px-xs py-xxs text-sm font-medium text-canvas-elevated"
         >
-          View on GitHub
+          {{ t('nav.github') }}
         </a>
 
         <button
           type="button"
           class="flex h-8 w-8 items-center justify-center rounded-sm border border-hairline text-ink sm:hidden"
           :aria-expanded="mobileOpen"
-          aria-label="Toggle navigation menu"
+          :aria-label="t('nav.toggleMenu')"
           @click="mobileOpen = !mobileOpen"
         >
           <Icon :name="mobileOpen ? 'lucide:x' : 'lucide:menu'" class="h-4 w-4" />

@@ -1,27 +1,30 @@
 <script setup lang="ts">
-const linkGroups = [
+const { t } = useI18n()
+const localePath = useLocalePath()
+
+const linkGroups = computed(() => [
   {
-    title: 'Product',
+    title: t('footer.product'),
     links: [
-      { label: 'Docs', to: '/docs' },
-      { label: 'Changelog', to: '/changelog' },
+      { label: t('footer.docs'), to: localePath('/docs') },
+      { label: t('footer.changelog'), to: localePath('/changelog') },
     ],
   },
   {
-    title: 'Company',
+    title: t('footer.company'),
     links: [
-      { label: 'About', to: '/about' },
-      { label: 'GitHub', to: 'https://github.com', external: true },
+      { label: t('footer.about'), to: localePath('/about') },
+      { label: t('footer.github'), to: 'https://github.com', external: true },
     ],
   },
   {
-    title: 'Legal',
+    title: t('footer.legal'),
     links: [
-      { label: 'Terms', to: '/legal/terms' },
-      { label: 'Privacy', to: '/legal/privacy' },
+      { label: t('footer.terms'), to: localePath('/legal/terms') },
+      { label: t('footer.privacy'), to: localePath('/legal/privacy') },
     ],
   },
-]
+])
 </script>
 
 <template>
@@ -50,7 +53,7 @@ const linkGroups = [
       </div>
 
       <p class="mt-2xl text-xs text-faint">
-        &copy; {{ new Date().getFullYear() }} Coderium. All rights reserved.
+        {{ t('footer.copyright', { year: new Date().getFullYear() }) }}
       </p>
     </div>
   </footer>

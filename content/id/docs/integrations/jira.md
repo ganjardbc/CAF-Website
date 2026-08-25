@@ -4,7 +4,7 @@ description: Hubungkan CAF Orchestrator ke Jira supaya pipeline trigger otomatis
 ---
 
 Sama seperti Linear, CAF Orchestrator memantau perubahan status ticket di Jira lewat
-webhook. Halaman ini melengkapi setup dasar di [CAF Orchestrator](/docs/caf-orchestrator)
+webhook. Halaman ini melengkapi setup dasar di [CAF Orchestrator](/id/docs/caf-orchestrator)
 dengan langkah spesifik untuk Jira.
 
 ## 1. Buat API token
@@ -44,4 +44,4 @@ di-hardcode di orchestrator.
 
 Alurnya identik dengan Linear: payload diverifikasi, job masuk antrian BullMQ, lalu
 agent Claude Code headless untuk fase itu dijalankan. Lihat
-[CAF Orchestrator](/docs/caf-orchestrator) untuk detail lengkapnya.
+[CAF Orchestrator](/id/docs/caf-orchestrator) untuk detail lengkapnya.

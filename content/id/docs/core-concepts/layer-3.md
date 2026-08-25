@@ -39,8 +39,8 @@ Setiap ticket punya foldernya sendiri di `.ai/tasks/<ticket-id>/`:
 Setiap fase mengikuti pola yang sama:
 
 1. Baca artifact dari fase sebelumnya (kalau ada) + konteks dari
-   [Layer 1](/docs/core-concepts/layer-1) + definisi perannya sendiri dari
-   [Layer 2](/docs/core-concepts/layer-2)
+   [Layer 1](/id/docs/core-concepts/layer-1) + definisi perannya sendiri dari
+   [Layer 2](/id/docs/core-concepts/layer-2)
 2. Kerjakan tugas sesuai scope fase
 3. Tulis hasilnya sebagai artifact baru sebelum fase selesai
 
@@ -51,4 +51,4 @@ memahami *kenapa* sebuah keputusan diambil, bukan cuma *apa* yang berubah.
 
 Format artifact ditentukan oleh **Layer 2: Agent Definitions**. `verify-report.md` yang
 dihasilkan di layer ini menjadi input untuk
-[Layer 4: Quality Gates](/docs/core-concepts/layer-4).
+[Layer 4: Quality Gates](/id/docs/core-concepts/layer-4).

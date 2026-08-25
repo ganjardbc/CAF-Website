@@ -9,6 +9,7 @@ export default defineNuxtConfig({
     '@nuxtjs/seo',
     '@nuxt/icon',
     '@nuxtjs/color-mode',
+    '@nuxtjs/i18n',
   ],
 
   css: ['~/assets/css/main.css'],
@@ -19,10 +20,14 @@ export default defineNuxtConfig({
     fallback: 'light',
   },
 
-  app: {
-    head: {
-      htmlAttrs: { lang: 'en' },
-    },
+  i18n: {
+    locales: [
+      { code: 'en', language: 'en-US', name: 'English' },
+      { code: 'id', language: 'id-ID', name: 'Bahasa Indonesia' },
+    ],
+    defaultLocale: 'en',
+    strategy: 'prefix_except_default',
+    detectBrowserLanguage: false,
   },
 
   site: {

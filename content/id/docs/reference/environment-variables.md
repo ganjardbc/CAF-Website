@@ -34,5 +34,5 @@ Isi hanya variabel tracker dan git host yang sesuai dengan stack kamu — tidak 
 mengisi keduanya (Linear dan Jira, atau GitHub dan GitLab) sekaligus.
 
 Detail cara mendapatkan tiap kredensial ada di halaman masing-masing:
-[CAF Orchestrator](/docs/caf-orchestrator), [Linear](/docs/integrations/linear),
-[Jira](/docs/integrations/jira), dan [GitHub / GitLab](/docs/integrations/github-gitlab).
+[CAF Orchestrator](/id/docs/caf-orchestrator), [Linear](/id/docs/integrations/linear),
+[Jira](/id/docs/integrations/jira), dan [GitHub / GitLab](/id/docs/integrations/github-gitlab).

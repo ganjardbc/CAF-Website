@@ -1,7 +1,9 @@
 <script setup lang="ts">
+const { t } = useI18n()
+
 useSeoMeta({
-  title: 'About',
-  description: 'CAF dibuat oleh Coderium — kenapa dan untuk masalah apa.',
+  title: () => t('about.title'),
+  description: () => t('about.metaDescription'),
 })
 
 definePageMeta({
@@ -12,40 +14,21 @@ definePageMeta({
 <template>
   <article class="mx-auto max-w-2xl px-lg py-4xl sm:py-section">
     <span class="font-mono text-xs font-medium uppercase tracking-wide text-mute">
-      About
+      {{ t('about.eyebrow') }}
     </span>
     <h1 class="mt-xs text-2xl font-semibold tracking-tight text-ink sm:text-[32px]">
-      Dibuat oleh Coderium
+      {{ t('about.heading') }}
     </h1>
 
     <div class="prose-legal mt-lg">
-      <p>
-        CAF (Coderium Agent Framework) dibuat dan dirawat oleh <strong>Coderium</strong>,
-        studio yang membangun tooling developer dengan fokus pada agentic coding yang
-        tetap bisa dipercaya — bukan cuma cepat.
-      </p>
+      <p v-html="t('about.p1')" />
 
-      <h2>Kenapa CAF dibuat</h2>
-      <p>
-        Banyak agent coding tool yang ada sekarang punya scope sempit (cuma bantu satu
-        bagian kecil dari siklus development) atau punya governance yang longgar
-        (langsung auto-merge tanpa jaminan review manusia). CAF dibuat untuk mengisi
-        celah itu: cakupan implementasi yang luas — dari ticket sampai PR — dipadukan
-        dengan governance ketat di setiap fase.
-      </p>
-      <p>
-        Kami percaya agent AI bisa mempercepat development tanpa mengorbankan kontrol.
-        Itu sebabnya setiap checkpoint di CAF — Plan, Implement, Verify, PR — mewajibkan
-        review manusia eksplisit, dan kenapa CAF Orchestrator sengaja jalan di
-        infrastruktur kamu sendiri, bukan sebagai layanan yang dikelola Coderium.
-      </p>
+      <h2>{{ t('about.h2Why') }}</h2>
+      <p>{{ t('about.p2') }}</p>
+      <p>{{ t('about.p3') }}</p>
 
-      <h2>Coderium</h2>
-      <p>
-        CAF adalah proyek terpisah dari situs utama Coderium. Untuk tahu lebih banyak
-        tentang Coderium sebagai studio, kunjungi
-        <span class="text-mute">situs utama Coderium (segera hadir)</span>.
-      </p>
+      <h2>{{ t('about.h2Coderium') }}</h2>
+      <p v-html="t('about.p4')" />
     </div>
   </article>
 </template>

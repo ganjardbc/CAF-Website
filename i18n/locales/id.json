@@ -1,0 +1,231 @@
+{
+  "docsSidebar": {
+    "selectLabel": "Navigasi docs",
+    "gettingStarted": {
+      "title": "Getting Started",
+      "introduction": "Introduction",
+      "quickStart": "Quick Start",
+      "piv": "Konsep PIV"
+    },
+    "coreConcepts": {
+      "title": "Core Concepts",
+      "layer1": "Layer 1: Project Knowledge Base",
+      "layer2": "Layer 2: Agent Definitions",
+      "layer3": "Layer 3: Artifact Handoff",
+      "layer4": "Layer 4: Quality Gates",
+      "layer5": "Layer 5: Orchestration"
+    },
+    "initiator": {
+      "title": "CAF Initiator"
+    },
+    "orchestrator": {
+      "title": "CAF Orchestrator"
+    },
+    "integrations": {
+      "title": "Integrations",
+      "linear": "Linear",
+      "jira": "Jira",
+      "githubGitlab": "GitHub / GitLab"
+    },
+    "reference": {
+      "title": "Reference",
+      "envVars": "Environment Variables",
+      "troubleshooting": "Troubleshooting"
+    }
+  },
+  "nav": {
+    "docs": "Docs",
+    "about": "About",
+    "github": "View on GitHub",
+    "toggleTheme": "Ganti tema warna",
+    "toggleMenu": "Buka/tutup menu navigasi"
+  },
+  "footer": {
+    "product": "Product",
+    "company": "Company",
+    "legal": "Legal",
+    "docs": "Docs",
+    "changelog": "Changelog",
+    "about": "About",
+    "github": "GitHub",
+    "terms": "Terms",
+    "privacy": "Privacy",
+    "copyright": "© {year} Coderium. All rights reserved."
+  },
+  "hero": {
+    "badge": "CAF v1.0.0 dirilis",
+    "new": "New",
+    "title": "Governance ketat, dari ticket sampai PR.",
+    "description": "CAF menjalankan setiap fase — Plan, Implement, Verify, PR — dengan checkpoint human-review wajib. Tidak ada auto-merge. Gratis dan open, jalan langsung di repo kamu sendiri.",
+    "getStarted": "Get Started",
+    "github": "View on GitHub"
+  },
+  "featureGrid": {
+    "eyebrow": "Apa itu CAF?",
+    "title": "Framework, bukan black box",
+    "items": [
+      {
+        "title": "Disiplin PIV",
+        "description": "Setiap task berjalan lewat Plan → Implement → Verify, dengan retry maksimal 3x sebelum dieskalasi ke manusia."
+      },
+      {
+        "title": "Artifact handoff via Markdown",
+        "description": "Hasil tiap fase disimpan sebagai file Markdown di repo — bukan context chat yang hilang begitu sesi berakhir."
+      },
+      {
+        "title": "Multi-tracker: Linear & Jira",
+        "description": "Orchestrator terhubung langsung ke tracker yang sudah kamu pakai — trigger otomatis dari perubahan status ticket."
+      },
+      {
+        "title": "Human review wajib",
+        "description": "Setiap checkpoint — Plan, Implement, Verify, PR — butuh approval manusia eksplisit. Tidak ada auto-merge."
+      },
+      {
+        "title": "Scanner agent read-only",
+        "description": "Agent yang membaca dan menganalisis kode tidak punya write access sampai ada approval gate eksplisit."
+      }
+    ]
+  },
+  "coreComponents": {
+    "eyebrow": "Dua komponen inti",
+    "title": "Scaffold di lokal, jalankan di VPS kamu",
+    "initiator": {
+      "eyebrow": "CLI scaffold generator",
+      "title": "CAF Initiator",
+      "description": "Deteksi stack proyek kamu secara otomatis, lalu generate seluruh knowledge base yang dibutuhkan agent — dari definisi agent sampai template task.",
+      "points": [
+        "Auto-deteksi stack: framework, package manager, struktur repo",
+        "Generate .claude/agents/ — definisi tiap agent role",
+        "Generate .ai/tasks/ — template artifact handoff"
+      ]
+    },
+    "orchestrator": {
+      "eyebrow": "Webhook-driven agent runner",
+      "title": "CAF Orchestrator",
+      "description": "Fastify + BullMQ + Redis, jalan di VPS kecil milik kamu sendiri. Menerima webhook dari tracker, lalu spawn agent Claude Code headless untuk tiap fase.",
+      "points": [
+        "Trigger otomatis dari perubahan status ticket (Linear/Jira)",
+        "Queue per-fase dengan BullMQ + Redis",
+        "Self-hosted — jalan di VPS kamu, bukan SaaS Coderium"
+      ]
+    }
+  },
+  "pipeline": {
+    "eyebrow": "Pipeline",
+    "title": "Ticket sampai PR, dengan gate manusia",
+    "description": "Setiap panah menuju PR melewati checkpoint {review} — tidak ada jalur yang melewatkannya.",
+    "reviewHighlight": "Review",
+    "ariaLabel": "Diagram pipeline CAF: Ticket dari Linear atau Jira mengalir ke Plan, Implement, QA, lalu wajib melalui checkpoint Review oleh manusia sebelum menjadi PR.",
+    "stages": {
+      "ticket": { "title": "Ticket", "subtitle": "Linear · Jira" },
+      "plan": { "title": "Plan", "subtitle": "Planner agent" },
+      "implement": { "title": "Implement", "subtitle": "Coding agent" },
+      "qa": { "title": "QA", "subtitle": "Scanner agent · read-only" },
+      "review": { "title": "Review", "subtitle": "Human checkpoint" },
+      "pr": { "title": "PR", "subtitle": "Merged" }
+    }
+  },
+  "faq": {
+    "eyebrow": "FAQ",
+    "title": "Pertanyaan yang sering diajukan",
+    "items": [
+      {
+        "question": "Apa itu CAF?",
+        "answer": "CAF (Coderium Agent Framework) adalah framework orkestrasi AI agent yang menjalankan siklus Plan → Implement → Verify → PR dengan governance ketat — setiap checkpoint butuh review manusia eksplisit."
+      },
+      {
+        "question": "Apakah CAF gratis?",
+        "answer": "Ya. CAF v1.0.0 gratis dan open — kamu jalankan langsung di repo dan infrastruktur kamu sendiri, tanpa biaya lisensi."
+      },
+      {
+        "question": "Tracker apa saja yang didukung?",
+        "answer": "Linear dan Jira didukung secara native lewat CAF Orchestrator. Tracker lain bisa ditambahkan lewat konfigurasi webhook."
+      },
+      {
+        "question": "AI runner apa yang dipakai?",
+        "answer": "Claude Code — dijalankan headless per fase (Plan, Implement, Verify, PR) oleh CAF Orchestrator."
+      },
+      {
+        "question": "Apakah CAF bisa auto-merge?",
+        "answer": "Tidak. Setiap fase punya checkpoint human-review wajib. Tidak ada jalur otomatis yang melewati approval manusia sebelum PR dibuat atau digabungkan."
+      },
+      {
+        "question": "Apakah CAF menyimpan kode saya di server pihak ketiga?",
+        "answer": "Tidak. CAF Orchestrator jalan di VPS milik kamu sendiri, dan artifact handoff antar fase cuma file Markdown di repo kamu — kode kamu tidak pernah dikirim ke server Coderium."
+      }
+    ]
+  },
+  "index": {
+    "title": "CAF — Coderium Agent Framework",
+    "description": "AI agent orchestration framework dengan governance ketat, dari ticket sampai PR."
+  },
+  "about": {
+    "title": "About",
+    "metaDescription": "CAF dibuat oleh Coderium — kenapa dan untuk masalah apa.",
+    "eyebrow": "About",
+    "heading": "Dibuat oleh Coderium",
+    "p1": "CAF (Coderium Agent Framework) dibuat dan dirawat oleh <strong>Coderium</strong>, studio yang membangun tooling developer dengan fokus pada agentic coding yang tetap bisa dipercaya — bukan cuma cepat.",
+    "h2Why": "Kenapa CAF dibuat",
+    "p2": "Banyak agent coding tool yang ada sekarang punya scope sempit (cuma bantu satu bagian kecil dari siklus development) atau punya governance yang longgar (langsung auto-merge tanpa jaminan review manusia). CAF dibuat untuk mengisi celah itu: cakupan implementasi yang luas — dari ticket sampai PR — dipadukan dengan governance ketat di setiap fase.",
+    "p3": "Kami percaya agent AI bisa mempercepat development tanpa mengorbankan kontrol. Itu sebabnya setiap checkpoint di CAF — Plan, Implement, Verify, PR — mewajibkan review manusia eksplisit, dan kenapa CAF Orchestrator sengaja jalan di infrastruktur kamu sendiri, bukan sebagai layanan yang dikelola Coderium.",
+    "h2Coderium": "Coderium",
+    "p4": "CAF adalah proyek terpisah dari situs utama Coderium. Untuk tahu lebih banyak tentang Coderium sebagai studio, kunjungi <span class=\"text-mute\">situs utama Coderium (segera hadir)</span>."
+  },
+  "changelog": {
+    "title": "Changelog",
+    "metaDescription": "Histori rilis CAF (Coderium Agent Framework).",
+    "eyebrow": "Changelog",
+    "heading": "Histori rilis",
+    "intro": "CAF masih di v1.0.0 — halaman ini akan terus bertambah seiring rilis berikutnya.",
+    "releases": [
+      {
+        "version": "v1.0.0",
+        "date": "2026",
+        "items": [
+          "Rilis awal CAF: disiplin PIV (Plan → Implement → Verify) dengan retry maksimal 3x",
+          "CAF Initiator — CLI scaffold generator dengan deteksi stack otomatis",
+          "CAF Orchestrator — webhook receiver self-hosted (Fastify + BullMQ + Redis)",
+          "Arsitektur 5 layer: Project Knowledge Base, Agent Definitions, Artifact Handoff, Quality Gates, Orchestration",
+          "Integrasi tracker: Linear dan Jira",
+          "Integrasi Git host: GitHub dan GitLab",
+          "Checkpoint human-review wajib di setiap fase — tidak ada auto-merge"
+        ]
+      }
+    ]
+  },
+  "legal": {
+    "draftLabel": "Draf.",
+    "draftNoticeSuffix": "Halaman ini disusun mengikuti kerangka di <code>PLAN.md</code> dan belum melalui tinjauan hukum. Jangan dijadikan acuan final sebelum direview oleh pihak yang berwenang.",
+    "lastUpdated": "Terakhir diperbarui: draf awal, belum dipublikasikan resmi.",
+    "terms": {
+      "title": "Terms of Service",
+      "metaDescription": "Syarat penggunaan CAF (Coderium Agent Framework).",
+      "heading": "Terms of Service",
+      "s1Title": "1. Apa itu CAF",
+      "s1Body": "CAF (Coderium Agent Framework) adalah sebuah framework — kumpulan kode, konvensi, dan tooling yang kamu jalankan sendiri di repo dan infrastruktur kamu. CAF <strong>bukan</strong> layanan SaaS yang di-hosting oleh Coderium. Tidak ada instance CAF Orchestrator yang dijalankan atau dikelola oleh Coderium atas nama kamu.",
+      "s2Title": "2. Lisensi",
+      "s2Body": "Kode CAF didistribusikan di bawah lisensi <strong>[Lisensi TBD]</strong> — akan ditentukan sebelum repo publik dirilis. Sampai lisensi final ditetapkan, anggap semua hak dilindungi.",
+      "s3Title": "3. Disediakan \"sebagaimana adanya\"",
+      "s3Body": "CAF v1.0.0 gratis dan disediakan <strong>as-is</strong>, tanpa jaminan (warranty) dalam bentuk apa pun, tersurat maupun tersirat. Tidak ada SLA (service level agreement) di versi gratis — tidak ada komitmen waktu respons atau uptime, karena CAF Orchestrator berjalan di infrastruktur kamu sendiri, bukan milik Coderium.",
+      "s4Title": "4. Batasan tanggung jawab",
+      "s4Body1": "Agent AI yang dijalankan CAF bisa menghasilkan kode yang salah, tidak lengkap, atau tidak sesuai maksud. Ini konsisten dengan prinsip governance CAF sendiri: <strong>review manusia wajib</strong> di setiap checkpoint sebelum kode digabungkan. Kamu — bukan Coderium — bertanggung jawab penuh atas keputusan untuk me-review, meng-approve, atau menggabungkan perubahan apa pun yang dihasilkan agent.",
+      "s4Body2": "Coderium tidak bertanggung jawab atas kerugian yang timbul dari penggunaan CAF, termasuk namun tidak terbatas pada kesalahan kode yang lolos review manusia.",
+      "s5Title": "5. Perubahan Terms",
+      "s5Body": "Ketentuan ini bisa berubah seiring perkembangan CAF. Perubahan akan diumumkan di <a href=\"{changelogHref}\">changelog</a> proyek."
+    },
+    "privacy": {
+      "title": "Privacy Policy",
+      "metaDescription": "Data apa yang disimpan situs CAF, dan bagaimana kode kamu tetap privat.",
+      "heading": "Privacy Policy",
+      "s1Title": "1. Kode kamu tidak pernah kami lihat",
+      "s1Body": "Ini poin paling penting: <strong>CAF Orchestrator berjalan di VPS milik kamu sendiri</strong>, bukan di server Coderium. Artifact handoff antar fase (lihat <a href=\"{layer3Href}\">Layer 3: Artifact Handoff</a>) cuma file Markdown yang disimpan di repo kamu. Source code project kamu tidak pernah dikirim ke, atau disimpan di, infrastruktur Coderium.",
+      "s2Title": "2. Data yang dikumpulkan situs ini",
+      "s2Body1": "Situs marketing dan dokumentasi ini (yang sedang kamu baca) saat ini <strong>tidak memasang analytics pihak ketiga</strong>. Kalau di masa depan kami menambahkan analytics, kami akan memprioritaskan tool privacy-friendly (seperti Plausible atau Umami) yang tidak melakukan tracking lintas situs, dan halaman ini akan diperbarui untuk menyebutkannya secara eksplisit.",
+      "s2Body2": "Kami tidak mengumpulkan email atau data pribadi lain lewat situs ini — tidak ada form newsletter atau pendaftaran akun di v1.0.0.",
+      "s3Title": "3. Kredensial yang kamu simpan sendiri",
+      "s3Body": "Variabel seperti API key tracker atau token Git host (lihat <a href=\"{envVarsHref}\">Environment Variables</a>) disimpan di file <code>.env</code> pada infrastruktur kamu sendiri. Coderium tidak pernah menerima atau menyimpan kredensial ini.",
+      "s4Title": "4. Pertanyaan",
+      "s4Body": "Kalau ada pertanyaan soal kebijakan privasi ini, hubungi kami lewat <a href=\"https://github.com\" target=\"_blank\" rel=\"noopener\">GitHub</a>."
+    }
+  }
+}
