@@ -41,13 +41,8 @@
     "toggleMenu": "Buka/tutup menu navigasi"
   },
   "footer": {
-    "product": "Product",
-    "company": "Company",
-    "legal": "Legal",
-    "docs": "Docs",
-    "changelog": "Changelog",
     "about": "About",
-    "github": "GitHub",
+    "changelog": "Changelog",
     "terms": "Terms",
     "privacy": "Privacy",
     "copyright": "© {year} Coderium. All rights reserved."
