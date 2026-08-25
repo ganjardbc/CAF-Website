@@ -16,7 +16,7 @@ const links = computed(() => [
       <div class="flex flex-col items-center gap-lg sm:flex-row sm:items-center sm:justify-between">
         <span class="font-mono text-sm font-semibold tracking-tight text-ink">CAF</span>
 
-        <div class="flex flex-col items-center gap-sm sm:flex-row sm:gap-lg">
+        <div class="flex flex-row flex-wrap items-center justify-center gap-sm sm:gap-lg">
           <NuxtLink
             v-for="link in links"
             :key="link.label"
