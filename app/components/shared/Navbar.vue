@@ -66,6 +66,15 @@ onUnmounted(() => {
       </div>
 
       <div class="flex items-center gap-sm">
+        <a
+          href="https://github.com"
+          target="_blank"
+          rel="noopener"
+          class="rounded-sm bg-ink px-xs py-xxs text-sm font-medium text-canvas-elevated"
+        >
+          {{ t('nav.github') }}
+        </a>
+
         <NuxtLink
           v-if="otherLocale"
           :to="switchLocalePath(otherLocale.code)"
@@ -90,15 +99,6 @@ onUnmounted(() => {
             </template>
           </ClientOnly>
         </button>
-
-        <a
-          href="https://github.com"
-          target="_blank"
-          rel="noopener"
-          class="rounded-sm bg-ink px-xs py-xxs text-sm font-medium text-canvas-elevated"
-        >
-          {{ t('nav.github') }}
-        </a>
 
         <button
           type="button"
