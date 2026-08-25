@@ -1,42 +1,34 @@
 <script setup lang="ts">
-const components = [
+const { t, tm, rt } = useI18n()
+
+const components = computed(() => [
   {
     icon: 'lucide:terminal',
-    eyebrow: 'CLI scaffold generator',
-    title: 'CAF Initiator',
-    description:
-      'Deteksi stack proyek kamu secara otomatis, lalu generate seluruh knowledge base yang dibutuhkan agent — dari definisi agent sampai template task.',
-    points: [
-      'Auto-deteksi stack: framework, package manager, struktur repo',
-      'Generate .claude/agents/ — definisi tiap agent role',
-      'Generate .ai/tasks/ — template artifact handoff',
-    ],
+    eyebrow: t('coreComponents.initiator.eyebrow'),
+    title: t('coreComponents.initiator.title'),
+    description: t('coreComponents.initiator.description'),
+    points: (tm('coreComponents.initiator.points') as string[]).map((p) => rt(p)),
     command: 'npx caf-initiator init',
   },
   {
     icon: 'lucide:server',
-    eyebrow: 'Webhook-driven agent runner',
-    title: 'CAF Orchestrator',
-    description:
-      'Fastify + BullMQ + Redis, jalan di VPS kecil milik kamu sendiri. Menerima webhook dari tracker, lalu spawn agent Claude Code headless untuk tiap fase.',
-    points: [
-      'Trigger otomatis dari perubahan status ticket (Linear/Jira)',
-      'Queue per-fase dengan BullMQ + Redis',
-      'Self-hosted — jalan di VPS kamu, bukan SaaS Coderium',
-    ],
+    eyebrow: t('coreComponents.orchestrator.eyebrow'),
+    title: t('coreComponents.orchestrator.title'),
+    description: t('coreComponents.orchestrator.description'),
+    points: (tm('coreComponents.orchestrator.points') as string[]).map((p) => rt(p)),
     command: 'docker compose up -d',
   },
-]
+])
 </script>
 
 <template>
   <section class="mx-auto max-w-[1200px] px-lg pt-2xl pb-4xl sm:pt-3xl sm:pb-section">
     <div class="mb-2xl text-center">
       <span class="font-mono text-xs font-medium uppercase tracking-wide text-mute">
-        Dua komponen inti
+        {{ t('coreComponents.eyebrow') }}
       </span>
       <h2 class="mt-xs text-2xl font-semibold tracking-[-1.28px] text-ink sm:text-[32px] sm:leading-[40px]">
-        Scaffold di lokal, jalankan di VPS kamu
+        {{ t('coreComponents.title') }}
       </h2>
     </div>
 

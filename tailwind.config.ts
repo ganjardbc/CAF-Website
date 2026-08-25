@@ -1,20 +1,21 @@
 import type { Config } from 'tailwindcss'
 
 export default <Partial<Config>>{
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
-        ink: '#171717',
-        canvas: '#fafafa',
-        'canvas-elevated': '#ffffff',
-        'hairline-soft': '#f2f2f2',
-        body: '#4d4d4d',
-        mute: '#8f8f8f',
-        faint: '#a1a1a1',
-        hairline: '#ebebeb',
-        link: '#0070f3',
-        'link-deep': '#0761d1',
-        'link-soft': '#d3e5ff',
+        ink: 'rgb(var(--color-ink) / <alpha-value>)',
+        canvas: 'rgb(var(--color-canvas) / <alpha-value>)',
+        'canvas-elevated': 'rgb(var(--color-canvas-elevated) / <alpha-value>)',
+        'hairline-soft': 'rgb(var(--color-hairline-soft) / <alpha-value>)',
+        body: 'rgb(var(--color-body) / <alpha-value>)',
+        mute: 'rgb(var(--color-mute) / <alpha-value>)',
+        faint: 'rgb(var(--color-faint) / <alpha-value>)',
+        hairline: 'rgb(var(--color-hairline) / <alpha-value>)',
+        link: 'rgb(var(--color-link) / <alpha-value>)',
+        'link-deep': 'rgb(var(--color-link-deep) / <alpha-value>)',
+        'link-soft': 'rgb(var(--color-link-soft) / <alpha-value>)',
         violet: '#7928ca',
         cyan: '#50e3c2',
         pink: '#ff0080',

@@ -1,8 +1,9 @@
 <script setup lang="ts">
+const { t } = useI18n()
+
 useSeoMeta({
-  title: 'CAF — Coderium Agent Framework',
-  description:
-    'AI agent orchestration framework dengan governance ketat, dari ticket sampai PR.',
+  title: () => t('index.title'),
+  description: () => t('index.description'),
 })
 
 useSchemaOrg([

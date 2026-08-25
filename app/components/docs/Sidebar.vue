@@ -1,50 +1,52 @@
 <script setup lang="ts">
 const route = useRoute()
 const router = useRouter()
+const { t } = useI18n()
+const localePath = useLocalePath()
 
-const sections = [
+const sections = computed(() => [
   {
-    title: 'Getting Started',
+    title: t('docsSidebar.gettingStarted.title'),
     links: [
-      { label: 'Introduction', to: '/docs' },
-      { label: 'Quick Start', to: '/docs/quick-start' },
-      { label: 'Konsep PIV', to: '/docs/piv' },
+      { label: t('docsSidebar.gettingStarted.introduction'), to: localePath('/docs') },
+      { label: t('docsSidebar.gettingStarted.quickStart'), to: localePath('/docs/quick-start') },
+      { label: t('docsSidebar.gettingStarted.piv'), to: localePath('/docs/piv') },
     ],
   },
   {
-    title: 'Core Concepts',
+    title: t('docsSidebar.coreConcepts.title'),
     links: [
-      { label: 'Layer 1: Project Knowledge Base', to: '/docs/core-concepts/layer-1' },
-      { label: 'Layer 2: Agent Definitions', to: '/docs/core-concepts/layer-2' },
-      { label: 'Layer 3: Artifact Handoff', to: '/docs/core-concepts/layer-3' },
-      { label: 'Layer 4: Quality Gates', to: '/docs/core-concepts/layer-4' },
-      { label: 'Layer 5: Orchestration', to: '/docs/core-concepts/layer-5' },
+      { label: t('docsSidebar.coreConcepts.layer1'), to: localePath('/docs/core-concepts/layer-1') },
+      { label: t('docsSidebar.coreConcepts.layer2'), to: localePath('/docs/core-concepts/layer-2') },
+      { label: t('docsSidebar.coreConcepts.layer3'), to: localePath('/docs/core-concepts/layer-3') },
+      { label: t('docsSidebar.coreConcepts.layer4'), to: localePath('/docs/core-concepts/layer-4') },
+      { label: t('docsSidebar.coreConcepts.layer5'), to: localePath('/docs/core-concepts/layer-5') },
     ],
   },
   {
-    title: 'CAF Initiator',
-    links: [{ label: 'CAF Initiator', to: '/docs/caf-initiator' }],
+    title: t('docsSidebar.initiator.title'),
+    links: [{ label: t('docsSidebar.initiator.title'), to: localePath('/docs/caf-initiator') }],
   },
   {
-    title: 'CAF Orchestrator',
-    links: [{ label: 'CAF Orchestrator', to: '/docs/caf-orchestrator' }],
+    title: t('docsSidebar.orchestrator.title'),
+    links: [{ label: t('docsSidebar.orchestrator.title'), to: localePath('/docs/caf-orchestrator') }],
   },
   {
-    title: 'Integrations',
+    title: t('docsSidebar.integrations.title'),
     links: [
-      { label: 'Linear', to: '/docs/integrations/linear' },
-      { label: 'Jira', to: '/docs/integrations/jira' },
-      { label: 'GitHub / GitLab', to: '/docs/integrations/github-gitlab' },
+      { label: t('docsSidebar.integrations.linear'), to: localePath('/docs/integrations/linear') },
+      { label: t('docsSidebar.integrations.jira'), to: localePath('/docs/integrations/jira') },
+      { label: t('docsSidebar.integrations.githubGitlab'), to: localePath('/docs/integrations/github-gitlab') },
     ],
   },
   {
-    title: 'Reference',
+    title: t('docsSidebar.reference.title'),
     links: [
-      { label: 'Environment Variables', to: '/docs/reference/environment-variables' },
-      { label: 'Troubleshooting', to: '/docs/reference/troubleshooting' },
+      { label: t('docsSidebar.reference.envVars'), to: localePath('/docs/reference/environment-variables') },
+      { label: t('docsSidebar.reference.troubleshooting'), to: localePath('/docs/reference/troubleshooting') },
     ],
   },
-]
+])
 
 const selected = computed({
   get: () => route.path,
@@ -57,7 +59,7 @@ const selected = computed({
     <select
       v-model="selected"
       class="w-full rounded-sm border border-hairline bg-canvas-elevated px-sm py-xs text-sm text-ink lg:hidden"
-      aria-label="Navigasi docs"
+      :aria-label="t('docsSidebar.selectLabel')"
     >
       <optgroup v-for="section in sections" :key="section.title" :label="section.title">
         <option v-for="link in section.links" :key="link.to" :value="link.to">

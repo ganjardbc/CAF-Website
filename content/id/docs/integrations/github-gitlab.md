@@ -20,12 +20,12 @@ kamu pakai.
 
 ## Apa yang dilakukan orchestrator dengan token ini
 
-Setelah fase Implement selesai dan lolos [Layer 4: Quality Gates](/docs/core-concepts/layer-4),
+Setelah fase Implement selesai dan lolos [Layer 4: Quality Gates](/id/docs/core-concepts/layer-4),
 orchestrator memakai token ini untuk:
 
 1. Push branch berisi perubahan dari fase Implement
 2. Membuka pull request, dengan deskripsi yang merangkum artifact dari
-   [Layer 3: Artifact Handoff](/docs/core-concepts/layer-3)
+   [Layer 3: Artifact Handoff](/id/docs/core-concepts/layer-3)
 
 ## Orchestrator tidak pernah merge PR
 

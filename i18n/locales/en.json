@@ -1,0 +1,231 @@
+{
+  "docsSidebar": {
+    "selectLabel": "Docs navigation",
+    "gettingStarted": {
+      "title": "Getting Started",
+      "introduction": "Introduction",
+      "quickStart": "Quick Start",
+      "piv": "PIV Concept"
+    },
+    "coreConcepts": {
+      "title": "Core Concepts",
+      "layer1": "Layer 1: Project Knowledge Base",
+      "layer2": "Layer 2: Agent Definitions",
+      "layer3": "Layer 3: Artifact Handoff",
+      "layer4": "Layer 4: Quality Gates",
+      "layer5": "Layer 5: Orchestration"
+    },
+    "initiator": {
+      "title": "CAF Initiator"
+    },
+    "orchestrator": {
+      "title": "CAF Orchestrator"
+    },
+    "integrations": {
+      "title": "Integrations",
+      "linear": "Linear",
+      "jira": "Jira",
+      "githubGitlab": "GitHub / GitLab"
+    },
+    "reference": {
+      "title": "Reference",
+      "envVars": "Environment Variables",
+      "troubleshooting": "Troubleshooting"
+    }
+  },
+  "nav": {
+    "docs": "Docs",
+    "about": "About",
+    "github": "View on GitHub",
+    "toggleTheme": "Toggle color theme",
+    "toggleMenu": "Toggle navigation menu"
+  },
+  "footer": {
+    "product": "Product",
+    "company": "Company",
+    "legal": "Legal",
+    "docs": "Docs",
+    "changelog": "Changelog",
+    "about": "About",
+    "github": "GitHub",
+    "terms": "Terms",
+    "privacy": "Privacy",
+    "copyright": "© {year} Coderium. All rights reserved."
+  },
+  "hero": {
+    "badge": "CAF v1.0.0 released",
+    "new": "New",
+    "title": "Strict governance, from ticket to PR.",
+    "description": "CAF runs every phase — Plan, Implement, Verify, PR — with a mandatory human-review checkpoint. No auto-merge. Free and open, running directly in your own repo.",
+    "getStarted": "Get Started",
+    "github": "View on GitHub"
+  },
+  "featureGrid": {
+    "eyebrow": "What is CAF?",
+    "title": "A framework, not a black box",
+    "items": [
+      {
+        "title": "PIV discipline",
+        "description": "Every task runs through Plan → Implement → Verify, with a maximum of 3 retries before being escalated to a human."
+      },
+      {
+        "title": "Artifact handoff via Markdown",
+        "description": "Each phase's output is stored as a Markdown file in the repo — not chat context that disappears once the session ends."
+      },
+      {
+        "title": "Multi-tracker: Linear & Jira",
+        "description": "The Orchestrator connects directly to the tracker you already use — automatically triggered by ticket status changes."
+      },
+      {
+        "title": "Mandatory human review",
+        "description": "Every checkpoint — Plan, Implement, Verify, PR — requires explicit human approval. No auto-merge."
+      },
+      {
+        "title": "Read-only scanner agent",
+        "description": "The agent that reads and analyzes code has no write access until an explicit approval gate is granted."
+      }
+    ]
+  },
+  "coreComponents": {
+    "eyebrow": "Two core components",
+    "title": "Scaffold locally, run on your own VPS",
+    "initiator": {
+      "eyebrow": "CLI scaffold generator",
+      "title": "CAF Initiator",
+      "description": "Automatically detects your project's stack, then generates the entire knowledge base your agents need — from agent definitions to task templates.",
+      "points": [
+        "Auto-detects your stack: framework, package manager, repo structure",
+        "Generates .claude/agents/ — definitions for each agent role",
+        "Generates .ai/tasks/ — the artifact handoff template"
+      ]
+    },
+    "orchestrator": {
+      "eyebrow": "Webhook-driven agent runner",
+      "title": "CAF Orchestrator",
+      "description": "Fastify + BullMQ + Redis, running on your own small VPS. Receives webhooks from your tracker, then spawns headless Claude Code agents for each phase.",
+      "points": [
+        "Triggered automatically by ticket status changes (Linear/Jira)",
+        "Per-phase queue with BullMQ + Redis",
+        "Self-hosted — runs on your own VPS, not a Coderium SaaS"
+      ]
+    }
+  },
+  "pipeline": {
+    "eyebrow": "Pipeline",
+    "title": "Ticket to PR, with a human gate",
+    "description": "Every arrow leading to a PR passes through the {review} checkpoint — there's no path that skips it.",
+    "reviewHighlight": "Review",
+    "ariaLabel": "CAF pipeline diagram: a ticket from Linear or Jira flows into Plan, Implement, QA, then must pass through a human Review checkpoint before becoming a PR.",
+    "stages": {
+      "ticket": { "title": "Ticket", "subtitle": "Linear · Jira" },
+      "plan": { "title": "Plan", "subtitle": "Planner agent" },
+      "implement": { "title": "Implement", "subtitle": "Coding agent" },
+      "qa": { "title": "QA", "subtitle": "Scanner agent · read-only" },
+      "review": { "title": "Review", "subtitle": "Human checkpoint" },
+      "pr": { "title": "PR", "subtitle": "Merged" }
+    }
+  },
+  "faq": {
+    "eyebrow": "FAQ",
+    "title": "Frequently asked questions",
+    "items": [
+      {
+        "question": "What is CAF?",
+        "answer": "CAF (Coderium Agent Framework) is an AI agent orchestration framework that runs the Plan → Implement → Verify → PR cycle with strict governance — every checkpoint requires explicit human review."
+      },
+      {
+        "question": "Is CAF free?",
+        "answer": "Yes. CAF v1.0.0 is free and open — you run it directly in your own repo and infrastructure, with no license fee."
+      },
+      {
+        "question": "Which trackers are supported?",
+        "answer": "Linear and Jira are natively supported through CAF Orchestrator. Other trackers can be added via webhook configuration."
+      },
+      {
+        "question": "Which AI runner does it use?",
+        "answer": "Claude Code — run headlessly per phase (Plan, Implement, Verify, PR) by CAF Orchestrator."
+      },
+      {
+        "question": "Can CAF auto-merge?",
+        "answer": "No. Every phase has a mandatory human-review checkpoint. There's no automated path that bypasses human approval before a PR is created or merged."
+      },
+      {
+        "question": "Does CAF store my code on a third-party server?",
+        "answer": "No. CAF Orchestrator runs on your own VPS, and the artifact handoff between phases is just a Markdown file in your repo — your code is never sent to a Coderium server."
+      }
+    ]
+  },
+  "index": {
+    "title": "CAF — Coderium Agent Framework",
+    "description": "AI agent orchestration framework with strict governance, from ticket to PR."
+  },
+  "about": {
+    "title": "About",
+    "metaDescription": "CAF is built by Coderium — why, and for what problem.",
+    "eyebrow": "About",
+    "heading": "Built by Coderium",
+    "p1": "CAF (Coderium Agent Framework) is built and maintained by <strong>Coderium</strong>, a studio building developer tooling with a focus on agentic coding you can actually trust — not just fast.",
+    "h2Why": "Why CAF was built",
+    "p2": "Many of today's agent coding tools have a narrow scope (helping with just one small part of the development cycle) or loose governance (auto-merging with no guarantee of human review). CAF was built to fill that gap: a wide implementation scope — from ticket to PR — paired with strict governance at every phase.",
+    "p3": "We believe AI agents can speed up development without sacrificing control. That's why every checkpoint in CAF — Plan, Implement, Verify, PR — requires explicit human review, and why CAF Orchestrator deliberately runs on your own infrastructure, not as a service managed by Coderium.",
+    "h2Coderium": "Coderium",
+    "p4": "CAF is a separate project from Coderium's main site. To learn more about Coderium as a studio, visit <span class=\"text-mute\">Coderium's main site (coming soon)</span>."
+  },
+  "changelog": {
+    "title": "Changelog",
+    "metaDescription": "Release history for CAF (Coderium Agent Framework).",
+    "eyebrow": "Changelog",
+    "heading": "Release history",
+    "intro": "CAF is still at v1.0.0 — this page will keep growing with future releases.",
+    "releases": [
+      {
+        "version": "v1.0.0",
+        "date": "2026",
+        "items": [
+          "Initial CAF release: PIV discipline (Plan → Implement → Verify) with a maximum of 3 retries",
+          "CAF Initiator — CLI scaffold generator with automatic stack detection",
+          "CAF Orchestrator — self-hosted webhook receiver (Fastify + BullMQ + Redis)",
+          "5-layer architecture: Project Knowledge Base, Agent Definitions, Artifact Handoff, Quality Gates, Orchestration",
+          "Tracker integrations: Linear and Jira",
+          "Git host integrations: GitHub and GitLab",
+          "Mandatory human-review checkpoint at every phase — no auto-merge"
+        ]
+      }
+    ]
+  },
+  "legal": {
+    "draftLabel": "Draft.",
+    "draftNoticeSuffix": "This page follows the outline in <code>PLAN.md</code> and hasn't been through legal review. Don't treat it as final until reviewed by qualified counsel.",
+    "lastUpdated": "Last updated: initial draft, not officially published.",
+    "terms": {
+      "title": "Terms of Service",
+      "metaDescription": "Terms of use for CAF (Coderium Agent Framework).",
+      "heading": "Terms of Service",
+      "s1Title": "1. What CAF is",
+      "s1Body": "CAF (Coderium Agent Framework) is a framework — a set of code, conventions, and tooling you run yourself in your own repo and infrastructure. CAF is <strong>not</strong> a SaaS service hosted by Coderium. No instance of CAF Orchestrator is run or managed by Coderium on your behalf.",
+      "s2Title": "2. License",
+      "s2Body": "CAF's code is distributed under the <strong>[License TBD]</strong> license — to be determined before the repo goes public. Until a final license is set, assume all rights reserved.",
+      "s3Title": "3. Provided \"as is\"",
+      "s3Body": "CAF v1.0.0 is free and provided <strong>as-is</strong>, without warranty of any kind, express or implied. There's no SLA (service level agreement) on the free version — no commitment to response time or uptime, since CAF Orchestrator runs on your own infrastructure, not Coderium's.",
+      "s4Title": "4. Limitation of liability",
+      "s4Body1": "Agents run by CAF may produce code that is incorrect, incomplete, or doesn't match intent. This is consistent with CAF's own governance principle: <strong>mandatory human review</strong> at every checkpoint before code is merged. You — not Coderium — are fully responsible for the decision to review, approve, or merge any change an agent produces.",
+      "s4Body2": "Coderium is not liable for any loss arising from the use of CAF, including but not limited to code defects that pass human review.",
+      "s5Title": "5. Changes to these Terms",
+      "s5Body": "These terms may change as CAF evolves. Changes will be announced in the project's <a href=\"{changelogHref}\">changelog</a>."
+    },
+    "privacy": {
+      "title": "Privacy Policy",
+      "metaDescription": "What data the CAF site stores, and how your code stays private.",
+      "heading": "Privacy Policy",
+      "s1Title": "1. We never see your code",
+      "s1Body": "This is the most important point: <strong>CAF Orchestrator runs on your own VPS</strong>, not on a Coderium server. The artifact handoff between phases (see <a href=\"{layer3Href}\">Layer 3: Artifact Handoff</a>) is just a Markdown file stored in your repo. Your project's source code is never sent to, or stored on, Coderium infrastructure.",
+      "s2Title": "2. Data this site collects",
+      "s2Body1": "This marketing and documentation site (the one you're reading now) currently <strong>doesn't run any third-party analytics</strong>. If we add analytics in the future, we'll prioritize privacy-friendly tools (like Plausible or Umami) that don't do cross-site tracking, and this page will be updated to say so explicitly.",
+      "s2Body2": "We don't collect email addresses or other personal data through this site — there's no newsletter form or account signup in v1.0.0.",
+      "s3Title": "3. Credentials you store yourself",
+      "s3Body": "Variables like tracker API keys or Git host tokens (see <a href=\"{envVarsHref}\">Environment Variables</a>) are stored in an <code>.env</code> file on your own infrastructure. Coderium never receives or stores these credentials.",
+      "s4Title": "4. Questions",
+      "s4Body": "If you have questions about this privacy policy, reach us via <a href=\"https://github.com\" target=\"_blank\" rel=\"noopener\">GitHub</a>."
+    }
+  }
+}

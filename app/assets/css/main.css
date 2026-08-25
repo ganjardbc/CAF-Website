@@ -1,5 +1,33 @@
 @import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap');
 
+:root {
+  --color-ink: 23 23 23;
+  --color-canvas: 250 250 250;
+  --color-canvas-elevated: 255 255 255;
+  --color-hairline-soft: 242 242 242;
+  --color-body: 77 77 77;
+  --color-mute: 143 143 143;
+  --color-faint: 161 161 161;
+  --color-hairline: 235 235 235;
+  --color-link: 0 112 243;
+  --color-link-deep: 7 97 209;
+  --color-link-soft: 211 229 255;
+}
+
+.dark {
+  --color-ink: 237 237 237;
+  --color-canvas: 10 10 10;
+  --color-canvas-elevated: 23 23 23;
+  --color-hairline-soft: 31 31 31;
+  --color-body: 163 163 163;
+  --color-mute: 138 138 138;
+  --color-faint: 107 107 107;
+  --color-hairline: 46 46 46;
+  --color-link: 59 158 255;
+  --color-link-deep: 96 181 255;
+  --color-link-soft: 17 34 59;
+}
+
 body {
-  @apply bg-canvas text-ink font-sans;
+  @apply bg-canvas text-ink font-sans transition-colors duration-200;
 }

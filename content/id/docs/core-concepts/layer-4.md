@@ -14,7 +14,7 @@ Dijalankan oleh agent Verifier yang read-only: lint, test, dan review otomatis t
 hasil Implement. Read-only di sini bukan detail teknis semata — itu jaminan bahwa proses
 pengecekan kualitas tidak bisa diam-diam "memperbaiki" kode tanpa jejak, karena Verifier
 memang tidak punya akses tulis. Hasilnya dicatat sebagai `verify-report.md` di
-[Layer 3: Artifact Handoff](/docs/core-concepts/layer-3).
+[Layer 3: Artifact Handoff](/id/docs/core-concepts/layer-3).
 
 ### Gate manusia
 
@@ -44,6 +44,6 @@ membedakan CAF dari orkestrator agent yang mengejar kecepatan lewat auto-merge.
 ## Hubungan dengan layer lain
 
 Layer 4 mengonsumsi `verify-report.md` dari **Layer 3**, dan hasil keputusan gate-nya
-menentukan apakah [Layer 5: Orchestration](/docs/core-concepts/layer-5) boleh
+menentukan apakah [Layer 5: Orchestration](/id/docs/core-concepts/layer-5) boleh
 melanjutkan pipeline ke fase berikutnya
 atau berhenti menunggu manusia.

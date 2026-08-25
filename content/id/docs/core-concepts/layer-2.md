@@ -5,7 +5,7 @@ description: Peran, batasan akses, dan kebijakan retry untuk tiap agent di CAF.
 
 Layer 2 mendefinisikan siapa mengerjakan apa. Setiap role dalam siklus PIV punya file
 definisi sendiri di `.claude/agents/` — hasil generate `caf-initiator init` yang sudah
-menyerap konteks dari [Layer 1: Project Knowledge Base](/docs/core-concepts/layer-1).
+menyerap konteks dari [Layer 1: Project Knowledge Base](/id/docs/core-concepts/layer-1).
 
 ## Empat role
 
@@ -26,7 +26,7 @@ di tangan manusia, sesuai checkpoint wajib di setiap fase.
 - **Batasan akses** — tools apa yang boleh dipakai, terutama status read-only vs read-write
 - **Kebijakan retry** — maksimal 3x percobaan sebelum dieskalasi ke manusia
 - **Format output** — struktur artifact yang harus dihasilkan di akhir fase (lihat
-  [Layer 3: Artifact Handoff](/docs/core-concepts/layer-3))
+  [Layer 3: Artifact Handoff](/id/docs/core-concepts/layer-3))
 
 ## Kustomisasi
 
@@ -37,4 +37,4 @@ menyesuaikan gaya kerja tim — misalnya menambah aturan khusus di `implementer.
 ## Hubungan dengan layer lain
 
 Layer 2 mengonsumsi konteks dari **Layer 1** dan menentukan format artifact yang akan
-ditulis ke [Layer 3: Artifact Handoff](/docs/core-concepts/layer-3) di setiap akhir fase.
+ditulis ke [Layer 3: Artifact Handoff](/id/docs/core-concepts/layer-3) di setiap akhir fase.

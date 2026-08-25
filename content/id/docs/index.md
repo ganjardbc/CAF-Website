@@ -17,5 +17,5 @@ setiap fase punya checkpoint human-review wajib. Tidak ada auto-merge.
   jalan di VPS kamu sendiri, trigger dari perubahan status ticket di
   Linear atau Jira.
 
-Lanjut ke [Quick Start](/docs/quick-start) untuk mulai memasang CAF di
+Lanjut ke [Quick Start](/id/docs/quick-start) untuk mulai memasang CAF di
 repo kamu.

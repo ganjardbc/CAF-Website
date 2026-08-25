@@ -1,40 +1,34 @@
 <script setup lang="ts">
+const { t, tm, rt } = useI18n()
+
 useSeoMeta({
-  title: 'Changelog',
-  description: 'Histori rilis CAF (Coderium Agent Framework).',
+  title: () => t('changelog.title'),
+  description: () => t('changelog.metaDescription'),
 })
 
 definePageMeta({
   layout: 'default',
 })
 
-const releases = [
-  {
-    version: 'v1.0.0',
-    date: '2026',
-    items: [
-      'Rilis awal CAF: disiplin PIV (Plan → Implement → Verify) dengan retry maksimal 3x',
-      'CAF Initiator — CLI scaffold generator dengan deteksi stack otomatis',
-      'CAF Orchestrator — webhook receiver self-hosted (Fastify + BullMQ + Redis)',
-      'Arsitektur 5 layer: Project Knowledge Base, Agent Definitions, Artifact Handoff, Quality Gates, Orchestration',
-      'Integrasi tracker: Linear dan Jira',
-      'Integrasi Git host: GitHub dan GitLab',
-      'Checkpoint human-review wajib di setiap fase — tidak ada auto-merge',
-    ],
-  },
-]
+const releases = computed(() =>
+  (tm('changelog.releases') as { version: string; date: string; items: string[] }[]).map((release) => ({
+    version: rt(release.version),
+    date: rt(release.date),
+    items: (release.items as unknown as string[]).map((item) => rt(item)),
+  })),
+)
 </script>
 
 <template>
   <article class="mx-auto max-w-2xl px-lg py-4xl sm:py-section">
     <span class="font-mono text-xs font-medium uppercase tracking-wide text-mute">
-      Changelog
+      {{ t('changelog.eyebrow') }}
     </span>
     <h1 class="mt-xs text-2xl font-semibold tracking-tight text-ink sm:text-[32px]">
-      Histori rilis
+      {{ t('changelog.heading') }}
     </h1>
     <p class="mt-sm text-base text-body">
-      CAF masih di v1.0.0 — halaman ini akan terus bertambah seiring rilis berikutnya.
+      {{ t('changelog.intro') }}
     </p>
 
     <div class="mt-xl flex flex-col gap-2xl">
