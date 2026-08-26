@@ -52,7 +52,7 @@
   "hero": {
     "badge": "CAF v0.1.0 — early access",
     "new": "New",
-    "title": "Strict governance, from ticket to PR.",
+    "title": "Coderium Agent Framework",
     "description": "CAF runs every phase — Plan, Implement, Verify, PR — with a mandatory human-review checkpoint. No auto-merge. Free and open, running directly in your own repo.",
     "getStarted": "Get Started",
     "github": "View on GitHub"
