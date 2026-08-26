@@ -15,8 +15,8 @@ const stages = computed(() =>
 
 const openKey = ref<string | null>(null)
 
-function closeDetail(key: string) {
-  if (openKey.value === key) openKey.value = null
+function toggleDetail(key: string) {
+  openKey.value = openKey.value === key ? null : key
 }
 </script>
 
@@ -57,24 +57,21 @@ function closeDetail(key: string) {
           <div v-if="index < stages.length - 1" class="my-xxs w-px flex-1 bg-hairline" />
         </div>
 
-        <div class="group relative" :class="index === stages.length - 1 ? '' : 'pb-xl sm:pb-2xl'">
-          <div class="flex items-center gap-xs pt-xxs sm:pt-xs">
+        <div class="relative flex-1" :class="index === stages.length - 1 ? '' : 'pb-xl sm:pb-2xl'">
+          <button
+            type="button"
+            class="flex w-full items-center justify-between gap-sm pt-xxs text-left sm:pt-xs"
+            :aria-expanded="openKey === stage.key"
+            @click="toggleDetail(stage.key)"
+          >
             <p class="text-base font-semibold text-ink sm:text-lg">{{ stage.title }}</p>
 
-            <button
-              type="button"
-              class="flex h-5 w-5 items-center justify-center rounded-full text-faint hover:text-ink focus-visible:text-ink focus-visible:outline-none"
-              :aria-expanded="openKey === stage.key"
-              :aria-label="stage.title"
-              @click="openKey = stage.key"
-              @focus="openKey = stage.key"
-              @blur="closeDetail(stage.key)"
-              @mouseenter="openKey = stage.key"
-              @mouseleave="closeDetail(stage.key)"
-            >
-              <Icon name="lucide:info" class="h-4 w-4" />
-            </button>
-          </div>
+            <Icon
+              name="lucide:chevron-down"
+              class="h-4 w-4 shrink-0 text-faint transition-transform duration-200"
+              :class="{ 'rotate-180': openKey === stage.key }"
+            />
+          </button>
 
           <p class="mt-xxs text-sm text-mute sm:text-base">{{ stage.subtitle }}</p>
 
