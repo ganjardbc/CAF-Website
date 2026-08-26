@@ -9,8 +9,7 @@ useSeoMeta({
 useSchemaOrg([
   defineSoftwareApp({
     name: 'CAF (Coderium Agent Framework)',
-    description:
-      'AI agent orchestration framework dengan governance ketat — Plan, Implement, Verify, PR, dengan checkpoint human-review wajib di setiap fase.',
+    description: computed(() => t('index.description')),
     applicationCategory: 'DeveloperApplication',
     operatingSystem: 'Linux, macOS',
     offers: { price: 0, priceCurrency: 'USD' },
