@@ -256,7 +256,7 @@
       "s3Title": "3. Credentials you store yourself",
       "s3Body": "Variables like tracker API keys or Git host tokens (see <a href=\"{envVarsHref}\">Environment Variables</a>) are stored in an <code>.env</code> file on your own infrastructure. Coderium never receives or stores these credentials.",
       "s4Title": "4. Questions",
-      "s4Body": "If you have questions about this privacy policy, reach us via <a href=\"https://github.com\" target=\"_blank\" rel=\"noopener\">GitHub</a>."
+      "s4Body": "If you have questions about this privacy policy, reach us via <a href=\"https://github.com/coderiumid/caf-initiator\" target=\"_blank\" rel=\"noopener\">GitHub</a>."
     }
   }
 }

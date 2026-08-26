@@ -256,7 +256,7 @@
       "s3Title": "3. Kredensial yang kamu simpan sendiri",
       "s3Body": "Variabel seperti API key tracker atau token Git host (lihat <a href=\"{envVarsHref}\">Environment Variables</a>) disimpan di file <code>.env</code> pada infrastruktur kamu sendiri. Coderium tidak pernah menerima atau menyimpan kredensial ini.",
       "s4Title": "4. Pertanyaan",
-      "s4Body": "Kalau ada pertanyaan soal kebijakan privasi ini, hubungi kami lewat <a href=\"https://github.com\" target=\"_blank\" rel=\"noopener\">GitHub</a>."
+      "s4Body": "Kalau ada pertanyaan soal kebijakan privasi ini, hubungi kami lewat <a href=\"https://github.com/coderiumid/caf-initiator\" target=\"_blank\" rel=\"noopener\">GitHub</a>."
     }
   }
 }

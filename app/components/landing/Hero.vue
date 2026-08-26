@@ -41,7 +41,7 @@ const localePath = useLocalePath()
           {{ t('hero.getStarted') }}
         </NuxtLink>
         <a
-          href="https://github.com"
+          href="https://github.com/coderiumid/caf-initiator"
           target="_blank"
           rel="noopener"
           class="rounded-pill border border-hairline bg-canvas-elevated px-md py-xs text-base font-medium text-ink"

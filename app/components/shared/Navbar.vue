@@ -69,7 +69,7 @@ onUnmounted(() => {
 
       <div class="flex items-center gap-sm">
         <a
-          href="https://github.com"
+          href="https://github.com/coderiumid/caf-initiator"
           target="_blank"
           rel="noopener"
           class="rounded-sm bg-ink px-xs py-xxs text-sm font-medium text-canvas-elevated"
