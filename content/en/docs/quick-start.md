@@ -5,18 +5,16 @@ description: Set up CAF Initiator in your repo, then connect CAF Orchestrator.
 
 ## 1. Run CAF Initiator
 
-CAF Initiator isn't published to a package registry yet — clone and link it:
+CAF Initiator is published on npm as `caf-initiator`. From your target repo's root:
 
 ```bash
-git clone https://github.com/ganjardbc/caf-initiator.git
-cd caf-initiator
-npm install
-npm link
+npx -p caf-initiator caf-init scaffold
 ```
 
-Then from your target repo's root:
+Or install the `caf-init` binary globally first:
 
 ```bash
+npm install -g caf-initiator
 caf-init scaffold
 ```
 

@@ -7,20 +7,23 @@ CAF Initiator is the CLI that scaffolds everything CAF needs in your repo: it
 automatically detects your project's stack, then generates agent definitions and
 artifact handoff templates.
 
-> CAF Initiator is pre-1.0 (`v0.1.0`) and not published to a package registry yet.
-> Install it by cloning the repo, not via `npx`/`npm install -g`.
+> CAF Initiator is pre-1.0 (`v0.1.0`), published on npm as
+> [`caf-initiator`](https://www.npmjs.com/package/caf-initiator).
 
 ## Installation
 
-```bash
-git clone https://github.com/ganjardbc/caf-initiator.git
-cd caf-initiator
+Run directly with `npx` — no install needed:
 
-npm install
-npm link
+```bash
+npx -p caf-initiator caf-init scaffold
 ```
 
-`npm link` makes the `caf-init` binary available globally.
+Or install the `caf-init` binary globally:
+
+```bash
+npm install -g caf-initiator
+caf-init scaffold
+```
 
 **Requirements:**
 

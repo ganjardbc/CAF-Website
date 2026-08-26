@@ -6,20 +6,23 @@ description: CLI scaffold generator — deteksi stack otomatis dan generate know
 CAF Initiator adalah CLI yang men-scaffold semua yang dibutuhkan CAF di repo kamu: deteksi
 stack proyek secara otomatis, lalu generate definisi agent dan template artifact handoff.
 
-> CAF Initiator masih pre-1.0 (`v0.1.0`) dan belum dipublish ke package registry.
-> Install dengan clone repo, bukan lewat `npx`/`npm install -g`.
+> CAF Initiator masih pre-1.0 (`v0.1.0`), sudah dipublish ke npm sebagai
+> [`caf-initiator`](https://www.npmjs.com/package/caf-initiator).
 
 ## Instalasi
 
-```bash
-git clone https://github.com/ganjardbc/caf-initiator.git
-cd caf-initiator
+Jalankan langsung pakai `npx` — tanpa install:
 
-npm install
-npm link
+```bash
+npx -p caf-initiator caf-init scaffold
 ```
 
-`npm link` membuat binary `caf-init` tersedia secara global.
+Atau install binary `caf-init` secara global:
+
+```bash
+npm install -g caf-initiator
+caf-init scaffold
+```
 
 **Prasyarat:**
 

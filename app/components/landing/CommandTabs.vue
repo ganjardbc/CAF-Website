@@ -1,6 +1,6 @@
 <script setup lang="ts">
 const tabs = [
-  { label: 'install', command: 'git clone https://github.com/ganjardbc/caf-initiator.git && npm link' },
+  { label: 'install', command: 'npm install -g caf-initiator' },
   { label: 'run', command: 'caf-init scaffold' },
 ]
 
