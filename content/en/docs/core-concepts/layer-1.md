@@ -18,7 +18,7 @@ Verifier, Reviewer — reads the same context before starting work.
 ## What it contains
 
 - **Stack & tooling** — framework, package manager, runtime version, automatically
-  detected by CAF Initiator during `init`
+  detected by CAF Initiator during `scaffold`
 - **Folder structure** — the file placement conventions already in place in the repo
 - **Architecture decisions** — deliberate constraints or patterns (e.g. "all state
   management uses X, not Y")
@@ -27,13 +27,12 @@ Verifier, Reviewer — reads the same context before starting work.
 
 ## Where this file lives
 
-CAF Initiator generates this knowledge base as `.claude/PROJECT.md` when you run
-`caf-initiator init`. This file can be edited manually at any time — CAF won't
-overwrite it on subsequent runs unless you explicitly request it via
-`caf-initiator export`.
+CAF Initiator generates this knowledge base as `CLAUDE.md`/`AGENTS.md` at the repo
+root when you run `caf-init scaffold`. These files can be edited manually at any
+time — CAF Initiator never overwrites existing files on subsequent runs.
 
 ## Relationship to other layers
 
 Layer 1 is the input for [Layer 2: Agent Definitions](/docs/core-concepts/layer-2) —
-every agent definition in `.claude/agents/` refers back to `PROJECT.md` so each role's
+every agent definition in `.claude/agents/` refers back to `CLAUDE.md`/`AGENTS.md` so each role's
 behavior stays aligned with the same project context.

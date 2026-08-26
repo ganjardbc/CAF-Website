@@ -4,7 +4,9 @@ const localePath = useLocalePath()
 const switchLocalePath = useSwitchLocalePath()
 
 const navLinks = computed(() => [
+  { label: t('nav.quickStart'), to: localePath('/docs/quick-start') },
   { label: t('nav.docs'), to: localePath('/docs') },
+  { label: t('nav.changelog'), to: localePath('/changelog') },
   { label: t('nav.about'), to: localePath('/about') },
 ])
 
@@ -49,12 +51,12 @@ onUnmounted(() => {
         : 'border-transparent bg-canvas'
     "
   >
-    <nav class="mx-auto flex max-w-[1200px] items-center justify-between px-lg py-sm">
-      <NuxtLink :to="localePath('/')" class="font-mono text-sm font-semibold tracking-tight text-ink">
+    <nav class="mx-auto flex max-w-[1200px] items-center justify-between px-lg py-sm gap-4">
+      <NuxtLink :to="localePath('/')" class="font-mono text-2xl font-semibold tracking-tight text-ink">
         CAF
       </NuxtLink>
 
-      <div class="hidden items-center gap-xs sm:flex">
+      <div class="hidden flex-1 items-center gap-xs sm:flex">
         <NuxtLink
           v-for="link in navLinks"
           :key="link.to"

@@ -15,7 +15,7 @@ setiap fase punya checkpoint human-review wajib. Tidak ada auto-merge.
   kamu dan generate knowledge base yang dibutuhkan agent.
 - **CAF Orchestrator** — webhook receiver (Fastify + BullMQ + Redis) yang
   jalan di VPS kamu sendiri, trigger dari perubahan status ticket di
-  Linear atau Jira.
+  Linear (dukungan Jira direncanakan, belum diimplementasikan).
 
 Lanjut ke [Quick Start](/id/docs/quick-start) untuk mulai memasang CAF di
 repo kamu.

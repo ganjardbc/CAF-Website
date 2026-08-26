@@ -7,20 +7,20 @@ CAF Initiator is the CLI that scaffolds everything CAF needs in your repo: it
 automatically detects your project's stack, then generates agent definitions and
 artifact handoff templates.
 
+> CAF Initiator is pre-1.0 (`v0.1.0`) and not published to a package registry yet.
+> Install it by cloning the repo, not via `npx`/`npm install -g`.
+
 ## Installation
 
-The fastest way, no global install needed — run it directly with `npx`:
-
 ```bash
-npx caf-initiator init
+git clone https://github.com/ganjardbc/caf-initiator.git
+cd caf-initiator
+
+npm install
+npm link
 ```
 
-If you use it often across many repos, install it globally instead:
-
-```bash
-npm install -g caf-initiator
-caf-initiator init
-```
+`npm link` makes the `caf-init` binary available globally.
 
 **Requirements:**
 
@@ -29,22 +29,45 @@ caf-initiator init
 
 ## Commands
 
-### `caf-initiator init`
+Run `caf-init` with no subcommand to print help — there's no interactive
+top-level menu; pick a subcommand explicitly.
 
-The main command. Runs the full scaffold flow:
+### `caf-init scaffold`
+
+The main command. Bare (no target), it runs **Setup → Golden Examples → ADR →
+Agents → Task Completion → Workflow** in sequence, with a skip-confirmation
+before each step:
 
 1. Detects your project's stack (framework, package manager, folder structure)
-2. Generates `.claude/agents/` — definitions for each agent role (Planner,
-   Implementer, Verifier, Reviewer)
-3. Generates `.ai/tasks/` — the artifact handoff template used between phases
+2. Lets you select golden examples as AI reference material
+3. Drafts Architecture Decision Records for detected technical choices
+4. Generates `.claude/agents/` — definitions for each agent role (Planner,
+   Architect, per-app implementation agents, QA, Reviewer, Documentation,
+   DevOps, Auditor, PM, UX Designer)
+5. Drafts the Definition of Done from verify scripts in `package.json`
+6. Generates the PIV workflow and agent-handoff docs from your agent roster
 
-### `caf-initiator export`
+Pass a target (`caf-init scaffold <target>`, one of `golden-examples`, `adr`,
+`agents`, `task-completion`, `workflow`, `feature-catalog-sync`) to run just
+that part.
 
-Exports your customized agent configuration into a single file that can be shared or
-versioned separately from your main repo — useful if you want to reuse the same
-configuration across multiple repos.
+### `caf-init docs`
 
-> Additional commands will be documented here as they ship in future releases.
+Scaffolds optional, read-only Layer 1 reference docs (`docs/product/prd.md`,
+Feature Specs, `docs/architecture/system-overview.md`, `docs/api-contract.md`,
+`docs/schema/erd.md`, `docs/testing-strategy.md`). None of these are required
+for the CAF pipeline to run.
+
+### `caf-init export`
+
+Copies already-generated agent definitions to other AI runner targets
+(`.kiro/agents/`, `.opencode/agents/`, etc.), with explicit enforcement-risk
+warnings.
+
+### `caf-init curate`
+
+Read-only Layer 1-4 compliance audit, then offers to sync missing sections
+into `.claude/agents/*.md`. `--audit-only` isolates the report for CI gates.
 
 ## Generated file structure
 
@@ -52,20 +75,28 @@ configuration across multiple repos.
 .claude/
   agents/
     planner.md
-    implementer.md
-    verifier.md
+    architect.md
+    qa.md
     reviewer.md
+    documentation.md
+    ...
 .ai/
   tasks/
-    <ticket-id>/
-      plan.md
-      implementation-notes.md
-      verify-report.md
+    README.md
+.caf/
+  knowledge/
+    golden-examples/
+    decisions/
+  workflows/
+    piv-workflow.md
+    agent-handoff.md
+    task-completion.md
 ```
 
 - **`.claude/agents/`** — one file per role, containing each agent's instructions and
-  access boundaries (for example, the Verifier is read-only until an explicit approval
+  access boundaries (for example, the Reviewer is read-only until an explicit approval
   gate is granted).
-- **`.ai/tasks/<ticket-id>/`** — the artifact handoff for a single ticket. Each phase
-  writes its output here as a Markdown file, instead of it being lost in chat context
-  once the session ends.
+- **`.ai/tasks/README.md`** — describes the artifact handoff convention. The
+  per-ticket folders (`plan.md`, `implementation-notes.md`, `verify-report.md`)
+  are written at runtime by the agents during a pipeline run — CAF Initiator
+  only scaffolds the convention, not the ticket folders themselves.

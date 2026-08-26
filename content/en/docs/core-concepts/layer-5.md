@@ -9,7 +9,8 @@ PR ready for review. This is what **CAF Orchestrator** does.
 
 ## What orchestration does
 
-1. Receives a webhook when a ticket's status changes in Linear or Jira
+1. Receives a webhook when a ticket transitions into the "Ready for AI" state in
+   Linear (Jira support is planned but not yet implemented)
 2. Queues a job for the matching phase via BullMQ + Redis
 3. Spawns a headless Claude Code agent for that phase — the agent reads
    [Layer 1](/docs/core-concepts/layer-1) and [Layer 2](/docs/core-concepts/layer-2),

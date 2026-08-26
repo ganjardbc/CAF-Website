@@ -8,7 +8,7 @@ const components = computed(() => [
     title: t('coreComponents.initiator.title'),
     description: t('coreComponents.initiator.description'),
     points: (tm('coreComponents.initiator.points') as string[]).map((p) => rt(p)),
-    command: 'npx caf-initiator init',
+    command: 'caf-init scaffold',
   },
   {
     icon: 'lucide:server',
@@ -16,7 +16,7 @@ const components = computed(() => [
     title: t('coreComponents.orchestrator.title'),
     description: t('coreComponents.orchestrator.description'),
     points: (tm('coreComponents.orchestrator.points') as string[]).map((p) => rt(p)),
-    command: 'docker compose up -d',
+    command: 'pnpm dev && pnpm dev:worker',
   },
 ])
 </script>

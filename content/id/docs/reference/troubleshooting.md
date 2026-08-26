@@ -7,7 +7,7 @@ Kumpulan masalah yang paling sering muncul saat setup, dikelompokkan per kompone
 
 ## CAF Initiator
 
-**`caf-initiator init` tidak mendeteksi stack dengan benar**
+**`caf-init scaffold` tidak mendeteksi stack dengan benar**
 
 Pastikan command dijalankan dari root repo (tempat `package.json`, `go.mod`, atau file
 manifest setara berada), bukan dari subfolder. Deteksi stack bergantung pada file
@@ -25,28 +25,28 @@ folder itu dulu kalau memang ingin generate ulang dari nol.
 
 Cek berurutan:
 
-1. URL webhook di tracker mengarah ke host dan path yang benar
-   (`/webhooks/linear` atau `/webhooks/jira`)
-2. `WEBHOOK_SECRET` di `.env` orchestrator sama persis dengan secret yang didaftarkan di
-   tracker
-3. Nama status ticket cocok dengan mapping yang dikonfigurasi — lihat
-   [Linear](/id/docs/integrations/linear) atau [Jira](/id/docs/integrations/jira)
+1. URL webhook di Linear mengarah ke host dan path yang benar (`/webhooks/linear`)
+2. `LINEAR_WEBHOOK_SECRET` di `.env` orchestrator sama persis dengan secret yang
+   didaftarkan di Linear
+3. `LINEAR_READY_STATE_ID` cocok dengan UUID workflow state yang kamu tuju saat
+   memindahkan ticket — lihat [Linear](/id/docs/integrations/linear)
 
 **Endpoint `/healthz` tidak merespons**
 
-Cek log container (`docker compose logs -f`) untuk error saat startup — penyebab paling
-umum adalah `REDIS_URL` yang salah atau Redis belum jalan.
+Cek log proses (`pnpm dev` / `pnpm start`, atau log process manager kamu) untuk error
+saat startup — penyebab paling umum adalah `REDIS_URL` yang salah atau Redis belum jalan.
 
-**Agent berhenti dan mengeskalasi ke manusia**
+**Agent berhenti dan diserahkan ke manusia**
 
-Ini bukan bug — ini kebijakan retry CAF: maksimal 3x percobaan per fase sebelum
-dieskalasi (lihat [Layer 4: Quality Gates](/id/docs/core-concepts/layer-4)). Cek
-`verify-report.md` di `.ai/tasks/<ticket-id>/` untuk tahu kenapa gate otomatis gagal.
+Ini bukan bug — ini kebijakan retry CAF: retry sekali kalau QA gagal atau reviewer
+beri "changes requested", lalu berhenti (lihat [Layer 4: Quality Gates](/id/docs/core-concepts/layer-4)).
+Cek `qa-report.md` atau `review-notes.md` di `.ai/tasks/<ticket-id>/` untuk tahu kenapa
+gate otomatis gagal.
 
 **PR tidak terbuka setelah fase Implement selesai**
 
-Biasanya token Git host kurang scope. Pastikan `GITHUB_TOKEN`/`GITLAB_TOKEN` punya akses
-tulis ke repo dan buka pull request — lihat
+Biasanya token Git host kurang scope. Pastikan `GITHUB_TOKEN` punya akses tulis ke repo
+dan bisa buka pull request — lihat
 [GitHub / GitLab](/id/docs/integrations/github-gitlab) untuk scope yang tepat.
 
 ## Masih belum ketemu solusinya?

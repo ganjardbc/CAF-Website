@@ -32,9 +32,10 @@ who understands the project. The human gate closes that gap.
 
 ## Retry policy
 
-If the automated gate fails, the agent may retry that phase — up to 3 times. After 3
-failed attempts, CAF stops and escalates to a human instead of continuing to retry
-without direction.
+If the automated gate fails, or the human-facing Reviewer returns "changes
+requested", the pipeline retries once. If it fails again, CAF stops and hands off
+to a human instead of continuing to retry without direction — there's no
+step-resume, so a retry re-runs the whole pipeline from the Planner.
 
 ## No auto-merge
 

@@ -1,48 +1,27 @@
 <script setup lang="ts">
 const { t } = useI18n()
 
-const stages = computed(() => [
-  { title: t('pipeline.stages.ticket.title'), subtitle: t('pipeline.stages.ticket.subtitle'), x: 40 },
-  { title: t('pipeline.stages.plan.title'), subtitle: t('pipeline.stages.plan.subtitle'), x: 250 },
-  { title: t('pipeline.stages.implement.title'), subtitle: t('pipeline.stages.implement.subtitle'), x: 460 },
-  { title: t('pipeline.stages.qa.title'), subtitle: t('pipeline.stages.qa.subtitle'), x: 670 },
-  { title: t('pipeline.stages.review.title'), subtitle: t('pipeline.stages.review.subtitle'), x: 880, highlight: true },
-  { title: t('pipeline.stages.pr.title'), subtitle: t('pipeline.stages.pr.subtitle'), x: 1090 },
-])
+const stageKeys = ['ticket', 'plan', 'implement', 'qa', 'reviewer', 'docs', 'pr', 'merge'] as const
 
-const nodeWidth = 160
-const nodeHeight = 80
-const nodeY = 60
-const centerY = nodeY + nodeHeight / 2
-
-const colorMode = useColorMode()
-const palette = computed(() =>
-  colorMode.value === 'dark'
-    ? {
-        canvasElevated: '#171717',
-        hairline: '#2e2e2e',
-        mute: '#8a8a8a',
-        faint: '#6b6b6b',
-        highlightBg: '#ededed',
-        highlightText: '#0a0a0a',
-        highlightSubtle: '#525252',
-        ink: '#ededed',
-      }
-    : {
-        canvasElevated: '#ffffff',
-        hairline: '#ebebeb',
-        mute: '#8f8f8f',
-        faint: '#a1a1a1',
-        highlightBg: '#171717',
-        highlightText: '#fafafa',
-        highlightSubtle: '#d1d1d1',
-        ink: '#171717',
-      },
+const stages = computed(() =>
+  stageKeys.map((key) => ({
+    key,
+    title: t(`pipeline.stages.${key}.title`),
+    subtitle: t(`pipeline.stages.${key}.subtitle`),
+    detail: t(`pipeline.stages.${key}.detail`),
+    highlight: key === 'merge',
+  })),
 )
+
+const openKey = ref<string | null>(null)
+
+function closeDetail(key: string) {
+  if (openKey.value === key) openKey.value = null
+}
 </script>
 
 <template>
-  <section class="mx-auto max-w-[1200px] px-lg pt-2xl pb-4xl sm:pt-3xl sm:pb-section">
+  <section class="mx-auto max-w-[720px] px-lg pt-2xl pb-4xl sm:pt-3xl sm:pb-section">
     <div class="mb-2xl text-center">
       <span class="font-mono text-xs font-medium uppercase tracking-wide text-mute">
         {{ t('pipeline.eyebrow') }}
@@ -61,91 +40,61 @@ const palette = computed(() =>
       </i18n-t>
     </div>
 
-    <div class="overflow-x-auto">
-      <svg
-        viewBox="0 0 1290 200"
-        class="mx-auto block h-auto min-w-[860px] max-w-full"
-        role="img"
-        :aria-label="t('pipeline.ariaLabel')"
-      >
-        <defs>
-          <marker
-            id="pipeline-arrow"
-            viewBox="0 0 10 10"
-            refX="8"
-            refY="5"
-            markerWidth="7"
-            markerHeight="7"
-            orient="auto-start-reverse"
+    <ol :aria-label="t('pipeline.ariaLabel')" class="flex flex-col">
+      <li v-for="(stage, index) in stages" :key="stage.key" class="flex gap-md sm:gap-lg">
+        <div class="flex flex-col items-center">
+          <div
+            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border font-mono text-sm sm:h-12 sm:w-12 sm:text-base"
+            :class="
+              stage.highlight
+                ? 'border-ink bg-ink text-canvas-elevated'
+                : 'border-hairline bg-canvas-elevated text-faint'
+            "
           >
-            <path d="M0,0 L10,5 L0,10 z" :fill="palette.mute" />
-          </marker>
-        </defs>
+            <Icon v-if="stage.highlight" name="lucide:lock" class="h-5 w-5" />
+            <span v-else>{{ String(index + 1).padStart(2, '0') }}</span>
+          </div>
+          <div v-if="index < stages.length - 1" class="my-xxs w-px flex-1 bg-hairline" />
+        </div>
 
-        <template v-for="(stage, index) in stages" :key="stage.title">
-          <line
-            v-if="index < stages.length - 1"
-            :x1="stage.x + nodeWidth"
-            :y1="centerY"
-            :x2="stages[index + 1].x"
-            :y2="centerY"
-            :stroke="palette.mute"
-            stroke-width="1.5"
-            marker-end="url(#pipeline-arrow)"
-          />
-        </template>
+        <div class="group relative" :class="index === stages.length - 1 ? '' : 'pb-xl sm:pb-2xl'">
+          <div class="flex items-center gap-xs pt-xxs sm:pt-xs">
+            <p class="text-base font-semibold text-ink sm:text-lg">{{ stage.title }}</p>
 
-        <g v-for="stage in stages" :key="stage.title">
-          <rect
-            :x="stage.x"
-            :y="nodeY"
-            :width="nodeWidth"
-            :height="nodeHeight"
-            rx="12"
-            :fill="stage.highlight ? palette.highlightBg : palette.canvasElevated"
-            :stroke="palette.hairline"
-          />
+            <button
+              type="button"
+              class="flex h-5 w-5 items-center justify-center rounded-full text-faint hover:text-ink focus-visible:text-ink focus-visible:outline-none"
+              :aria-expanded="openKey === stage.key"
+              :aria-label="stage.title"
+              @click="openKey = stage.key"
+              @focus="openKey = stage.key"
+              @blur="closeDetail(stage.key)"
+              @mouseenter="openKey = stage.key"
+              @mouseleave="closeDetail(stage.key)"
+            >
+              <Icon name="lucide:info" class="h-4 w-4" />
+            </button>
+          </div>
 
-          <g v-if="stage.highlight" :transform="`translate(${stage.x + nodeWidth / 2 - 7}, ${nodeY + 14})`">
-            <rect x="0" y="6" width="14" height="10" rx="2" fill="none" :stroke="palette.highlightText" stroke-width="1.3" />
-            <path d="M3,6 V4 a4,4 0 0 1 8,0 V6" fill="none" :stroke="palette.highlightText" stroke-width="1.3" />
-          </g>
-          <text
-            v-else
-            :x="stage.x + nodeWidth / 2"
-            :y="nodeY + 22"
-            text-anchor="middle"
-            font-family="ui-monospace, monospace"
-            font-size="10"
-            :fill="palette.faint"
+          <p class="mt-xxs text-sm text-mute sm:text-base">{{ stage.subtitle }}</p>
+
+          <Transition
+            enter-active-class="transition ease-out duration-150"
+            enter-from-class="opacity-0 -translate-y-1"
+            enter-to-class="opacity-100 translate-y-0"
+            leave-active-class="transition ease-in duration-100"
+            leave-from-class="opacity-100 translate-y-0"
+            leave-to-class="opacity-0 -translate-y-1"
           >
-            {{ String(stages.indexOf(stage) + 1).padStart(2, '0') }}
-          </text>
-
-          <text
-            :x="stage.x + nodeWidth / 2"
-            :y="nodeY + (stage.highlight ? 48 : 46)"
-            text-anchor="middle"
-            font-family="inherit"
-            font-size="16"
-            font-weight="600"
-            :fill="stage.highlight ? palette.highlightText : palette.ink"
-          >
-            {{ stage.title }}
-          </text>
-
-          <text
-            :x="stage.x + nodeWidth / 2"
-            :y="nodeY + 64"
-            text-anchor="middle"
-            font-family="inherit"
-            font-size="11"
-            :fill="stage.highlight ? palette.highlightSubtle : palette.mute"
-          >
-            {{ stage.subtitle }}
-          </text>
-        </g>
-      </svg>
-    </div>
+            <p
+              v-if="openKey === stage.key"
+              class="mt-sm max-w-md rounded-md border border-hairline bg-canvas-elevated px-sm py-xs text-sm text-body shadow-[0px_2px_2px_rgba(0,0,0,0.04),0px_8px_16px_-4px_rgba(0,0,0,0.04)]"
+            >
+              {{ stage.detail }}
+            </p>
+          </Transition>
+        </div>
+      </li>
+    </ol>
   </section>
 </template>

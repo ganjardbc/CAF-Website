@@ -34,7 +34,9 @@
     }
   },
   "nav": {
+    "quickStart": "Quick Start",
     "docs": "Docs",
+    "changelog": "Changelog",
     "about": "About",
     "github": "View on GitHub",
     "toggleTheme": "Ganti tema warna",
@@ -48,7 +50,7 @@
     "copyright": "© {year} Coderium. All rights reserved."
   },
   "hero": {
-    "badge": "CAF v1.0.0 dirilis",
+    "badge": "CAF v0.1.0 — early access",
     "new": "New",
     "title": "Governance ketat, dari ticket sampai PR.",
     "description": "CAF menjalankan setiap fase — Plan, Implement, Verify, PR — dengan checkpoint human-review wajib. Tidak ada auto-merge. Gratis dan open, jalan langsung di repo kamu sendiri.",
@@ -61,15 +63,15 @@
     "items": [
       {
         "title": "Disiplin PIV",
-        "description": "Setiap task berjalan lewat Plan → Implement → Verify, dengan retry maksimal 3x sebelum dieskalasi ke manusia."
+        "description": "Setiap task berjalan lewat Plan → Implement → Verify, retry sekali kalau gagal sebelum diserahkan ke manusia."
       },
       {
         "title": "Artifact handoff via Markdown",
         "description": "Hasil tiap fase disimpan sebagai file Markdown di repo — bukan context chat yang hilang begitu sesi berakhir."
       },
       {
-        "title": "Multi-tracker: Linear & Jira",
-        "description": "Orchestrator terhubung langsung ke tracker yang sudah kamu pakai — trigger otomatis dari perubahan status ticket."
+        "title": "Pipeline trigger dari Linear",
+        "description": "Orchestrator terhubung langsung ke Linear — trigger otomatis dari perubahan status ticket. Dukungan Jira direncanakan."
       },
       {
         "title": "Human review wajib",
@@ -99,7 +101,7 @@
       "title": "CAF Orchestrator",
       "description": "Fastify + BullMQ + Redis, jalan di VPS kecil milik kamu sendiri. Menerima webhook dari tracker, lalu spawn agent Claude Code headless untuk tiap fase.",
       "points": [
-        "Trigger otomatis dari perubahan status ticket (Linear/Jira)",
+        "Trigger otomatis dari perubahan status ticket di Linear (Jira direncanakan)",
         "Queue per-fase dengan BullMQ + Redis",
         "Self-hosted — jalan di VPS kamu, bukan SaaS Coderium"
       ]
@@ -107,17 +109,51 @@
   },
   "pipeline": {
     "eyebrow": "Pipeline",
-    "title": "Ticket sampai PR, dengan gate manusia",
-    "description": "Setiap panah menuju PR melewati checkpoint {review} — tidak ada jalur yang melewatkannya.",
-    "reviewHighlight": "Review",
-    "ariaLabel": "Diagram pipeline CAF: Ticket dari Linear atau Jira mengalir ke Plan, Implement, QA, lalu wajib melalui checkpoint Review oleh manusia sebelum menjadi PR.",
+    "title": "Rangkaian agent jalan sendiri — merge tidak pernah otomatis",
+    "description": "Seluruh rangkaian agent berjalan otomatis begitu ticket siap. Satu-satunya langkah yang menunggu manusia adalah {review} — tidak ada jalur yang melewatkannya.",
+    "reviewHighlight": "Merge",
+    "ariaLabel": "Diagram pipeline CAF Orchestrator: ticket pindah ke state Ready for AI di Linear, lalu mengalir otomatis lewat agent Plan, Implement, QA, Reviewer, dan Docs, membuka pull request, lalu menunggu manusia untuk merge — tidak ada auto-merge.",
     "stages": {
-      "ticket": { "title": "Ticket", "subtitle": "Linear · Jira" },
-      "plan": { "title": "Plan", "subtitle": "Planner agent" },
-      "implement": { "title": "Implement", "subtitle": "Coding agent" },
-      "qa": { "title": "QA", "subtitle": "Scanner agent · read-only" },
-      "review": { "title": "Review", "subtitle": "Human checkpoint" },
-      "pr": { "title": "PR", "subtitle": "Merged" }
+      "ticket": {
+        "title": "Ticket",
+        "subtitle": "Linear · Ready for AI",
+        "detail": "Trigger begitu ticket pindah ke workflow state \"Ready for AI\" di Linear — satu-satunya trigger yang didukung saat ini. Dukungan Jira direncanakan, belum diimplementasikan."
+      },
+      "plan": {
+        "title": "Plan",
+        "subtitle": "Planner agent",
+        "detail": "Agent Planner membaca ticket dan membuat draft requirements.md serta tasks.md — rencana yang jadi acuan rangkaian agent berikutnya."
+      },
+      "implement": {
+        "title": "Implement",
+        "subtitle": "Frontend/backend",
+        "detail": "Agent frontend dan backend menulis kode sesuai plan, masing-masing terbatas ke scope app-nya sendiri."
+      },
+      "qa": {
+        "title": "QA",
+        "subtitle": "Scanner read-only",
+        "detail": "Agent scanner read-only menjalankan lint, test, dan review otomatis. Bisa menandai masalah tapi tidak punya akses tulis untuk memperbaikinya."
+      },
+      "reviewer": {
+        "title": "Reviewer",
+        "subtitle": "Ringkasan diff",
+        "detail": "Agent read-only menyiapkan ringkasan diff dan checklist (review-notes.md) supaya manusia bisa approve/reject lebih cepat."
+      },
+      "docs": {
+        "title": "Docs",
+        "subtitle": "Agent docs",
+        "detail": "Agent dokumentasi meng-update dokumentasi yang terdampak oleh perubahan."
+      },
+      "pr": {
+        "title": "PR",
+        "subtitle": "Branch di-push",
+        "detail": "Branch di-push dan pull request dibuka otomatis, dengan deskripsi yang merangkum rangkaian artifact."
+      },
+      "merge": {
+        "title": "Merge",
+        "subtitle": "Tanpa auto-merge",
+        "detail": "Satu-satunya checkpoint manusia yang wajib. Kalau QA gagal atau reviewer beri verdict \"changes requested\", pipeline retry sekali, lalu berhenti dan diserahkan ke manusia — tidak pernah ada merge otomatis."
+      }
     }
   },
   "faq": {
@@ -130,11 +166,11 @@
       },
       {
         "question": "Apakah CAF gratis?",
-        "answer": "Ya. CAF v1.0.0 gratis dan open — kamu jalankan langsung di repo dan infrastruktur kamu sendiri, tanpa biaya lisensi."
+        "answer": "Ya. CAF gratis dan open — kamu jalankan langsung di repo dan infrastruktur kamu sendiri, tanpa biaya lisensi."
       },
       {
         "question": "Tracker apa saja yang didukung?",
-        "answer": "Linear dan Jira didukung secara native lewat CAF Orchestrator. Tracker lain bisa ditambahkan lewat konfigurasi webhook."
+        "answer": "Linear didukung secara native lewat CAF Orchestrator saat ini. Dukungan Jira direncanakan, belum diimplementasikan."
       },
       {
         "question": "AI runner apa yang dipakai?",
@@ -171,18 +207,18 @@
     "metaDescription": "Histori rilis CAF (Coderium Agent Framework).",
     "eyebrow": "Changelog",
     "heading": "Histori rilis",
-    "intro": "CAF masih di v1.0.0 — halaman ini akan terus bertambah seiring rilis berikutnya.",
+    "intro": "CAF masih di v0.1.0 — halaman ini akan terus bertambah seiring rilis berikutnya.",
     "releases": [
       {
-        "version": "v1.0.0",
+        "version": "v0.1.0",
         "date": "2026",
         "items": [
-          "Rilis awal CAF: disiplin PIV (Plan → Implement → Verify) dengan retry maksimal 3x",
+          "Rilis awal CAF: disiplin PIV (Plan → Implement → Verify), retry sekali sebelum diserahkan ke manusia",
           "CAF Initiator — CLI scaffold generator dengan deteksi stack otomatis",
           "CAF Orchestrator — webhook receiver self-hosted (Fastify + BullMQ + Redis)",
           "Arsitektur 5 layer: Project Knowledge Base, Agent Definitions, Artifact Handoff, Quality Gates, Orchestration",
-          "Integrasi tracker: Linear dan Jira",
-          "Integrasi Git host: GitHub dan GitLab",
+          "Integrasi tracker: Linear (Jira direncanakan)",
+          "Integrasi Git host: GitHub (GitLab direncanakan)",
           "Checkpoint human-review wajib di setiap fase — tidak ada auto-merge"
         ]
       }
@@ -201,7 +237,7 @@
       "s2Title": "2. Lisensi",
       "s2Body": "Kode CAF didistribusikan di bawah lisensi <strong>[Lisensi TBD]</strong> — akan ditentukan sebelum repo publik dirilis. Sampai lisensi final ditetapkan, anggap semua hak dilindungi.",
       "s3Title": "3. Disediakan \"sebagaimana adanya\"",
-      "s3Body": "CAF v1.0.0 gratis dan disediakan <strong>as-is</strong>, tanpa jaminan (warranty) dalam bentuk apa pun, tersurat maupun tersirat. Tidak ada SLA (service level agreement) di versi gratis — tidak ada komitmen waktu respons atau uptime, karena CAF Orchestrator berjalan di infrastruktur kamu sendiri, bukan milik Coderium.",
+      "s3Body": "CAF gratis dan disediakan <strong>as-is</strong>, tanpa jaminan (warranty) dalam bentuk apa pun, tersurat maupun tersirat. Tidak ada SLA (service level agreement) di versi gratis — tidak ada komitmen waktu respons atau uptime, karena CAF Orchestrator berjalan di infrastruktur kamu sendiri, bukan milik Coderium.",
       "s4Title": "4. Batasan tanggung jawab",
       "s4Body1": "Agent AI yang dijalankan CAF bisa menghasilkan kode yang salah, tidak lengkap, atau tidak sesuai maksud. Ini konsisten dengan prinsip governance CAF sendiri: <strong>review manusia wajib</strong> di setiap checkpoint sebelum kode digabungkan. Kamu — bukan Coderium — bertanggung jawab penuh atas keputusan untuk me-review, meng-approve, atau menggabungkan perubahan apa pun yang dihasilkan agent.",
       "s4Body2": "Coderium tidak bertanggung jawab atas kerugian yang timbul dari penggunaan CAF, termasuk namun tidak terbatas pada kesalahan kode yang lolos review manusia.",
@@ -216,7 +252,7 @@
       "s1Body": "Ini poin paling penting: <strong>CAF Orchestrator berjalan di VPS milik kamu sendiri</strong>, bukan di server Coderium. Artifact handoff antar fase (lihat <a href=\"{layer3Href}\">Layer 3: Artifact Handoff</a>) cuma file Markdown yang disimpan di repo kamu. Source code project kamu tidak pernah dikirim ke, atau disimpan di, infrastruktur Coderium.",
       "s2Title": "2. Data yang dikumpulkan situs ini",
       "s2Body1": "Situs marketing dan dokumentasi ini (yang sedang kamu baca) saat ini <strong>tidak memasang analytics pihak ketiga</strong>. Kalau di masa depan kami menambahkan analytics, kami akan memprioritaskan tool privacy-friendly (seperti Plausible atau Umami) yang tidak melakukan tracking lintas situs, dan halaman ini akan diperbarui untuk menyebutkannya secara eksplisit.",
-      "s2Body2": "Kami tidak mengumpulkan email atau data pribadi lain lewat situs ini — tidak ada form newsletter atau pendaftaran akun di v1.0.0.",
+      "s2Body2": "Kami tidak mengumpulkan email atau data pribadi lain lewat situs ini — tidak ada form newsletter atau pendaftaran akun.",
       "s3Title": "3. Kredensial yang kamu simpan sendiri",
       "s3Body": "Variabel seperti API key tracker atau token Git host (lihat <a href=\"{envVarsHref}\">Environment Variables</a>) disimpan di file <code>.env</code> pada infrastruktur kamu sendiri. Coderium tidak pernah menerima atau menyimpan kredensial ini.",
       "s4Title": "4. Pertanyaan",

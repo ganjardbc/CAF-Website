@@ -14,6 +14,7 @@ has a mandatory human-review checkpoint. There's no auto-merge.
 - **CAF Initiator** — a CLI scaffold generator that detects your project's stack and
   generates the knowledge base your agents need.
 - **CAF Orchestrator** — a webhook receiver (Fastify + BullMQ + Redis) that runs on
-  your own VPS, triggered by ticket status changes in Linear or Jira.
+  your own VPS, triggered by ticket status changes in Linear (Jira support is
+  planned but not yet implemented).
 
 Continue to [Quick Start](/docs/quick-start) to set up CAF in your repo.

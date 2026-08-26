@@ -3,21 +3,23 @@ title: GitHub / GitLab
 description: The credentials CAF Orchestrator needs to open a PR once the review checkpoint passes.
 ---
 
-Linear and Jira are trigger sources; GitHub or GitLab is where the PR eventually gets
-opened. This integration is different in nature from the tracker webhooks — the
-Orchestrator needs credentials with write access to the repo, not just something to
-receive notifications on.
+Linear is the trigger source; GitHub is where the PR eventually gets opened.
+This integration is different in nature from the Linear webhook — the
+Orchestrator needs credentials with write access to the repo, not just
+something to receive notifications on.
+
+> **GitLab is not yet supported.** Only GitHub is implemented today —
+> there's no `GITLAB_TOKEN` handling in the current release. This page will
+> be updated once GitLab support ships.
 
 ## Required credentials
 
-Create a token with the minimum scope needed to push a branch and open a PR:
+Create a fine-grained GitHub personal access token with `Contents: Read and
+write` and `Pull requests: Read and write` scope, restricted to the relevant
+repo. Store it as `GITHUB_TOKEN` in the Orchestrator's `.env`.
 
-- **GitHub**: a fine-grained personal access token with `Contents: Read and write`
-  and `Pull requests: Read and write` scope, restricted to the relevant repo
-- **GitLab**: a project access token with `write_repository` and `api` scope
-
-Store it as `GITHUB_TOKEN` or `GITLAB_TOKEN` in the Orchestrator's `.env`, depending
-on which you use.
+You'll also need a `GITHUB_WEBHOOK_SECRET` if you want the automated PR review
+feature — see [CAF Orchestrator](/docs/caf-orchestrator#automated-pr-review).
 
 ## What the Orchestrator does with this token
 

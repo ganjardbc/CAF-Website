@@ -22,4 +22,6 @@ A read-only scanner agent checks the implementation — lint, tests, automated r
 Read-only means this agent cannot change code without an explicit approval gate.
 
 Once Verify passes, the final checkpoint is **human review** before a PR is created.
-Each phase gets a maximum of 3 retries before being escalated to a human.
+On a QA failure or a reviewer "changes requested" verdict, the pipeline retries
+once, then stops and hands off to a human — there's no automatic multi-retry
+escalation, and a retry restarts the whole pipeline (no step-resume).

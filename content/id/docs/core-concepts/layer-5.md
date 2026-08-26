@@ -9,7 +9,8 @@ Ini yang dikerjakan oleh **CAF Orchestrator**.
 
 ## Apa yang dilakukan orchestration
 
-1. Menerima webhook saat status ticket berubah di Linear atau Jira
+1. Menerima webhook saat ticket pindah ke state "Ready for AI" di Linear
+   (dukungan Jira direncanakan, belum diimplementasikan)
 2. Mengantrikan job untuk fase yang sesuai lewat BullMQ + Redis
 3. Spawn agent Claude Code headless untuk fase itu — agent membaca
    [Layer 1](/id/docs/core-concepts/layer-1) dan [Layer 2](/id/docs/core-concepts/layer-2),

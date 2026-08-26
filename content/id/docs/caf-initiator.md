@@ -6,20 +6,20 @@ description: CLI scaffold generator — deteksi stack otomatis dan generate know
 CAF Initiator adalah CLI yang men-scaffold semua yang dibutuhkan CAF di repo kamu: deteksi
 stack proyek secara otomatis, lalu generate definisi agent dan template artifact handoff.
 
+> CAF Initiator masih pre-1.0 (`v0.1.0`) dan belum dipublish ke package registry.
+> Install dengan clone repo, bukan lewat `npx`/`npm install -g`.
+
 ## Instalasi
 
-Cara tercepat, tanpa instalasi global — jalankan langsung dengan `npx`:
-
 ```bash
-npx caf-initiator init
+git clone https://github.com/ganjardbc/caf-initiator.git
+cd caf-initiator
+
+npm install
+npm link
 ```
 
-Kalau kamu sering memakainya di banyak repo, install secara global:
-
-```bash
-npm install -g caf-initiator
-caf-initiator init
-```
+`npm link` membuat binary `caf-init` tersedia secara global.
 
 **Prasyarat:**
 
@@ -28,22 +28,45 @@ caf-initiator init
 
 ## Commands
 
-### `caf-initiator init`
+Jalankan `caf-init` tanpa subcommand untuk lihat help — tidak ada menu
+interaktif top-level, pilih subcommand secara eksplisit.
 
-Command utama. Menjalankan alur scaffold penuh:
+### `caf-init scaffold`
+
+Command utama. Tanpa target, menjalankan **Setup → Golden Examples → ADR →
+Agents → Task Completion → Workflow** berurutan, dengan konfirmasi skip di
+tiap step:
 
 1. Mendeteksi stack proyek (framework, package manager, struktur folder)
-2. Generate `.claude/agents/` — definisi tiap agent role (Planner, Implementer, Verifier,
-   Reviewer)
-3. Generate `.ai/tasks/` — template artifact handoff antar fase
+2. Memilih golden examples sebagai referensi AI
+3. Membuat draft Architecture Decision Records untuk keputusan teknis yang terdeteksi
+4. Generate `.claude/agents/` — definisi tiap agent role (Planner, Architect,
+   agent implementasi per-app, QA, Reviewer, Documentation, DevOps, Auditor,
+   PM, UX Designer)
+5. Membuat draft Definition of Done dari verify script di `package.json`
+6. Generate dokumen workflow PIV dan agent-handoff dari roster agent kamu
 
-### `caf-initiator export`
+Berikan target (`caf-init scaffold <target>`, salah satu dari
+`golden-examples`, `adr`, `agents`, `task-completion`, `workflow`,
+`feature-catalog-sync`) untuk menjalankan bagian itu saja.
 
-Meng-export konfigurasi agent yang sudah kamu sesuaikan menjadi satu file yang bisa
-dibagikan atau di-versioning terpisah dari repo utama — berguna kalau kamu ingin memakai
-konfigurasi yang sama di beberapa repo.
+### `caf-init docs`
 
-> Command lain akan didokumentasikan di sini begitu dirilis pada versi berikutnya.
+Men-scaffold dokumen referensi Layer 1 opsional dan read-only
+(`docs/product/prd.md`, Feature Specs, `docs/architecture/system-overview.md`,
+`docs/api-contract.md`, `docs/schema/erd.md`, `docs/testing-strategy.md`).
+Tidak ada yang wajib untuk pipeline CAF berjalan.
+
+### `caf-init export`
+
+Menyalin definisi agent yang sudah di-generate ke target AI runner lain
+(`.kiro/agents/`, `.opencode/agents/`, dsb), dengan peringatan risiko
+enforcement eksplisit.
+
+### `caf-init curate`
+
+Audit compliance Layer 1-4 (read-only), lalu menawarkan sync bagian yang
+kurang ke `.claude/agents/*.md`. `--audit-only` mengisolasi report untuk CI gate.
 
 ## Struktur file yang di-generate
 
@@ -51,19 +74,27 @@ konfigurasi yang sama di beberapa repo.
 .claude/
   agents/
     planner.md
-    implementer.md
-    verifier.md
+    architect.md
+    qa.md
     reviewer.md
+    documentation.md
+    ...
 .ai/
   tasks/
-    <ticket-id>/
-      plan.md
-      implementation-notes.md
-      verify-report.md
+    README.md
+.caf/
+  knowledge/
+    golden-examples/
+    decisions/
+  workflows/
+    piv-workflow.md
+    agent-handoff.md
+    task-completion.md
 ```
 
 - **`.claude/agents/`** — satu file per role, berisi instruksi dan batasan akses tiap agent
-  (misalnya Verifier bersifat read-only sampai ada approval gate eksplisit).
-- **`.ai/tasks/<ticket-id>/`** — artifact handoff antar fase untuk satu ticket. Setiap fase
-  menulis hasilnya sebagai file Markdown di sini, bukan menyimpannya di context chat yang
-  hilang begitu sesi berakhir.
+  (misalnya Reviewer bersifat read-only sampai ada approval gate eksplisit).
+- **`.ai/tasks/README.md`** — mendeskripsikan konvensi artifact handoff. Folder
+  per-ticket (`plan.md`, `implementation-notes.md`, `verify-report.md`) ditulis
+  saat runtime oleh agent selama pipeline berjalan — CAF Initiator cuma
+  men-scaffold konvensinya, bukan folder ticket-nya sendiri.

@@ -23,16 +23,19 @@ Every ticket gets its own folder under `.ai/tasks/<ticket-id>/`:
 
 ```
 .ai/tasks/<ticket-id>/
-  plan.md
-  implementation-notes.md
+  requirements.md
+  tasks.md
   verify-report.md
+  qa-report.md
+  review-notes.md
 ```
 
 | File | Written by | Contents |
 |---|---|---|
-| `plan.md` | Planner | The work plan and steps to be taken |
-| `implementation-notes.md` | Implementer | Changes made and the reasoning behind them |
-| `verify-report.md` | Verifier | Lint, test results, and automated review findings |
+| `requirements.md` / `tasks.md` | Planner | The work plan and steps to be taken (Planner can also mark agents to skip here — see [CAF Orchestrator](/docs/caf-orchestrator)) |
+| `verify-report.md` | Implementation agents | Changes made and the reasoning behind them |
+| `qa-report.md` | QA | Lint, test results, and automated review findings |
+| `review-notes.md` | Reviewer | Diff summary and checklist for human review |
 
 ## The read-write loop between phases
 

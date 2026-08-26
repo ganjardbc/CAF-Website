@@ -1,7 +1,7 @@
 <script setup lang="ts">
 const tabs = [
-  { label: 'npx', command: 'npx caf-initiator init' },
-  { label: 'git clone', command: 'git clone https://github.com/coderium/caf.git' },
+  { label: 'install', command: 'git clone https://github.com/ganjardbc/caf-initiator.git && npm link' },
+  { label: 'run', command: 'caf-init scaffold' },
 ]
 
 const active = ref(0)

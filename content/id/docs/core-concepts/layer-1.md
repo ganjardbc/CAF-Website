@@ -18,7 +18,7 @@ sama sebelum mulai bekerja.
 ## Apa isinya
 
 - **Stack & tooling** — framework, package manager, versi runtime, yang dideteksi otomatis
-  oleh CAF Initiator saat `init`
+  oleh CAF Initiator saat `scaffold`
 - **Struktur folder** — konvensi penempatan file yang sudah berlaku di repo
 - **Keputusan arsitektur** — batasan atau pola yang sengaja dipilih (misalnya "semua state
   management pakai X, bukan Y")
@@ -26,13 +26,13 @@ sama sebelum mulai bekerja.
 
 ## Di mana file ini hidup
 
-CAF Initiator men-generate knowledge base ini sebagai `.claude/PROJECT.md` saat kamu
-menjalankan `caf-initiator init`. File ini bisa diedit manual kapan saja — CAF tidak
-menimpanya otomatis di run berikutnya kecuali kamu memintanya lewat `caf-initiator export`.
+CAF Initiator men-generate knowledge base ini sebagai `CLAUDE.md`/`AGENTS.md` di root
+repo saat kamu menjalankan `caf-init scaffold`. File-file ini bisa diedit manual kapan
+saja — CAF Initiator tidak pernah menimpa file yang sudah ada di run berikutnya.
 
 ## Hubungan dengan layer lain
 
 Layer 1 adalah input untuk [Layer 2: Agent Definitions](/id/docs/core-concepts/layer-2) —
 setiap definisi agent di
-`.claude/agents/` mengacu balik ke `PROJECT.md` supaya perilaku tiap role tetap selaras
-dengan konteks proyek yang sama.
+`.claude/agents/` mengacu balik ke `CLAUDE.md`/`AGENTS.md` supaya perilaku tiap role tetap
+selaras dengan konteks proyek yang sama.

@@ -1,22 +1,48 @@
 ---
 title: Quick Start
-description: Set up CAF Initiator in your repo with one command.
+description: Set up CAF Initiator in your repo, then connect CAF Orchestrator.
 ---
 
-Run CAF Initiator from your repo's root:
+## 1. Run CAF Initiator
+
+CAF Initiator isn't published to a package registry yet — clone and link it:
 
 ```bash
-npx caf-initiator init
+git clone https://github.com/ganjardbc/caf-initiator.git
+cd caf-initiator
+npm install
+npm link
+```
+
+Then from your target repo's root:
+
+```bash
+caf-init scaffold
 ```
 
 This command will:
 
 1. Detect your project's stack (framework, package manager, repo structure)
 2. Generate `.claude/agents/` — definitions for each agent role
-3. Generate `.ai/tasks/` — the artifact handoff template used between phases
+3. Draft the PIV workflow and agent-handoff docs used between phases
 
-Once that's done, connect CAF Orchestrator to your tracker (Linear or Jira) so tasks
-run automatically as ticket status changes.
+See [CAF Initiator](/docs/caf-initiator) for the full command reference
+(`scaffold`, `docs`, `export`, `curate`).
 
-> This section is still a skeleton placeholder — full CAF Orchestrator installation
-> content will follow in a later phase.
+## 2. Connect CAF Orchestrator
+
+Once your repo has agent definitions, set up CAF Orchestrator so tickets run
+automatically as their status changes in Linear:
+
+```bash
+git clone <your-caf-orchestrator-repo-url>
+cd caf-orchestrator
+pnpm install
+cp .env.example .env
+# fill in the required variables — see Environment Variables reference
+pnpm dev
+pnpm dev:worker
+```
+
+See [CAF Orchestrator](/docs/caf-orchestrator) for full setup, requirements,
+and the webhook configuration.

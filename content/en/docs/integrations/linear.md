@@ -19,7 +19,7 @@ Under **Settings → API → Webhooks**, add a new webhook:
 
 - URL: `https://<your-vps-host>/webhooks/linear`
 - Event: `Issue` — specifically status changes (`state changed`)
-- Secret: match this to the Orchestrator's `WEBHOOK_SECRET`
+- Secret: match this to the Orchestrator's `LINEAR_WEBHOOK_SECRET`
 
 ## 3. Agree on a status mapping
 

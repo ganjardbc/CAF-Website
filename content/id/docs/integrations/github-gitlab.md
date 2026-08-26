@@ -3,20 +3,22 @@ title: GitHub / GitLab
 description: Kredensial yang dibutuhkan CAF Orchestrator untuk membuka PR setelah checkpoint review lolos.
 ---
 
-Linear dan Jira adalah sumber trigger; GitHub atau GitLab adalah tempat PR akhirnya
-dibuka. Integrasi ini beda sifatnya dari webhook tracker — orchestrator butuh kredensial
-dengan akses tulis ke repo, bukan sekadar menerima notifikasi.
+Linear adalah sumber trigger; GitHub adalah tempat PR akhirnya dibuka.
+Integrasi ini beda sifatnya dari webhook Linear — orchestrator butuh
+kredensial dengan akses tulis ke repo, bukan sekadar menerima notifikasi.
+
+> **GitLab belum didukung.** Cuma GitHub yang diimplementasikan saat ini —
+> belum ada handling `GITLAB_TOKEN` di rilis saat ini. Halaman ini akan
+> diperbarui begitu dukungan GitLab rilis.
 
 ## Kredensial yang dibutuhkan
 
-Buat token dengan scope minimal yang diperlukan untuk push branch dan membuka PR:
+Buat fine-grained personal access token GitHub dengan scope
+`Contents: Read and write` dan `Pull requests: Read and write`, terbatas ke
+repo yang relevan. Simpan sebagai `GITHUB_TOKEN` di `.env` orchestrator.
 
-- **GitHub**: fine-grained personal access token dengan scope `Contents: Read and write`
-  dan `Pull requests: Read and write`, terbatas ke repo yang relevan
-- **GitLab**: project access token dengan scope `write_repository` dan `api`
-
-Simpan sebagai `GITHUB_TOKEN` atau `GITLAB_TOKEN` di `.env` orchestrator, sesuai yang
-kamu pakai.
+Kamu juga butuh `GITHUB_WEBHOOK_SECRET` kalau mau pakai fitur automated PR
+review — lihat [CAF Orchestrator](/id/docs/caf-orchestrator#automated-pr-review).
 
 ## Apa yang dilakukan orchestrator dengan token ini
 

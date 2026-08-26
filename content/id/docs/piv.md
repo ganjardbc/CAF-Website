@@ -24,4 +24,7 @@ review otomatis. Read-only berarti agent ini tidak bisa mengubah kode
 tanpa approval gate eksplisit.
 
 Setelah Verify lolos, checkpoint terakhir adalah **human review** sebelum
-PR dibuat. Retry maksimal 3x di tiap fase sebelum dieskalasi ke manusia.
+PR dibuat. Kalau QA gagal atau reviewer memberi verdict "changes requested",
+pipeline retry sekali, lalu berhenti dan diserahkan ke manusia — tidak ada
+eskalasi retry berulang otomatis, dan retry mengulang seluruh pipeline dari
+awal (tidak ada step-resume).

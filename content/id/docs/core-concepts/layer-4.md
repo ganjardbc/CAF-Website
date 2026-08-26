@@ -31,9 +31,10 @@ proyeknya. Gate manusia menutup celah itu.
 
 ## Kebijakan retry
 
-Kalau gate otomatis gagal, agent boleh mencoba ulang fase tersebut — maksimal 3x. Setelah
-3 percobaan tetap gagal, CAF berhenti dan mengeskalasi ke manusia alih-alih terus mencoba
-tanpa arah.
+Kalau gate otomatis gagal, atau Reviewer memberi verdict "changes requested", pipeline
+retry sekali. Kalau gagal lagi, CAF berhenti dan diserahkan ke manusia alih-alih terus
+mencoba tanpa arah — tidak ada step-resume, jadi retry mengulang seluruh pipeline dari
+Planner.
 
 ## Tidak ada auto-merge
 

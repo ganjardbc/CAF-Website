@@ -23,16 +23,19 @@ Setiap ticket punya foldernya sendiri di `.ai/tasks/<ticket-id>/`:
 
 ```
 .ai/tasks/<ticket-id>/
-  plan.md
-  implementation-notes.md
+  requirements.md
+  tasks.md
   verify-report.md
+  qa-report.md
+  review-notes.md
 ```
 
 | File | Ditulis oleh | Isinya |
 |---|---|---|
-| `plan.md` | Planner | Rencana kerja, langkah yang akan diambil |
-| `implementation-notes.md` | Implementer | Perubahan yang dibuat dan alasannya |
-| `verify-report.md` | Verifier | Hasil lint, test, dan temuan review otomatis |
+| `requirements.md` / `tasks.md` | Planner | Rencana kerja, langkah yang akan diambil (Planner juga bisa menandai agent yang di-skip di sini — lihat [CAF Orchestrator](/id/docs/caf-orchestrator)) |
+| `verify-report.md` | Agent implementasi | Perubahan yang dibuat dan alasannya |
+| `qa-report.md` | QA | Hasil lint, test, dan temuan review otomatis |
+| `review-notes.md` | Reviewer | Ringkasan diff dan checklist untuk human review |
 
 ## Alur baca-tulis antar fase
 

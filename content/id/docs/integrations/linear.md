@@ -18,7 +18,7 @@ Di **Settings → API → Webhooks**, tambahkan webhook baru:
 
 - URL: `https://<host-vps-kamu>/webhooks/linear`
 - Event: `Issue` — khususnya perubahan status (`state changed`)
-- Secret: samakan dengan `WEBHOOK_SECRET` di `.env` orchestrator
+- Secret: samakan dengan `LINEAR_WEBHOOK_SECRET` di `.env` orchestrator
 
 ## 3. Sepakati mapping status
 
