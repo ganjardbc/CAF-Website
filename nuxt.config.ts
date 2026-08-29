@@ -3,6 +3,12 @@ export default defineNuxtConfig({
   compatibilityDate: '2026-01-01',
   devtools: { enabled: true },
 
+  app: {
+    head: {
+      link: [{ rel: 'icon', type: 'image/png', href: '/favicon.png' }],
+    },
+  },
+
   modules: [
     '@nuxtjs/tailwindcss',
     '@nuxt/content',

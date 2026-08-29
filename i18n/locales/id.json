@@ -45,8 +45,8 @@
   "footer": {
     "about": "About",
     "changelog": "Changelog",
-    "terms": "Terms",
-    "privacy": "Privacy",
+    "terms": "Terms Of Service",
+    "privacy": "Privacy Policy",
     "copyright": "© {year} Coderium. All rights reserved."
   },
   "hero": {

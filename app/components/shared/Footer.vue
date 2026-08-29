@@ -1,6 +1,11 @@
 <script setup lang="ts">
+import logoWhite from '../../assets/images/logo-white.png'
+import logoBlack from '../../assets/images/logo-black.png'
+
 const { t } = useI18n()
 const localePath = useLocalePath()
+const colorMode = useColorMode()
+const logo = computed(() => (colorMode.value === 'dark' ? logoWhite : logoBlack))
 
 const links = computed(() => [
   { label: t('footer.terms'), to: localePath('/legal/terms') },
@@ -12,7 +17,7 @@ const links = computed(() => [
   <footer class="border-t border-hairline bg-canvas">
     <div class="mx-auto max-w-[1200px] px-lg py-xl">
       <div class="flex flex-col items-center gap-lg sm:flex-row sm:items-center sm:justify-between">
-        <span class="font-mono text-2xl font-semibold tracking-tight text-ink">CAF</span>
+        <img :src="logo" class="w-20" />
 
         <div class="flex flex-row flex-wrap items-center justify-center gap-sm sm:gap-lg">
           <NuxtLink

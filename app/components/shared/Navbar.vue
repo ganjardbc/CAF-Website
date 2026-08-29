@@ -1,7 +1,12 @@
 <script setup lang="ts">
+import logoWhite from '../../assets/images/logo-white.png'
+import logoBlack from '../../assets/images/logo-black.png'
+
 const { t, locale, locales } = useI18n()
 const localePath = useLocalePath()
 const switchLocalePath = useSwitchLocalePath()
+const colorMode = useColorMode()
+const logo = computed(() => (colorMode.value === 'dark' ? logoWhite : logoBlack))
 
 const navLinks = computed(() => [
   { label: t('nav.quickStart'), to: localePath('/docs/quick-start') },
@@ -15,7 +20,6 @@ const otherLocale = computed(() => (locales.value as { code: string }[]).find((l
 const mobileOpen = ref(false)
 const route = useRoute()
 const scrolled = ref(false)
-const colorMode = useColorMode()
 
 function toggleColorMode() {
   colorMode.preference = colorMode.value === 'dark' ? 'light' : 'dark'
@@ -53,7 +57,7 @@ onUnmounted(() => {
   >
     <nav class="mx-auto flex max-w-[1200px] items-center justify-between px-lg py-sm gap-4">
       <NuxtLink :to="localePath('/')" class="font-mono text-2xl font-semibold tracking-tight text-ink">
-        CAF
+        <img :src="logo" class="w-20" />
       </NuxtLink>
 
       <div class="hidden flex-1 items-center gap-xs sm:flex">
