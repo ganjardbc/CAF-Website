@@ -15,9 +15,14 @@ manifest di direktori kerja saat ini.
 
 **`.claude/agents/` sudah ada dan tidak mau di-generate ulang**
 
-CAF Initiator tidak menimpa file yang sudah ada supaya tidak menghapus kustomisasi kamu
-(lihat [Layer 2: Agent Definitions](/id/docs/core-concepts/layer-2)). Hapus atau pindahkan
-folder itu dulu kalau memang ingin generate ulang dari nol.
+CAF Initiator secara default tidak menimpa file yang sudah ada supaya tidak menghapus
+kustomisasi kamu (lihat [Layer 2: Agent Definitions](/id/docs/core-concepts/layer-2)).
+Kalau memang mau generate ulang — misalnya setelah upgrade `caf-initiator` supaya dapat
+template terbaru — pakai `--force` (`caf-init scaffold agents --force`, atau
+`caf-init export --force` untuk salinan yang sudah dipublish di `.opencode/`/`.kiro/`/dst):
+ini menimpa langsung, termasuk edit manual yang sudah kamu buat sejak generate terakhir,
+jadi cek `git diff` setelahnya. `caf-init export` defaultnya cuma republish definisi agent —
+pakai `--kind both` (atau `--kind command`) kalau companion slash command juga perlu di-refresh.
 
 ## CAF Orchestrator
 

@@ -15,9 +15,14 @@ manifest files in the current working directory.
 
 **`.claude/agents/` already exists and won't regenerate**
 
-CAF Initiator won't overwrite existing files so it doesn't erase your customizations
-(see [Layer 2: Agent Definitions](/docs/core-concepts/layer-2)). Remove or move that
-folder first if you actually want to regenerate it from scratch.
+CAF Initiator won't overwrite existing files by default, so it doesn't erase your
+customizations (see [Layer 2: Agent Definitions](/docs/core-concepts/layer-2)). If you
+actually want to regenerate — e.g. after upgrading `caf-initiator` to pick up template
+changes — pass `--force` (`caf-init scaffold agents --force`, or `caf-init export
+--force` for already-published copies in `.opencode/`/`.kiro/`/etc): it overwrites in
+place, including any manual edits made since the last generate, so check `git diff`
+afterward. `caf-init export` only republishes agent definitions by default — pass
+`--kind both` (or `--kind command`) if the companion slash commands need refreshing too.
 
 ## CAF Orchestrator
 
