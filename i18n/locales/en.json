@@ -55,7 +55,8 @@
     "title": "Coderium Agent Framework",
     "description": "CAF runs every phase — Plan, Implement, Verify, PR — with a mandatory human-review checkpoint. No auto-merge. Free and open, running directly in your own repo.",
     "getStarted": "Get Started",
-    "github": "View on GitHub"
+    "github": "View on GitHub",
+    "npm": "View on npm"
   },
   "featureGrid": {
     "eyebrow": "What is CAF?",

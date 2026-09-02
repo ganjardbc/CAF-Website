@@ -55,7 +55,8 @@
     "title": "Coderium Agent Framework",
     "description": "CAF menjalankan setiap fase — Plan, Implement, Verify, PR — dengan checkpoint human-review wajib. Tidak ada auto-merge. Gratis dan open, jalan langsung di repo kamu sendiri.",
     "getStarted": "Get Started",
-    "github": "View on GitHub"
+    "github": "View on GitHub",
+    "npm": "View on npm"
   },
   "featureGrid": {
     "eyebrow": "Apa itu CAF?",
