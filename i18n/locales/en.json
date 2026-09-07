@@ -50,7 +50,7 @@
     "copyright": "© {year} Coderium. All rights reserved."
   },
   "hero": {
-    "badge": "CAF v0.1.0 — early access",
+    "badge": "CAF v0.1.6 — early access",
     "new": "New",
     "title": "Coderium Agent Framework",
     "description": "CAF runs every phase — Plan, Implement, Verify, PR — with a mandatory human-review checkpoint. No auto-merge. Free and open, running directly in your own repo.",
