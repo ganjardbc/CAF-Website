@@ -208,8 +208,37 @@
     "metaDescription": "Release history for CAF (Coderium Agent Framework).",
     "eyebrow": "Changelog",
     "heading": "Release history",
-    "intro": "CAF is still at v0.1.0 — this page will keep growing with future releases.",
+    "intro": "CAF is still at v0.1.6 — this page will keep growing with future releases.",
     "releases": [
+      {
+        "version": "v0.1.6",
+        "date": "2026",
+        "items": [
+          "Kind-aware Report Format for caf-reviewer (CAF-REVIEWER-FORMAT-01)",
+          "caf-reviewer.md gets its own Report Format section — fixed Verdict skeleton (APPROVE | CHANGES REQUESTED | DEFER) written to .caf/tasks/review-notes.md",
+          "Previously only the auditor kind had a Report Format; reviewer branch added to buildReportFormatSection(kind)",
+          "buildAuditContractSections(kind): reviewer gets Report Format only (no What to Look For — scoped to the Verdict contract, not review criteria)",
+          "Skeleton copied verbatim from caf-orchestrator's buildInitialReviewPrompt() to stay word-for-word compatible with report-reader.ts's strict/loose Verdict parsers (no shared import between packages — drift risk noted in code)",
+          "Regression tests added: test/reviewer-report-format.test.js",
+          "README updated"
+        ]
+      },
+      {
+        "version": "v0.1.5",
+        "date": "2026",
+        "items": [
+          "Content-level section tracking system (CAF-CURATE-DIFF-01)",
+          "curate command: content-level section tracking (baseline/current/template 3-way diff → IN_SYNC/DRIFT/CUSTOMIZATION/CONFLICT/UNTRACKED)",
+          "curate baseline command — backfills the manifest for untracked sections, never edits content",
+          "Section parsing is now fence-aware (handles ``` blocks, avoids false section boundaries)",
+          "Retry logic added for discovery agents and section guards",
+          "devops added to KNOWN_KINDS (fixes misclassification as implementation, a privilege-escalation risk)",
+          "Discovery section builders (Tools/Input/Output) got real pm/ux-designer branches — no more generic-fallback DRIFT false positives",
+          "Idempotency check aligned with the webhook's initial review posting method",
+          "Test script added to package.json plus a large test suite expansion (agents sync, manifest gen, devops handling, retry logic, Discovery sections)",
+          "Docs updated: section tracking and retry logic explained"
+        ]
+      },
       {
         "version": "v0.1.0",
         "date": "2026",

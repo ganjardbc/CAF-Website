@@ -208,8 +208,37 @@
     "metaDescription": "Histori rilis CAF (Coderium Agent Framework).",
     "eyebrow": "Changelog",
     "heading": "Histori rilis",
-    "intro": "CAF masih di v0.1.0 — halaman ini akan terus bertambah seiring rilis berikutnya.",
+    "intro": "CAF masih di v0.1.6 — halaman ini akan terus bertambah seiring rilis berikutnya.",
     "releases": [
+      {
+        "version": "v0.1.6",
+        "date": "2026",
+        "items": [
+          "Report Format kind-aware untuk caf-reviewer (CAF-REVIEWER-FORMAT-01)",
+          "caf-reviewer.md dapat section Report Format sendiri — skeleton Verdict (APPROVE | CHANGES REQUESTED | DEFER) yang sudah diperbaiki, ditulis ke .caf/tasks/review-notes.md",
+          "Sebelumnya hanya kind auditor yang punya Report Format; branch reviewer ditambahkan ke buildReportFormatSection(kind)",
+          "buildAuditContractSections(kind): reviewer hanya dapat Report Format (tanpa What to Look For — scoped ke kontrak Verdict, bukan kriteria review)",
+          "Skeleton disalin verbatim dari buildInitialReviewPrompt() milik caf-orchestrator supaya tetap kompatibel kata-per-kata dengan parser Verdict strict/loose di report-reader.ts (tidak ada shared import antar package — risiko drift dicatat di kode)",
+          "Regression test ditambahkan: test/reviewer-report-format.test.js",
+          "README diperbarui"
+        ]
+      },
+      {
+        "version": "v0.1.5",
+        "date": "2026",
+        "items": [
+          "Sistem content-level section tracking (CAF-CURATE-DIFF-01)",
+          "Command curate: content-level section tracking (3-way diff baseline/current/template → IN_SYNC/DRIFT/CUSTOMIZATION/CONFLICT/UNTRACKED)",
+          "Command curate baseline — mengisi manifest untuk section yang untracked, tidak pernah mengubah konten",
+          "Parsing section sekarang fence-aware (menangani blok ```, menghindari batas section yang salah)",
+          "Retry logic ditambahkan untuk discovery agents dan section guards",
+          "devops ditambahkan ke KNOWN_KINDS (memperbaiki salah klasifikasi sebagai implementation, risiko privilege-escalation)",
+          "Section builder Discovery (Tools/Input/Output) dapat branch pm/ux-designer yang sesungguhnya — tidak ada lagi false positive DRIFT dari generic-fallback",
+          "Idempotency check diselaraskan dengan metode posting initial review milik webhook",
+          "Test script ditambahkan ke package.json plus ekspansi test suite besar (agents sync, manifest gen, devops handling, retry logic, Discovery sections)",
+          "Dokumentasi diperbarui: section tracking dan retry logic dijelaskan"
+        ]
+      },
       {
         "version": "v0.1.0",
         "date": "2026",
