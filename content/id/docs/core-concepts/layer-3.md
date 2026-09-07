@@ -19,10 +19,10 @@ keputusan yang diambil ikut hilang. Artifact Markdown di repo:
 
 ## Struktur file per ticket
 
-Setiap ticket punya foldernya sendiri di `.ai/tasks/<ticket-id>/`:
+Setiap ticket punya foldernya sendiri di `.caf/tasks/<ticket-id>/`:
 
 ```
-.ai/tasks/<ticket-id>/
+.caf/tasks/<ticket-id>/
   requirements.md
   tasks.md
   verify-report.md

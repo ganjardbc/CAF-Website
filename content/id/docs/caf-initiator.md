@@ -6,7 +6,7 @@ description: CLI scaffold generator — deteksi stack otomatis dan generate know
 CAF Initiator adalah CLI yang men-scaffold semua yang dibutuhkan CAF di repo kamu: deteksi
 stack proyek secara otomatis, lalu generate definisi agent dan template artifact handoff.
 
-> CAF Initiator masih pre-1.0 (`v0.1.0`), sudah dipublish ke npm sebagai
+> CAF Initiator masih pre-1.0 (`v0.1.6`), sudah dipublish ke npm sebagai
 > [`caf-initiator`](https://www.npmjs.com/package/caf-initiator).
 
 ## Instalasi
@@ -121,7 +121,7 @@ di destination.
 ### `caf-init curate`
 
 Audit compliance Layer 1-4 (read-only), lalu menawarkan sync bagian yang
-kurang ke `.claude/agents/*.md`. `--audit-only` mengisolasi report untuk CI gate.
+kurang/drift ke `.claude/agents/*.md`. `--audit-only` mengisolasi report untuk CI gate.
 
 | Option | Deskripsi | Default |
 |---|---|---|
@@ -130,7 +130,32 @@ kurang ke `.claude/agents/*.md`. `--audit-only` mengisolasi report untuk CI gate
 | `--output <file>` | Simpan juga audit report sebagai markdown ke path ini | tidak ada |
 | `--audit-only` | Report saja, non-interaktif — exit code 1 kalau ada gap wajib (untuk CI gate) | `false` |
 | `--sync-only` | Skip audit report, langsung ke flow sync | `false` |
-| `--dry-run` | Dengan `--sync-only`: tampilkan apa yang akan ditambah tanpa menulis/prompt | `false` |
+| `--dry-run` | Dengan `--sync-only`: tampilkan apa yang akan ditambah/diupdate tanpa menulis/prompt | `false` |
+
+`curate` melacak sekumpulan section pada level **konten**, bukan cuma keberadaan
+heading, berbasis manifest di `.caf/.generate-manifest.json` (hash konten tiap
+section saat generate/sync terakhir). Membandingkan baseline vs. file saat ini vs.
+template saat ini mengklasifikasi tiap section jadi `IN_SYNC`, `DRIFT` (aman
+di-auto-sync — file belum berubah sejak baseline, cuma template yang berubah),
+`CUSTOMIZATION` atau `CONFLICT` (file sudah diedit manual — tidak pernah
+ditulis otomatis, selalu dilaporkan untuk review manual), atau `UNTRACKED` (belum
+ada baseline). Ini yang bikin `curate sync` aman dijalankan ulang setelah kamu edit
+manual sebuah file agent — cuma section `DRIFT` yang pernah disentuh.
+
+### `caf-init curate baseline`
+
+Backfill untuk project yang sudah pakai `caf-init curate` sebelum manifest ini ada
+(setiap section bakal kebaca `UNTRACKED`). Mencatat konten **saat ini** dari tiap
+section untracked yang bisa di-sync sebagai baseline apa adanya — tidak pernah
+mengedit konten file, tidak pernah menebak apakah kontennya cocok dengan template
+terbaru. Review section secara manual dulu kalau belum.
+
+| Option | Deskripsi | Default |
+|---|---|---|
+| `--dir <path>` | Direktori target repo | `cwd` |
+| `--agent-dir <path>` | Direktori berisi definisi agent yang sudah ada | `.claude/agents` |
+| `--dry-run` | Tampilkan apa yang akan di-baseline tanpa menulis/prompt | `false` |
+| `--yes` | Skip konfirmasi prompt | `false` |
 
 ## Struktur file yang di-generate
 
@@ -148,10 +173,9 @@ kurang ke `.claude/agents/*.md`. `--audit-only` mengisolasi report untuk CI gate
   commands/
     caf-plan-ticket.md
     ...
-.ai/
+.caf/
   tasks/
     README.md
-.caf/
   knowledge/
     INDEX.md
     golden-examples/
@@ -160,6 +184,7 @@ kurang ke `.claude/agents/*.md`. `--audit-only` mengisolasi report untuk CI gate
     piv-workflow.md
     agent-handoff.md
     task-completion.md
+  .generate-manifest.json
 ```
 
 - **`.claude/agents/`** — satu file per role, berisi instruksi dan batasan akses tiap agent
@@ -167,7 +192,10 @@ kurang ke `.claude/agents/*.md`. `--audit-only` mengisolasi report untuk CI gate
   masing-masing bisa cover lebih dari satu app — lihat `caf-init scaffold agents` di atas.
 - **`.claude/commands/`** — companion slash command yang di-generate berbarengan
   dengan role tertentu (Planner, Architect, QA, Reviewer, Auditor, PM, ...).
-- **`.ai/tasks/README.md`** — mendeskripsikan konvensi artifact handoff. Folder
+- **`.caf/.generate-manifest.json`** — hash konten per-section yang dipakai
+  `curate`/`curate baseline` untuk membedakan `DRIFT` (aman di-auto-sync) dari
+  section yang sudah diedit manual — lihat `caf-init curate` di atas.
+- **`.caf/tasks/README.md`** — mendeskripsikan konvensi artifact handoff. Folder
   per-ticket di `.caf/tasks/{TICKET-ID}/` (`requirements.md`, `tasks.md`,
   `verify-report.md`, ...) ditulis saat runtime oleh agent selama pipeline
   berjalan — CAF Initiator cuma men-scaffold konvensinya, bukan folder ticket-nya sendiri.

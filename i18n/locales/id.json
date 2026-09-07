@@ -94,7 +94,7 @@
       "points": [
         "Auto-deteksi stack: framework, package manager, struktur repo",
         "Generate .claude/agents/ — definisi tiap agent role",
-        "Generate .ai/tasks/ — template artifact handoff"
+        "Generate .caf/tasks/ — template artifact handoff"
       ]
     },
     "orchestrator": {

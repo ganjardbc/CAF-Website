@@ -19,10 +19,10 @@ behind its decisions goes with it. A Markdown artifact in the repo:
 
 ## Per-ticket file structure
 
-Every ticket gets its own folder under `.ai/tasks/<ticket-id>/`:
+Every ticket gets its own folder under `.caf/tasks/<ticket-id>/`:
 
 ```
-.ai/tasks/<ticket-id>/
+.caf/tasks/<ticket-id>/
   requirements.md
   tasks.md
   verify-report.md

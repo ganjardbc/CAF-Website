@@ -45,7 +45,7 @@ saat startup — penyebab paling umum adalah `REDIS_URL` yang salah atau Redis b
 
 Ini bukan bug — ini kebijakan retry CAF: retry sekali kalau QA gagal atau reviewer
 beri "changes requested", lalu berhenti (lihat [Layer 4: Quality Gates](/id/docs/core-concepts/layer-4)).
-Cek `qa-report.md` atau `review-notes.md` di `.ai/tasks/<ticket-id>/` untuk tahu kenapa
+Cek `qa-report.md` atau `review-notes.md` di `.caf/tasks/<ticket-id>/` untuk tahu kenapa
 gate otomatis gagal.
 
 **PR tidak terbuka setelah fase Implement selesai**

@@ -70,7 +70,7 @@ Urutan section (mengikuti pola opencode, disesuaikan konteks CAF):
    - Mandatory human review di setiap checkpoint, no auto-merge
    - Read-only scanner agents — tidak ada write access tanpa approval gate eksplisit
 6. **CAF Initiator** — section/card sendiri. Jelaskan: CLI scaffold generator, hasil deteksi
-   stack otomatis, generate `.claude/agents/`, `.ai/tasks/`, dsb. Sertakan contoh command:
+   stack otomatis, generate `.claude/agents/`, `.caf/tasks/`, dsb. Sertakan contoh command:
    `caf-initiator init` (sesuaikan command asli kamu).
 7. **CAF Orchestrator** — section/card sendiri. Jelaskan: Fastify + BullMQ + Redis, webhook
    receiver, jalan di VPS kecil, trigger dari perubahan status ticket di Linear/Jira, spawn

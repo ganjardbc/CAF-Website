@@ -46,7 +46,7 @@ manager's logs) for startup errors — the most common cause is an incorrect
 
 This isn't a bug — it's CAF's retry policy: one retry on QA failure or reviewer
 "changes requested" before stopping (see [Layer 4: Quality Gates](/docs/core-concepts/layer-4)).
-Check `qa-report.md` or `review-notes.md` in `.ai/tasks/<ticket-id>/` to see why
+Check `qa-report.md` or `review-notes.md` in `.caf/tasks/<ticket-id>/` to see why
 the automated gate failed.
 
 **PR doesn't open after the Implement phase finishes**

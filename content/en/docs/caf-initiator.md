@@ -7,7 +7,7 @@ CAF Initiator is the CLI that scaffolds everything CAF needs in your repo: it
 automatically detects your project's stack, then generates agent definitions and
 artifact handoff templates.
 
-> CAF Initiator is pre-1.0 (`v0.1.0`), published on npm as
+> CAF Initiator is pre-1.0 (`v0.1.6`), published on npm as
 > [`caf-initiator`](https://www.npmjs.com/package/caf-initiator).
 
 ## Installation
@@ -121,7 +121,7 @@ untouched at the destination.
 
 ### `caf-init curate`
 
-Read-only Layer 1-4 compliance audit, then offers to sync missing sections
+Read-only Layer 1-4 compliance audit, then offers to sync missing/drifted sections
 into `.claude/agents/*.md`. `--audit-only` isolates the report for CI gates.
 
 | Option | Description | Default |
@@ -131,7 +131,32 @@ into `.claude/agents/*.md`. `--audit-only` isolates the report for CI gates.
 | `--output <file>` | Also save the audit report as markdown to this path | none |
 | `--audit-only` | Report only, non-interactive — exit code 1 on required gaps (for CI gates) | `false` |
 | `--sync-only` | Skip the audit report, go straight to the sync flow | `false` |
-| `--dry-run` | With `--sync-only`: show what would be added without writing or prompting | `false` |
+| `--dry-run` | With `--sync-only`: show what would be added/updated without writing or prompting | `false` |
+
+`curate` tracks a fixed set of sections at the **content** level, not just heading
+presence, keyed off a manifest at `.caf/.generate-manifest.json` (a hash of each
+section's content as of the last generate/sync). Comparing baseline vs. current file
+vs. current template classifies every present section as `IN_SYNC`, `DRIFT` (safe to
+auto-sync — the file hasn't changed since baseline, only the template has),
+`CUSTOMIZATION` or `CONFLICT` (file was hand-edited — never auto-written, always
+reported for manual review), or `UNTRACKED` (no baseline yet). This is what makes
+`curate sync` safe to re-run after you've hand-edited an agent file: only `DRIFT`
+sections are ever touched.
+
+### `caf-init curate baseline`
+
+Backfill for projects that ran `caf-init curate` before this manifest existed (every
+section would otherwise read as `UNTRACKED`). Records the **current** content of every
+untracked, syncable section as its baseline as-is — never edits file content, never
+guesses whether it matches the latest template. Review sections manually first if you
+haven't already.
+
+| Option | Description | Default |
+|---|---|---|
+| `--dir <path>` | Target repo directory | `cwd` |
+| `--agent-dir <path>` | Directory containing existing agent definitions | `.claude/agents` |
+| `--dry-run` | Show what would be baselined without writing or prompting | `false` |
+| `--yes` | Skip the confirmation prompt | `false` |
 
 ## Generated file structure
 
@@ -149,10 +174,9 @@ into `.claude/agents/*.md`. `--audit-only` isolates the report for CI gates.
   commands/
     caf-plan-ticket.md
     ...
-.ai/
+.caf/
   tasks/
     README.md
-.caf/
   knowledge/
     INDEX.md
     golden-examples/
@@ -161,6 +185,7 @@ into `.claude/agents/*.md`. `--audit-only` isolates the report for CI gates.
     piv-workflow.md
     agent-handoff.md
     task-completion.md
+  .generate-manifest.json
 ```
 
 - **`.claude/agents/`** — one file per role, containing each agent's instructions and
@@ -169,7 +194,10 @@ into `.claude/agents/*.md`. `--audit-only` isolates the report for CI gates.
   `caf-init scaffold agents` above.
 - **`.claude/commands/`** — companion slash commands generated alongside certain
   roles (Planner, Architect, QA, Reviewer, Auditor, PM, ...).
-- **`.ai/tasks/README.md`** — describes the artifact handoff convention. The
+- **`.caf/.generate-manifest.json`** — per-section content hashes used by
+  `curate`/`curate baseline` to tell `DRIFT` (safe to auto-sync) apart from a
+  hand-edited section — see `caf-init curate` above.
+- **`.caf/tasks/README.md`** — describes the artifact handoff convention. The
   per-ticket folders under `.caf/tasks/{TICKET-ID}/` (`requirements.md`,
   `tasks.md`, `verify-report.md`, ...) are written at runtime by the agents
   during a pipeline run — CAF Initiator only scaffolds the convention, not the
