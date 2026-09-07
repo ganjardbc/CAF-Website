@@ -31,7 +31,7 @@ an audit trail if needed. This is not a bug, it's a design choice: the CAF-PRREV
 allowlist deliberately does not reveal to outsiders that this command was ever invoked by an
 unauthorized user.
 
-(This threshold is tied to a single source: `.ai/tasks/CAF-PRREVIEW-01/plan.md` §5 — if the
+(This threshold is tied to a single source: `.caf/tasks/CAF-PRREVIEW-01/plan.md` §5 — if the
 threshold changes, update it there first, then here AND on the caf-orchestrator webhook side
 Checkpoint B. DO NOT update only one side.)
 

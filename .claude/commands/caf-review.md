@@ -34,7 +34,7 @@ mechanism for it) for an audit trail if necessary. This is not a bug, it's by de
 CAF-PRREVIEW-01 whitelist trigger is deliberately designed to not leak to outside parties
 that this command was ever invoked by an unauthorized user.
 
-(This threshold refers to a single source: `.ai/tasks/CAF-PRREVIEW-01/plan.md` §5 — if the
+(This threshold refers to a single source: `.caf/tasks/CAF-PRREVIEW-01/plan.md` §5 — if the
 threshold changes, update it there first, then here, in `/caf-fix-review`, AND on the
 caf-orchestrator webhook side Checkpoint B. DO NOT update just one side.)
 
@@ -231,7 +231,7 @@ Show in chat: the final Verdict, the GitHub event used, a link to the newly crea
   PR Review object via `pulls/{number}/reviews` like this command does. Two different artifact
   contracts, so `GET pulls/{number}/reviews` will never find that webhook review,
   regardless of whose login is being searched for. See the separate backlog item at
-  `.ai/tasks/CAF-PRREVIEW-01/open-items.md` (caf-initiator) — migrating the webhook's initial
+  `.caf/tasks/CAF-PRREVIEW-01/open-items.md` (caf-initiator) — migrating the webhook's initial
   review to `pulls/{number}/reviews` (if approved) would simultaneously make this idempotency
   check automatically work across both paths, but that's a decision that touches
   `caf-orchestrator`, outside this command's scope.
