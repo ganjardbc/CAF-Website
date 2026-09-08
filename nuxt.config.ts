@@ -5,6 +5,7 @@ export default defineNuxtConfig({
 
   app: {
     head: {
+      titleTemplate: (title) => (title ? `${title} · CAF` : 'CAF — Coderium Agent Framework'),
       link: [{ rel: 'icon', type: 'image/png', href: '/favicon.png' }],
     },
   },
@@ -39,6 +40,9 @@ export default defineNuxtConfig({
   site: {
     url: 'https://caf-website-jade.vercel.app',
     name: 'CAF',
+    description:
+      'AI agent orchestration framework with strict governance — Plan, Implement, Verify, PR, with mandatory human-review checkpoints at every phase.',
+    defaultLocale: 'en',
   },
 
   nitro: {
