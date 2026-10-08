@@ -1,12 +1,11 @@
 ---
 title: GitHub / GitLab
-description: The credentials CAF Orchestrator needs to open a PR once the review checkpoint passes.
+description: How CAF Orchestrator uses GitHub — as the place PRs are opened, as a ticket trigger, and for AI PR review.
 ---
 
-Linear is the trigger source; GitHub is where the PR eventually gets opened.
-This integration is different in nature from the Linear webhook — the
-Orchestrator needs credentials with write access to the repo, not just
-something to receive notifications on.
+GitHub plays three roles for CAF Orchestrator: it is where every PR is opened, it
+can be the ticket source (GitHub Issues), and its PR comments drive AI review and
+pipeline resumes.
 
 > **GitLab is not yet supported.** Only GitHub is implemented today —
 > there's no `GITLAB_TOKEN` handling in the current release. This page will
@@ -14,27 +13,58 @@ something to receive notifications on.
 
 ## Required credentials
 
-Create a fine-grained GitHub personal access token with `Contents: Read and
-write` and `Pull requests: Read and write` scope, restricted to the relevant
-repo. Store it as `GITHUB_TOKEN` in the Orchestrator's `.env`.
+Both are required in the Orchestrator's `.env`:
 
-You'll also need a `GITHUB_WEBHOOK_SECRET` if you want the automated PR review
-feature — see [CAF Orchestrator](/docs/caf-orchestrator#automated-pr-review).
+- `GITHUB_TOKEN` — a fine-grained personal access token restricted to the relevant
+  repo(s), with `Contents: Read and write` and `Pull requests: Read and write`. Add
+  `Issues: Read and write` if you trigger from GitHub Issues, so the Orchestrator
+  can comment on them.
+- `GITHUB_WEBHOOK_SECRET` — the secret you set on the repo webhook.
 
-## What the Orchestrator does with this token
+## Register the webhook
 
-After the Implement phase finishes and passes
-[Layer 4: Quality Gates](/docs/core-concepts/layer-4), the Orchestrator uses this
-token to:
+In each target repo, under **Settings → Webhooks**, add:
 
-1. Push the branch containing the Implement phase's changes
-2. Open a pull request, with a description summarizing the artifact from
-   [Layer 3: Artifact Handoff](/docs/core-concepts/layer-3)
+- Payload URL: `https://<your-vps-host>/webhooks/github`
+- Content type: `application/json`
+- Secret: the same value as `GITHUB_WEBHOOK_SECRET`
+- Events: `Issues`, `Issue comments`, `Pull request review comments`
+
+## GitHub Issues as the ticket source
+
+Apply the label set in `github.readyLabel` (default `ready-for-ai`) to an issue and
+the full pipeline runs for it. The project is matched by repository (each project's
+`repoCloneUrl`), and the ticket key becomes `<ticketPrefix>-<issue number>`. Results
+are posted back as a comment on the issue.
+
+## PR comment commands
+
+On a PR this pipeline opened (head branch `ai-agent/<TICKET-KEY>`):
+
+| Comment | What it does |
+|---|---|
+| `/caf-retry-pipeline` | Resumes a pipeline that stopped at a gate (on its Draft PR) |
+| `/caf-review` | Runs a full AI review and posts it as a GitHub PR review |
+| `/caf-fix-review` | The Reviewer addresses every review comment on the PR |
+| A reply in an inline review thread | The Reviewer addresses that one thread |
+
+Only users with `write`, `maintain` or `admin` permission on the repo can trigger
+these (and the issue label); the permission is checked live on every trigger.
+Comments from bot accounts are ignored. See
+[CAF Orchestrator](/docs/caf-orchestrator#automated-pr-review).
+
+## What the Orchestrator does with the token
+
+1. Clones the repo and pushes the branch `ai-agent/<TICKET-KEY>`
+2. Opens a pull request once the
+   [Layer 4 quality gates](/docs/core-concepts/layer-4) pass — or a **Draft PR**
+   carrying the failing report when a gate is exhausted
+3. Posts comments, replies and PR reviews
 
 ## The Orchestrator never merges a PR
 
-This token is deliberately never given merge scope. Once a PR is open, the merge
-decision still goes through your normal review process on GitHub/GitLab — we
+The Orchestrator has no merge step. Once a PR is open, the merge
+decision still goes through your normal review process on GitHub — we
 recommend keeping branch protection rules enabled on your repo so CAF's
 "no auto-merge" policy is also enforced at the platform level, not just by the
 Orchestrator.

@@ -4,39 +4,57 @@ description: Connect CAF Orchestrator to Linear so your pipeline triggers automa
 ---
 
 CAF Orchestrator watches for status changes on Linear tickets via webhook, then
-queues the matching phase. This page adds Linear-specific setup on top of the basics
+runs the agent pipeline. This page adds Linear-specific setup on top of the basics
 covered in [CAF Orchestrator](/docs/caf-orchestrator).
 
 ## 1. Create an API key
 
-In Linear, go to **Settings → API → Personal API keys** and create a new key with
-read access to your workspace. Add it to the Orchestrator's `.env` as
-`LINEAR_API_KEY`.
+In Linear, go to **Settings → API → Personal API keys** and create a new key. The
+Orchestrator uses it to read tickets and post comments on them. Add it to the
+Orchestrator's `.env` as `LINEAR_API_KEY`.
 
 ## 2. Register a webhook
 
 Under **Settings → API → Webhooks**, add a new webhook:
 
 - URL: `https://<your-vps-host>/webhooks/linear`
-- Event: `Issue` — specifically status changes (`state changed`)
+- Event: `Issue`
 - Secret: match this to the Orchestrator's `LINEAR_WEBHOOK_SECRET`
 
-## 3. Agree on a status mapping
+## 3. Set the "Ready for AI" state
 
-The Orchestrator triggers phases based on ticket status. A recommended convention:
+The pipeline is triggered by **one** workflow state. Create a state in your Linear
+team (for example "Ready for AI") and put its UUID in `caf.config.yaml`:
 
-| Linear status | Phase triggered |
-|---|---|
-| Ready for Plan | Plan |
-| Ready for Implement | Implement |
-| Ready for Verify | Verify |
-| In Review | Waiting for human review (no automatic trigger) |
+```yaml
+linear:
+  readyStateId: 00000000-0000-0000-0000-000000000000
+```
 
-These status names are just a convention, not hardcoded — adjust them to match your
-team's workflow in the Orchestrator's configuration.
+The name of the state doesn't matter — only the UUID is matched. Startup fails fast
+if `linear.readyStateId` is missing.
+
+## 4. Map the ticket prefix to a project
+
+Tickets are routed by their key prefix. For tickets like `ABC-123`, add a project
+with `ticketPrefix: ABC`:
+
+```yaml
+projects:
+  your-project:
+    ticketPrefix: ABC
+    repoCloneUrl: https://github.com/your-org/your-repo.git
+    baseBranch: main
+    workspaceDir: /tmp/caf-orchestrator/workspace/your-project
+```
 
 ## What happens once the webhook is received
 
-The flow is the same as described in [CAF Orchestrator](/docs/caf-orchestrator): the
-payload gets verified, a job is queued in BullMQ, then a headless Claude Code agent
-for that phase runs.
+The Orchestrator verifies the signature and timestamp, then dedupes by delivery ID.
+It only reacts to an actual state transition into the ready state — editing another
+field of a ticket that is already there triggers nothing. From there the whole agent
+chain runs as described in [CAF Orchestrator](/docs/caf-orchestrator#the-pipeline),
+and the result is posted back as a comment on the ticket.
+
+Moving a ticket back into the ready state while its `ai-agent/<TICKET-KEY>` branch
+still exists **resumes** the stopped pipeline instead of starting a new one.

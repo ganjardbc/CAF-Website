@@ -1,46 +1,70 @@
 ---
 title: CAF Orchestrator
-description: Webhook receiver self-hosted (Fastify + BullMQ + Redis) yang menjalankan agent per fase.
+description: Webhook receiver self-hosted (Fastify + BullMQ + Redis) yang menjalankan pipeline agent dari ticket sampai PR.
 ---
 
-CAF Orchestrator adalah service kecil yang jalan di VPS kamu sendiri. Ia menerima webhook
-dari Linear atau GitHub Issues, mengantrikan job per fase, lalu spawn agent Claude Code
-headless untuk menjalankan Plan, Implement, Verify, sampai membuka PR.
+CAF Orchestrator adalah service kecil yang jalan di VPS kamu sendiri. Begitu ticket
+jadi "Ready for AI", ia clone repo target, menjalankan rantai proses
+`claude --agent <name>` headless (`caf-planner` → `caf-frontend` / `caf-backend` →
+`caf-qa` → `caf-reviewer` → `caf-documentation`), push branch
+`ai-agent/<TICKET-KEY>`, membuka PR di GitHub, lalu melaporkan hasilnya ke ticket.
 
-> Linear dan GitHub Issues sekarang dua-duanya bisa trigger pipeline. Dukungan
-> Jira direncanakan tapi belum diimplementasikan — lihat
-> [Jira](/id/docs/integrations/jira) untuk statusnya.
+Ia juga menjalankan AI review pada PR yang sudah ada, dipicu comment di PR.
 
-## Prasyarat
+> Linear dan GitHub Issues sama-sama bisa memicu pipeline saat ini. Dukungan Jira
+> direncanakan tapi belum diimplementasikan — lihat [Jira](/id/docs/integrations/jira).
+> Source: [github.com/coderiumid/caf-orchestrator](https://github.com/coderiumid/caf-orchestrator).
+
+## Apa yang memicunya
+
+| Trigger | Di mana | Hasil |
+|---|---|---|
+| Ticket Linear pindah ke state `linear.readyStateId` | `POST /webhooks/linear` | Pipeline agent penuh |
+| GitHub Issue mendapat label `github.readyLabel` (default `ready-for-ai`) | `POST /webhooks/github` | Pipeline agent penuh |
+| Comment `/caf-retry-pipeline` di Draft PR, atau ticket Linear masuk lagi ke "Ready for AI" saat branch-nya masih ada | salah satu webhook | Melanjutkan pipeline yang berhenti di sebuah gate |
+| Comment `/caf-review` di PR | `POST /webhooks/github` | Review penuh, diposting sebagai GitHub PR review |
+| Comment `/caf-fix-review` di PR | `POST /webhooks/github` | Reviewer menangani semua comment review di PR |
+| Reply di dalam inline review thread | `POST /webhooks/github` | Reviewer menangani satu thread itu |
+
+Trigger dari sisi GitHub mensyaratkan pemberi comment atau label punya permission
+`write`, `maintain`, atau `admin` di repo; selain itu diabaikan diam-diam. Trigger
+lewat comment PR hanya berlaku di PR yang dihasilkan pipeline ini (head branch
+`ai-agent/<TICKET-KEY>`). `ENABLE_PIPELINE_TRIGGER=false` adalah kill switch untuk
+semuanya.
+
+## Requirements
 
 - Node.js 22 atau lebih baru
 - pnpm
 - Redis
-- CLI `claude` tersedia di PATH, dengan definisi agent (`planner`, `frontend`,
-  `backend`, `qa`, `reviewer`, `documentation`) sudah dikonfigurasi di
-  `.claude/agents/` **repo target** — ini yang di-scaffold oleh
-  [CAF Initiator](/id/docs/caf-initiator)
+- `git`, dengan akses push ke repo target
+- CLI `claude` tersedia di PATH, dengan definisi agent (`caf-planner`,
+  `caf-frontend`, `caf-backend`, `caf-qa`, `caf-reviewer`, `caf-documentation`) ada
+  di `.claude/agents/` **repo target** — inilah yang di-scaffold
+  [CAF Initiator](/id/docs/caf-initiator). Orchestrator hanya tahu namanya dan
+  memanggilnya
 
 ## Setup
 
-CAF Orchestrator jalan sebagai dua proses (web server + worker) yang berbagi
-Redis sebagai queue backend — bisa langsung pakai pnpm, atau lewat `Dockerfile`
-+ `docker-compose.yml` yang sudah disediakan di repo.
+CAF Orchestrator jalan sebagai dua proses yang berbagi Redis sebagai backend queue:
+
+- **Web server** — menerima dan memvalidasi webhook Linear/GitHub, memasukkan job ke
+  antrian, dan menyajikan dashboard monitoring.
+- **Worker** — mengambil job dari antrian dan menjalankannya: `agent-pipeline`
+  (ticket → PR) dan `pr-review` (comment PR → review).
+
+Dua-duanya harus jalan supaya ada yang diproses — web server saja hanya menerima
+webhook.
 
 ```bash
-git clone <url-repo-caf-orchestrator-kamu>
+git clone https://github.com/coderiumid/caf-orchestrator.git
 cd caf-orchestrator
 pnpm install
-cp .env.example .env
-# isi REDIS_URL, LINEAR_WEBHOOK_SECRET, LINEAR_API_KEY, GITHUB_TOKEN,
-# GITHUB_WEBHOOK_SECRET, dan salah satu dari CLAUDE_CODE_OAUTH_TOKEN atau
-# openai.useOpenai di caf.config.yaml + OPENAI_API_KEY
-cp caf.config.example.yaml caf.config.yaml
-# isi linear.readyStateId (UUID), github.readyLabel, dan minimal satu entry
-# di bawah projects: (repoCloneUrl, ticketPrefix, baseBranch)
+cp .env.example .env                           # secret dan toggle operasional
+cp caf.config.example.yaml caf.config.yaml     # config struktural
 ```
 
-Jalankan kedua proses (keduanya harus tetap jalan supaya ticket diproses):
+Isi kedua file (lihat [Konfigurasi](#konfigurasi)), lalu jalankan dua prosesnya:
 
 ```bash
 pnpm dev            # web server
@@ -55,164 +79,247 @@ pnpm start
 pnpm start:worker
 ```
 
-Production, pakai Docker (`docker-compose.yml` menyediakan service `api` +
-`worker` yang berbagi container Redis dan volume `workspace`):
+Production, dengan Docker (`docker-compose.yml` menjalankan `redis`, `api`, dan
+`worker` dari satu image):
 
 ```bash
 docker compose build
 docker compose up -d
 ```
 
-Setelah jalan, cek endpoint kesehatannya:
+Setelah jalan, cek endpoint health-nya:
 
 ```bash
 curl http://localhost:PORT/health
 ```
 
-Balikin `200` dengan `{ status: "healthy", services: { redis, disk } }` kalau
-koneksi Redis dan probe tulis ke `workspace.dir` dua-duanya sukses, atau `503`
+Mengembalikan `200` dengan `{ status: "healthy", services: { redis, disk } }` kalau
+koneksi Redis dan write probe ke `workspace.dir` sama-sama berhasil, atau `503`
 dengan `status: "unhealthy"` kalau tidak.
 
-Lihat [Environment Variables](/id/docs/reference/environment-variables) untuk daftar lengkap.
+### Deploy dengan Docker
 
-### Deploy pakai Docker
+`deploy.sh` di repo melakukan pull `origin/main`, rebuild image, dan restart service
+— bisa dijalankan manual maupun dari CI. Flag-nya antara lain `--skip-pull` dan
+`--skip-build`. Workflow GitHub Actions bawaan menjalankan typecheck, lint, test,
+dan build di setiap push dan PR, lalu memanggil `deploy.sh` di VPS lewat SSH untuk
+push ke `main`.
 
-`deploy.sh` di repo membungkus siklus `git fetch && reset --hard origin/main
-&& docker compose build && docker compose up -d` yang biasa dipakai buat
-deploy di VPS — dipakai manual maupun dari workflow deploy CI. Flag:
-`--skip-pull`, `--skip-build`, `--no-cache`, `--env <path>`. Juga prune image
-dangling tiap habis deploy.
+## Konfigurasi
+
+Config dibagi ke dua file, dua-duanya divalidasi saat startup — config yang tidak
+valid atau tidak lengkap langsung gagal.
+
+### `.env` — secret dan toggle operasional
+
+Lihat [Environment Variables](/id/docs/reference/environment-variables) untuk daftar
+lengkap. Wajib: `REDIS_URL`, `LINEAR_WEBHOOK_SECRET`, `LINEAR_API_KEY`,
+`GITHUB_TOKEN`, `GITHUB_WEBHOOK_SECRET`, dan satu jalur auth Claude Code
+(`CLAUDE_CODE_OAUTH_TOKEN`, atau `OPENAI_API_KEY` bersama `openai.useOpenai: true`).
+
+### `caf.config.yaml` — config struktural
+
+`caf.config.example.yaml` memuat semua field beserta default-nya. Yang wajib kamu
+isi:
+
+- `linear.readyStateId` — UUID workflow state "Ready for AI".
+- `projects:` — minimal satu entry. Tiap project punya `ticketPrefix` (mis. `ABC`
+  untuk `ABC-123`), `repoCloneUrl`, `baseBranch`, dan `workspaceDir` absolut.
+
+Yang sering diatur:
+
+| Field | Yang dikontrol | Default |
+|---|---|---|
+| `github.readyLabel` | Label yang membuat GitHub Issue jadi "Ready for AI" | `ready-for-ai` |
+| `workspace.mode` | `ephemeral` (clone baru per job) atau `persistent` (pakai ulang satu checkout per repo) | `ephemeral` |
+| `agents.qa.maxRetries` / `agents.reviewer.maxRetries` | Retry gate dalam satu run | masing-masing `1` |
+| `orchestration.maxOrchestrationRetries` | Berapa kali ticket yang gate-nya habis bisa di-resume; bisa di-override per project | `2` |
+| `claude.agentTimeoutMs` | Timeout per proses agent | 30 menit |
+| `queue.workerConcurrency` | Job pipeline bersamaan per worker | `1` |
+| `queue.jobAttempts` | Retry seluruh job setelah kegagalan tak terduga | `3` |
+| `openai.*`, `agents.modelOverrides` | Model routing (lihat di bawah) | mati |
+| `dashboard.enabled`, `dashboard.basicAuthUser`, `db.path` | Dashboard monitoring | mati |
 
 ## Konfigurasi webhook
 
-Orchestrator trigger otomatis pada salah satu transisi berikut:
+Daftarkan webhook yang mengarah ke Orchestrator:
 
-- **Linear** — ticket pindah ke workflow state yang UUID-nya di-set sebagai
-  `linear.readyStateId` di `caf.config.yaml` (mis. "Ready for AI")
-- **GitHub Issues** — label yang cocok dengan `github.readyLabel` di
-  `caf.config.yaml` (default `ready-for-ai`) dipasang ke sebuah issue
+- **Linear** — `https://<host-vps-kamu>/webhooks/linear`, secret =
+  `LINEAR_WEBHOOK_SECRET`. Lihat [Linear](/id/docs/integrations/linear).
+- **GitHub** (per repo target) — `https://<host-vps-kamu>/webhooks/github`, secret =
+  `GITHUB_WEBHOOK_SECRET`, event `Issues`, `Issue comments`, dan
+  `Pull request review comments`. Lihat
+  [GitHub / GitLab](/id/docs/integrations/github-gitlab).
 
-Daftarkan webhook yang sesuai, mengarah ke endpoint orchestrator:
+Signature tiap payload diverifikasi, dan delivery di-dedupe berdasarkan delivery ID.
 
-- Linear: `https://<host-vps-kamu>/webhooks/linear`
-- GitHub (trigger ticket, PR review, dan komentar `/caf-retry-pipeline` — ketiganya
-  satu endpoint): `https://<host-vps-kamu>/webhooks/github`
+## Pipeline
 
-Alurnya:
+1. Clone repo target ke workspace project dan buat branch `ai-agent/<TICKET-KEY>`.
+   Ticket Linear di-routing ke project berdasarkan prefix ticket, GitHub Issue
+   berdasarkan repository.
+2. Jalankan `caf-planner`, yang wajib menghasilkan
+   `.caf/tasks/<TICKET-KEY>/tasks.md`.
+3. Baca `tasks.md`: header `## Frontend Tasks` / `## Backend Tasks` menentukan agent
+   implementasi mana yang jalan (`caf-frontend`, lalu `caf-backend`).
+4. Jalankan agent implementasi, lalu baca `verify-report.md`.
+5. Jalankan `caf-qa` → `qa-report.md`. Kalau `FAIL`, jalankan ulang implementasi
+   sampai `agents.qa.maxRetries` kali.
+6. Jalankan `caf-reviewer` → `review-notes.md`. Kalau `CHANGES REQUESTED`, jalankan
+   ulang implementasi sampai `agents.reviewer.maxRetries` kali.
+7. Kalau `tasks.md` punya `## Docs Tasks` yang berisi, jalankan `caf-documentation`.
+   Kegagalan docs tidak pernah menggagalkan job.
+8. Commit, push, buka PR di GitHub, dan posting comment akhir (link PR plus report QA
+   dan reviewer) di ticket Linear atau GitHub Issue.
 
-1. Ticket pindah ke state ready (Linear) atau dapat label ready (GitHub Issue)
-2. Sumbernya mengirim webhook ke orchestrator
-3. Orchestrator memverifikasi signature payload (`LINEAR_WEBHOOK_SECRET` atau
-   secret webhook GitHub) dan dedupe berdasarkan delivery ID
-4. Job pipeline masuk ke antrian BullMQ, di-routing ke entry `projects:` yang
-   cocok berdasarkan prefix ticket key (Linear) atau repo (GitHub)
-5. Orchestrator menjalankan rangkaian agent (planner → frontend/backend → QA →
-   reviewer → docs) sebagai proses `claude --agent <name>` headless, push
-   branch, lalu membuka PR GitHub
+Orchestrator tidak pernah me-merge PR sendiri.
 
-Setiap fase tetap berhenti di checkpoint human-review — orchestrator tidak
-pernah merge PR sendiri. Kalau QA gagal atau reviewer memberi verdict "changes
-requested", pipeline retry implementation agent sekali per gate
-(`agents.qa.maxRetries` / `agents.reviewer.maxRetries`, default `1`); kalau
-masih gagal, orchestrator push branch dan membuka (atau update) **Draft PR**
-berisi report yang gagal, lalu berhenti dan komentar menunggu manusia.
+### Kalau sebuah gate habis
 
-### Resume pipeline yang berhenti (`/caf-retry-pipeline`)
+Kalau sebuah gate (implementation verify, QA, atau reviewer) masih gagal setelah
+retry-nya habis, pekerjaan tidak dibiarkan terdampar: branch di-push dan **Draft PR**
+dibuka — atau diperbarui, kalau sudah ada yang terbuka — dengan report yang gagal
+sebagai body-nya. Pipeline lalu berhenti dan memberi comment untuk manusia, yang bisa
+memperbaiki manual atau me-resume.
 
-Run yang gate-exhausted bukan jalan buntu. Resume dengan salah satu cara:
+### Kegagalan yang bukan gate
 
-- Komentar `/caf-retry-pipeline` di Draft PR-nya, atau
-- Pindahkan ticket Linear balik ke state ready (orchestrator mendeteksi branch
-  `ai-agent/<TICKET-KEY>` sudah ada lewat GitHub API dan resume, bukan mulai
+- Agent crash atau timeout mengulang seluruh job dari Planner, sampai
+  `queue.jobAttempts` kali.
+- `429` (kuota API habis) atau `404` (model tidak ditemukan) dari agent menghentikan
+  pipeline dengan rapi lewat comment, bukan retry — mengulangnya hanya akan gagal
+  dengan cara yang sama.
+
+### Melanjutkan pipeline yang berhenti (`/caf-retry-pipeline`)
+
+Run yang gate-nya habis bukan jalan buntu. Lanjutkan dengan salah satu cara:
+
+- Comment `/caf-retry-pipeline` di Draft PR, atau
+- Pindahkan ticket Linear kembali ke ready state (Orchestrator mendeteksi branch
+  `ai-agent/<TICKET-KEY>` sudah ada lewat GitHub API dan me-resume, bukan memulai
   ticket baru)
 
-Dua path ini ketemu di logic resume yang sama persis — tidak ada yang punya
-counter atau kode pemilihan gate sendiri-sendiri.
+Kedua jalur berujung di logika resume yang sama — tidak ada yang punya counter atau
+kode pemilihan gate sendiri.
 
-**Bagaimana state-nya bertahan antar invocation.** Tiap kali gate gagal,
-orchestrator menulis `orchestration-state.json` ke `.ai/tasks/<TICKET-KEY>/`
-di workspace — `orchestrationRetryCount`, `lastFailedGate`
-(`implementation`/`qa`/`reviewer`), `lastKnownCommitSha`, dan judul/deskripsi
-ticket (supaya resume bisa bangun ulang prompt tanpa planner tanpa perlu fetch
-ulang ticket asli). Folder itu ikut ter-commit di akhir tiap run seperti
-biasa, jadi file-nya ikut **di branch itu sendiri** — tetap bertahan meski
-pakai mode workspace default `ephemeral` yang menghapus clone lokal setelah
-tiap job. Begitu pipeline sukses penuh, file-nya dihapus; ketiadaan file itu
-yang dicek trigger resume buat menolak ticket yang tidak punya apa-apa untuk
-di-resume.
+**Bagaimana state bertahan antar invocation.** Setiap gate gagal, Orchestrator
+menulis `orchestration-state.json` ke `.caf/tasks/<TICKET-KEY>/` di workspace —
+`orchestrationRetryCount`, `lastFailedGate` (`implementation`/`qa`/`reviewer`),
+`lastKnownCommitSha`, dan judul/deskripsi ticket (supaya resume bisa menyusun ulang
+prompt tanpa planner tanpa mengambil ulang ticket aslinya). Folder itu ikut dalam
+commit-and-push normal di akhir setiap run, jadi file-nya ikut **di branch itu
+sendiri** — tetap bertahan walau pakai workspace mode default `ephemeral`, yang
+menghapus clone lokal setelah tiap job. Saat pipeline sukses penuh, file ini
+dihapus; ketiadaannya yang dicek trigger resume untuk menolak ticket yang tidak
+punya apa pun untuk dilanjutkan.
 
 **Apa yang sebenarnya dilakukan resume:**
 
-1. Sync ulang ke branch yang sudah ada (tidak pernah bikin branch baru). Untuk
-   checkout mode `persistent`, dulu jalankan `git status` read-only dan
-   **berhenti dengan komentar** kalau ketemu residu belum di-commit (mis. run
-   sebelumnya terputus di tengah tulis) — tidak diam-diam membuang perubahan
-   lokal di sini, beda dengan path sync non-retry biasa.
-2. Cek budget retry: tolak dengan komentar kalau state tidak ada, atau kalau
+1. Memastikan branch masih ada di remote. Retry yang dipicu setelah PR di-merge dan
+   branch-nya dihapus berhenti dengan comment; tidak pernah fallback ke checkout
+   baru.
+2. Sync ulang ke branch yang sudah ada (tidak pernah membuat branch baru). Untuk
+   checkout mode `persistent`, ia lebih dulu menjalankan `git status` read-only dan
+   **berhenti dengan comment** kalau menemukan sisa perubahan yang belum di-commit
+   (mis. run sebelumnya terputus di tengah penulisan) — di sini perubahan lokal
+   tidak dibuang diam-diam, berbeda dengan jalur sync normal non-retry.
+3. Mengecek jatah retry: menolak dengan comment kalau tidak ada state, atau kalau
    `orchestrationRetryCount` sudah mencapai
-   `orchestration.maxOrchestrationRetries`; kalau belum, counter di-increment.
-3. Kalau HEAD sudah lewat dari `lastKnownCommitSha` (manusia push commit
-   selagi ticket berhenti), `git diff --stat` dari gap itu dihitung dan
-   dikasih ke agent yang di-resume sebagai context tambahan — ini tidak pernah
-   memblokir resume, cuma residu belum di-commit di langkah 1 yang memblokir.
-4. Skip planner sepenuhnya. `lastFailedGate` menentukan report mana
-   (`verify-report.md` / `qa-report.md` / `review-notes.md`) yang dibaca balik
-   sebagai context, lalu re-run implementation agent dan lanjut ke tail normal
-   QA → reviewer → docs → PR — kode tail yang sama persis dengan run baru,
+   `orchestration.maxOrchestrationRetries`; kalau tidak, counter dinaikkan.
+4. Kalau HEAD sudah bergerak melewati `lastKnownCommitSha` (manusia push commit saat
+   ticket berhenti), `git diff --stat` untuk selisih itu dihitung dan diberikan ke
+   agent yang di-resume sebagai konteks tambahan — ini tidak pernah memblokir
+   resume, hanya sisa uncommitted di langkah 2 yang memblokir.
+5. Melewati planner sepenuhnya. `lastFailedGate` menentukan report mana
+   (`verify-report.md` / `qa-report.md` / `review-notes.md`) yang dibaca ulang
+   sebagai konteks, lalu agent implementasi dijalankan ulang dan lanjut lewat ekor
+   normal QA → reviewer → docs → PR — kode ekor yang persis sama dengan run baru,
    bukan salinan terpisah per gate.
 
-Kalau resume-nya datang dari komentar PR, semua komentar status untuk run itu
-— termasuk komentar sukses di akhir — dikirim balik ke PR itu, bukan ke ticket
-Linear asli, karena itu yang sedang diperhatikan manusianya.
+Kalau resume datang dari comment PR, semua comment status untuk run itu — termasuk
+comment sukses di akhir — dikirim ke PR tersebut, bukan ke ticket asalnya, karena
+itulah yang sedang dipantau manusia.
 
-Tiap repo punya batas jumlah retry lintas-invocation ini —
-`orchestration.maxOrchestrationRetries` di `caf.config.yaml` (default global,
-override per-project di `projects.<name>.orchestration`) — setelah limit
-tercapai, retry otomatis tidak ditawarkan lagi dan ticket butuh follow-up
-manual sepenuhnya.
+## PR review otomatis
 
-## Automated PR review
+Orchestrator bisa menjalankan `caf-reviewer` terhadap sebuah PR sebagai respons atas
+comment di PR. Ini job terpisah dari pipeline ticket di atas. Hanya berlaku di PR
+yang head branch-nya `ai-agent/<TICKET-KEY>` — yang dibuka pipeline ini.
 
-Orchestrator juga mendengarkan event PR/komentar GitHub (`/webhooks/github`)
-dan bisa menjalankan `caf-reviewer` terhadap sebuah PR, komentar dikirim balik
-ke PR itu. Ini terpisah dari pipeline Plan/Implement/Verify di atas dan jalan
-di PR mana saja, tidak cuma yang dibuka orchestrator sendiri.
-
-Cuma user dengan permission `write`/`maintain`/`admin` di repo (dicek live
-lewat GitHub API tiap trigger) yang bisa mulai review pass; komentar user lain
-diam-diam diabaikan. `ENABLE_PIPELINE_TRIGGER=false` juga mematikan ini.
-
-Tiga trigger path, masing-masing dipetakan ke sebuah **mode** review:
+Tiga jalur trigger, masing-masing dipetakan ke satu **mode** review:
 
 | Trigger | Mode | Perilaku |
 |---|---|---|
-| Komentar `/caf-review` di PR | `initial` | Review penuh dari nol, tanpa context komentar sebelumnya |
-| Komentar `/caf-fix-review` di PR | `global` | Re-review terhadap semua thread komentar inline + general yang ada di PR |
-| Reply di dalam thread inline review-comment | `scoped` | Re-review dibatasi ke thread itu saja |
+| Comment `/caf-review` di PR | `initial` | Review penuh dari nol. Verdict diposting sebagai GitHub PR review sungguhan; kalau GitHub menolaknya sebagai self-review, diposting ulang sebagai comment dengan verdict disebut di body |
+| Comment `/caf-fix-review` di PR | `global` | Reviewer menangani semua comment inline dan umum yang ada, membalas satu per satu, lalu memposting ringkasan |
+| Reply di dalam thread inline review-comment | `scoped` | Sama, tapi hanya untuk satu thread itu |
 
-Komentar yang diposting akun bot (termasuk komentar summary orchestrator
-sendiri) selalu diabaikan — tanpa guard ini, output review orchestrator sendiri
-bakal trigger ulang dirinya sendiri saat delivery.
+Di mode `global` dan `scoped`, tiap comment berakhir `FIXED`, `SKIPPED`, atau
+`NOT_APPLICABLE`, tercatat di `fix-review-log.md`.
+
+Comment yang diposting akun bot (termasuk comment ringkasan milik Orchestrator
+sendiri) selalu diabaikan — tanpa guard ini, output review Orchestrator akan memicu
+dirinya sendiri. Job PR review selalu clone ke workspace baru, apa pun isi
+`workspace.mode`.
+
+## Dashboard monitoring
+
+Dashboard monitoring pipeline live disajikan web server di `/dashboard`: fase PIV,
+jumlah retry per gate, cost nyata yang dilaporkan CLI `claude`, link artifact, dan
+run PR review, diperbarui real time. Halaman kedua yang read-only di
+`/dashboard/agent-floor` menampilkan run yang sama sebagai kantor agent beranimasi,
+dengan mode live, replay, dan demo.
+
+Default-nya mati dan dilindungi basic auth. Untuk mengaktifkannya:
+
+```yaml
+# caf.config.yaml
+dashboard:
+  enabled: true
+  basicAuthUser: admin
+```
+
+dan set `DASHBOARD_BASIC_AUTH_PASSWORD` di `.env`. Histori run disimpan di file
+SQLite (`db.path`, default `./data/caf-dashboard.sqlite`); `pnpm db:migrate` membuat
+atau meng-upgrade-nya.
+
+Di belakang reverse proxy, pastikan `/dashboard`, `/api/pipelines*`, dan
+`/api/events/stream` semuanya di-proxy dan hanya disajikan lewat HTTPS.
 
 ## Fitur opsional (default mati)
 
-- **Bull Board dashboard** — tampilan `/admin/queues` untuk job pipeline, di
-  balik basic auth. Aktifkan lewat `dashboard.enabled` di `caf.config.yaml`.
-- **Notifikasi Telegram** — alert selesai/gagal pipeline. Set
+- **Notifikasi Telegram** — alert pipeline mulai, selesai, dan gagal. Set
   `TELEGRAM_BOT_TOKEN` dan `TELEGRAM_CHAT_ID` bersamaan.
-- **OpenRouter model routing** — route agent tertentu lewat OpenRouter,
-  bukan lewat Claude Code CLI. Aktifkan lewat `openai.useOpenai` di
-  `caf.config.yaml` plus `OPENAI_API_KEY`.
+- **Model routing** — arahkan agent lewat endpoint kompatibel-Anthropic seperti
+  OpenRouter dengan `openai.useOpenai: true` plus `OPENAI_API_KEY`.
+  `agents.modelOverrides` memilih model per agent, global atau per project. Setiap
+  model id harus terdaftar persis di `openai.allowedModels`; daftarnya kosong (tidak
+  ada yang diizinkan) secara default.
 - **Dynamic agent skip** — Planner bisa menulis section `## Skip Agents` di
-  `tasks.md` untuk skip agent yang tidak relevan buat sebuah ticket. Default
-  mati, aktifkan dengan `AGENT_SKIP_ENABLED=true`.
+  `tasks.md` untuk melewati agent yang tidak relevan bagi sebuah ticket. Aktifkan
+  dengan `AGENT_SKIP_ENABLED=true`. Melewati QA atau Reviewer menambahkan peringatan
+  eksplisit di body PR.
+- **Persistent workspace** — `workspace.mode: persistent` memakai ulang satu
+  checkout per repo, bukan clone per job. Pakai hanya untuk repo besar: job kedua
+  untuk repo yang sama ditolak selama job pertama masih memegang workspace.
 
 ## Multi-repo
 
-Routing multi-repo/multi-team sudah live: map `projects:` di `caf.config.yaml`
-punya satu entry per project (`ticketPrefix`, `repoCloneUrl`, `baseBranch`,
+Routing multi-repo/multi-tim sudah aktif: map `projects:` di `caf.config.yaml`
+berisi satu entry per project (`ticketPrefix`, `repoCloneUrl`, `baseBranch`,
 `workspaceDir`, opsional `agents.modelOverrides` dan
-`orchestration.maxOrchestrationRetries`). Ticket Linear masuk di-routing dengan
+`orchestration.maxOrchestrationRetries`). Ticket Linear yang masuk di-routing dengan
 mencocokkan prefix ticket key (mis. `ABC-123` → `ABC`) ke `ticketPrefix` sebuah
-project; job dari GitHub di-routing berdasarkan repo. Minimal satu project
-harus dikonfigurasi — startup gagal langsung kalau `projects:` kosong.
+project; job dari GitHub di-routing berdasarkan repo, dan ticket key-nya adalah
+`<ticketPrefix>-<nomor issue>`. Prefix harus unik dan direktori workspace tidak
+boleh tumpang tindih. Minimal satu project harus dikonfigurasi — startup langsung
+gagal kalau map `projects:` kosong.
+
+## Batasan scope
+
+- Worker concurrency default-nya 1 — proses agent Claude Code yang berjalan
+  bersamaan itu mahal.
+- Hanya pipeline yang berhenti rapi di sebuah gate yang bisa di-resume di tengah
+  jalan, dan hanya atas permintaan. Selain itu diulang dari Planner.
+- Persistent workspace dikunci in-process, jadi mode itu mengasumsikan satu instance
+  worker.

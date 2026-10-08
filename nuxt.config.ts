@@ -41,7 +41,7 @@ export default defineNuxtConfig({
     url: 'https://caf-website-jade.vercel.app',
     name: 'CAF',
     description:
-      'AI agent orchestration framework with strict governance — Plan, Implement, Verify, PR, with mandatory human-review checkpoints at every phase.',
+      'AI agent orchestration framework with strict governance — Plan, Implement, Verify, PR, behind quality gates, with a human deciding every merge.',
     defaultLocale: 'en',
   },
 

@@ -1,204 +1,424 @@
 ---
 title: CAF Initiator
-description: CLI scaffold generator — automatic stack detection and agent knowledge base generation.
+description: The caf-init CLI — detects your stack and writes CAF's knowledge base, agents, commands and skills.
 ---
 
-CAF Initiator is the CLI that scaffolds everything CAF needs in your repo: it
-automatically detects your project's stack, then generates agent definitions and
-artifact handoff templates.
+CAF Initiator prepares a repository for CAF. Its CLI, `caf-init`, detects the stack,
+package manager and ticket tracker, then writes CAF's starter files: knowledge base,
+agent definitions, workflow docs, slash commands and skills.
 
-> CAF Initiator is pre-1.0 (`v0.1.6`), published on npm as
-> [`caf-initiator`](https://www.npmjs.com/package/caf-initiator).
+`caf-init` never calls an AI model. Everything it writes is a deterministic draft
+built from what it detected; anything it could not detect is left as a `TODO`, never
+guessed.
+
+> CAF Initiator is pre-1.0 (`v0.1.9`), published on npm as
+> [`caf-initiator`](https://www.npmjs.com/package/caf-initiator). Source:
+> [github.com/coderiumid/caf-initiator](https://github.com/coderiumid/caf-initiator).
+
+## Quick start
+
+```bash
+# 1. Preview — detects the stack and lists what would be written
+npx -p caf-initiator caf-init scaffold --dry-run
+
+# 2. Generate the drafts (asks before each step)
+npx -p caf-initiator caf-init scaffold
+
+# 3. Optional: add the CAF skills
+npx -p caf-initiator caf-init scaffold skills
+
+# 4. In your AI runner (e.g. Claude Code), fill in the TODOs
+/caf-complete-drafts
+
+# 5. Check the result, then review the diff and commit
+npx -p caf-initiator caf-init curate --check-drafts
+```
+
+Run from inside the target repository, or pass `--dir <path>`.
 
 ## Installation
 
-Run directly with `npx` — no install needed:
+Requires **Node.js 18 or newer**.
 
 ```bash
-npx -p caf-initiator caf-init scaffold
+npm install -g caf-initiator      # then: caf-init <command>
 ```
 
-Or install the `caf-init` binary globally:
+Or run it without installing, with `npx -p caf-initiator caf-init <command>`.
 
-```bash
-npm install -g caf-initiator
-caf-init scaffold
+## What gets generated
+
+```
+<your repo>/
+├── CLAUDE.md                        # project context for agents (draft)
+├── AGENTS.md                        # concrete rules for agents (draft)
+├── .caf/
+│   ├── tasks/README.md              # per-ticket artifact convention
+│   ├── knowledge/
+│   │   ├── INDEX.md                 # status of the optional reference docs
+│   │   ├── golden-examples/         # RULES.md pointing at your best files
+│   │   └── decisions/               # ADR drafts
+│   ├── workflows/
+│   │   ├── task-completion.md       # Definition of Done
+│   │   ├── piv-workflow.md          # Plan → Implement → Verify
+│   │   └── agent-handoff.md
+│   └── .generate-manifest.json      # section baselines, written by `curate`
+└── .claude/
+    ├── agents/caf-*.md              # agent definitions
+    ├── commands/caf-*.md            # companion slash commands
+    └── skills/caf-*/SKILL.md        # only with `scaffold skills`
 ```
 
-**Requirements:**
+Setup also appends ignore rules for `.caf/discovery/*/` and `.caf/audits/*/` to
+`.gitignore`.
 
-- Node.js 18 or newer
-- A repo that has already been initialized with `git init`
+The per-ticket folders under `.caf/tasks/<TICKET-ID>/` (`requirements.md`,
+`tasks.md`, `verify-report.md`, ...) are written at runtime by the agents — CAF
+Initiator only scaffolds the convention.
 
 ## Commands
 
-Run `caf-init` with no subcommand to print help — there's no interactive
-top-level menu; pick a subcommand explicitly (`scaffold`, `export`, `curate`, `docs`).
+`caf-init` with no subcommand prints help.
 
-All file writes are **non-destructive by default** — an existing file is never
-silently overwritten, so re-running a command is always safe. `scaffold` and
-`export` both accept `--force` as an explicit opt-in escape hatch when you
-actually want to regenerate a file that already exists (for example after
-upgrading `caf-initiator` and wanting the latest agent templates) — it
-overwrites in place, including any manual edits you made since the last
-generate, so review your `git diff` afterward.
+| Command | What it does |
+|---|---|
+| `caf-init scaffold` | Run the whole setup chain, confirming each step |
+| `caf-init scaffold <target>` | Run one part of it |
+| `caf-init curate` | Audit an existing CAF setup, then offer to sync agent sections with the current templates |
+| `caf-init curate --check-drafts` | Read-only check of the drafts after they were filled in |
+| `caf-init curate baseline` | Record the current agent sections as the tracking baseline |
+| `caf-init docs` | Scaffold optional reference docs under `docs/` |
+| `caf-init export` | Copy agent definitions and commands to other AI runners |
+
+Every command accepts `--dir <path>` (default: current directory). `--dry-run` shows
+what would happen without writing.
 
 ### `caf-init scaffold`
 
-The main command. Bare (no target), it runs **Setup → Golden Examples → ADR →
-Agents → Task Completion → Workflow** in sequence, with a skip-confirmation
-before each step:
+Bare `scaffold` runs these steps in order, asking before each one after Setup:
 
-1. Detects your project's stack (framework, package manager, folder structure)
-2. Lets you select golden examples as AI reference material
-3. Drafts Architecture Decision Records for detected technical choices
-4. Generates `.claude/agents/` — definitions for each agent role (Planner,
-   Architect, per-app Frontend/Backend implementation agents, QA, Reviewer,
-   Documentation, DevOps, Auditor, PM, UX Designer)
-5. Drafts the Definition of Done from verify scripts in `package.json`
-6. Generates the PIV workflow and agent-handoff docs from your agent roster
+| Step | Target name | Output |
+|---|---|---|
+| Setup | (always first) | `CLAUDE.md`, `AGENTS.md`, `.caf/tasks/README.md`, `.caf/knowledge/INDEX.md`. Checks for existing AI-tool config first; detects stack and tracker |
+| Golden Examples | `golden-examples` | Lets you pick reference files; writes `RULES.md` with a do/don't skeleton |
+| ADR | `adr` | ADR drafts for technical decisions already visible in the repo |
+| Agents | `agents` | Agent definitions you select, plus their companion slash commands |
+| Task Completion | `task-completion` | `.caf/workflows/task-completion.md` from the verify scripts in `package.json` |
+| Workflow | `workflow` | `piv-workflow.md` and `agent-handoff.md` from the agent roster |
+| AI Draft Completion | `complete-drafts` | The `/caf-complete-drafts` command |
 
-`docs` (Reference Docs) and `feature-catalog-sync` are never part of this
-bare chain — both are opt-in, run them as an explicit target.
+Two more targets exist but only run when named explicitly:
 
-Pass a target (`caf-init scaffold <target>`, one of `golden-examples`, `adr`,
-`agents`, `task-completion`, `workflow`, `feature-catalog-sync`) to run just
-that part, with the same behavior as running it standalone.
+| Target | Output | Why it is not in the chain |
+|---|---|---|
+| `skills` | `.claude/skills/caf-*/SKILL.md` | It offers to edit agent definitions that already exist |
+| `feature-catalog-sync` | The `/caf-feature-catalog-sync` command | Its catalog needs manual review before it is usable |
+
+Notes:
+
+- `scaffold workflow` needs an agent roster; run `scaffold agents` first.
+- Agents on offer: Planner, Architect, Frontend and Backend (per assigned app), extra
+  per-app implementation agents, QA, Reviewer, Documentation, Auditor, PM, UX
+  Designer. CAF recommends starting with Planner plus one implementation agent.
+- Frontend and Backend can each be assigned more than one app. The generated agent
+  then lists every app in its scope and reads the app tag on each task line in
+  `tasks.md` (`- [ ] (apps/web) Fix email validation`).
+- The tracker is detected from `.linear/`, `atlassian.yml` or a README mention.
+  Otherwise you are asked (Linear, Jira, GitHub Issues); it is never silently
+  defaulted.
+
+Options:
 
 | Option | Description | Default |
 |---|---|---|
-| `--dir <path>` | Target repo directory | `cwd` |
+| `--dir <path>` | Target repo directory | current directory |
 | `--dry-run` | Show detection results without writing anything | `false` |
-| `--app <app-path>` | Restrict to a specific app path (e.g. `apps/api`) — used by `golden-examples`/`adr`/`agents`/`task-completion` targets | all apps |
-| `--agent-dir <path>` | Directory to read/write agent definitions | `.claude/agents` |
-| `--command-dir <path>` | Directory to write companion slash commands — used by `agents`/`feature-catalog-sync` targets | `.claude/commands` |
-| `--force` | Overwrite files that already exist instead of skipping them — only used by the `agents` target | `false` |
+| `--app <app-path>` | Restrict to one app. Used by `golden-examples`, `adr`, `agents`, `task-completion` | all apps |
+| `--agent-dir <path>` | Where agent definitions are read and written | `.claude/agents` |
+| `--command-dir <path>` | Where slash commands are written | `.claude/commands` |
+| `--force` | Overwrite existing files. `agents` target: agent definitions and their commands. `skills` target: `SKILL.md` files only. Manual edits in an overwritten file are lost and the `curate` manifest is not updated | `false` |
+| `--mode <single\|mono>` | Override the detected [repo mode](#repo-mode-monorepo-vs-single_repo) | auto-detect |
+| `--scope <dirs...>` | `SINGLE_REPO`, `agents` target: limit the implementation agent to these directories | whole repo |
+| `--role <implementer\|frontend\|backend>` | `SINGLE_REPO`, `agents` target: role and filename of the one implementation agent | `implementer` |
 
-#### `caf-init scaffold agents`
+### `caf-init scaffold skills`
 
-The Frontend/Backend implementation agents can each be assigned **more than
-one app** — pick both `apps/web` and `apps/landing` for the Frontend role, for
-example, and the generated `caf-frontend.md` gets a scope listing every app
-plus an instruction to read the app tag on each task line in `tasks.md`
-(`- [ ] (apps/web) Fix email validation`). A role assigned exactly one app
-still renders the plain single-app format — nothing changes for a
-non-monorepo project or a role with a single app.
+Writes five universal skills into `.claude/skills/<name>/SKILL.md`.
 
-### `caf-init docs`
-
-Scaffolds optional, read-only Layer 1 reference docs (`docs/product/prd.md`,
-Feature Specs, `docs/architecture/system-overview.md`, `docs/api-contract.md`,
-`docs/schema/erd.md`, `docs/testing-strategy.md`). None of these are required
-for the CAF pipeline to run — existing files are never overwritten, and
-interactive mode asks per item before creating a placeholder.
-
-| Option | Description | Default |
+| Skill | What it tells the reader | Agents that point at it |
 |---|---|---|
-| `--dir <path>` | Target repo directory | `cwd` |
-| `--dry-run` | Show detection results without writing anything | `false` |
-| `--include <items...>` | Non-interactive: only generate these items (`product`, `architecture`, `schema`, `testing-strategy`, `api-contract`) | interactive prompts |
-| `--feature <name...>` | Non-interactive: Feature Spec names to generate placeholders for | interactive prompt |
+| `caf-verify` | The repo's real lint, typecheck, test and build commands | implementation agents, QA |
+| `caf-scope-discipline` | Stay inside the task's scope; report what is outside it, don't fix it | implementation agents, Planner, Architect, Reviewer, Documentation |
+| `caf-no-guess` | Cite what you read; an unknown becomes an open item, never an invented fact | all of the above |
+| `caf-escalate` | When to stop and hand the task back to a human | implementation agents |
+| `caf-piv` | Plan, wait for the go-ahead, implement, verify | none (manual sessions only) |
 
-### `caf-init export`
+Auditor, PM and UX Designer agents get no skills.
 
-Copies already-generated agent and/or command definitions to other AI runner
-targets (`.kiro/`, `.opencode/`, `.cursor/`, `.clinerules/`, or a custom
-folder), with explicit enforcement-risk warnings before publishing to a
-target whose scope/tool enforcement hasn't been validated.
+**How a skill reaches its reader**
 
-| Option | Description | Default |
-|---|---|---|
-| `--dir <path>` | Target repo directory | `cwd` |
-| `--agent-dir <path>` | Source directory containing existing agent definitions | `.claude/agents` |
-| `--kind <agent\|command\|both>` | What to publish — agent definitions, companion slash commands, or both | `agent` |
-| `--dry-run` | Show what would be published without writing anything | `false` |
-| `--force` | Overwrite files that already exist at the destination instead of skipping them | `false` |
+- **Manual session.** Claude Code picks skills up through their frontmatter
+  `description`, so a free-form coding prompt still gets the PIV, verification and
+  scope rules.
+- **CAF agent.** The agent definition gets a `## Skills` section listing `Read`
+  pointers to the skill files. A `skills:` frontmatter key is not used because it is
+  ignored when an agent is started with `claude --agent`.
 
-`--kind` defaults to `agent` only — pass `--kind both` (or `--kind command`)
-if you also want the companion slash commands republished, otherwise a
-`--force` run will refresh your agents but silently leave stale commands
-untouched at the destination.
+**DRAFT skills**
+
+`caf-verify` is built from the scripts detected in `package.json`. If one of the four
+slots has no script, that slot is written as a `TODO` line and the skill gets a
+`DRAFT` banner. While the banner is there:
+
+- agents are told to ignore the skill, and
+- no agent gets a pointer to it.
+
+To activate it, resolve the `TODO` lines and remove the whole banner: both the
+`> DRAFT ...` sentence and the `> Agents: this skill is NOT ready...` line.
+
+**Pointers in existing agent definitions**
+
+- For each agent without a `## Skills` section you get a preview and a per-file
+  confirmation.
+- The write happens only if the new content is the old content plus exactly that one
+  section.
+- An agent that already has a `## Skills` section is never edited. If a pointer is
+  missing there, the command names it and you add the line yourself.
+- An agent file whose name is not a known CAF kind is asked with default **No**.
+- Agents generated by `scaffold agents` *after* this target get their pointers
+  automatically.
+
+**Other rules**
+
+- An existing `SKILL.md` is never overwritten, unless `--force` is passed.
+- A skill is not written if a folder with the same name minus the `caf-` prefix
+  exists (`caf-verify/` vs `verify/`). Exit code 1.
+- `## Skills` is not tracked by `curate`: it is never reported as drift and never
+  rewritten by a sync.
+
+Agents follow skills with high but not perfect reliability. Skills are guidance;
+enforcement stays with the Verify, QA and Reviewer stages.
+
+### `caf-init scaffold complete-drafts`
+
+Generates `.claude/commands/caf-complete-drafts.md`, a command you run in your AI
+runner to fill in the `TODO`s that the other steps left behind.
+
+The command makes the AI work in four phases: read the repo, report a plan and its
+questions and **stop for your answers**, fill in the drafts, verify. It is
+instructed to:
+
+- take facts only from the code and cite the file (verification commands,
+  conventions, concrete rules);
+- never invent human-owned content such as business context, PRD, ADR reasoning or
+  golden-example choices. Those come only from your answers; otherwise the `TODO`
+  stays;
+- edit only `Role`, `Scope` and `Verify Checklist` in agent definitions, leaving
+  tracked sections, `## Skills` and the frontmatter alone;
+- work only on skills that still carry a `DRAFT` banner, and never invent a
+  verification command;
+- never commit or push.
+
+When agent definitions exist, this step offers to record their baseline first. Say
+yes: without a baseline taken before the AI runs, a changed tracked section cannot
+be detected afterwards.
 
 ### `caf-init curate`
 
-Read-only Layer 1-4 compliance audit, then offers to sync missing/drifted sections
-into `.claude/agents/*.md`. `--audit-only` isolates the report for CI gates.
+Bare `curate` prints an audit report and then offers to sync agent sections: update
+the ones that drifted from the template, and add tracked sections that are missing
+(each addition is confirmed separately). Use the flags to run one side only.
 
 | Option | Description | Default |
 |---|---|---|
-| `--dir <path>` | Target repo directory | `cwd` |
-| `--agent-dir <path>` | Directory containing existing agent definitions | `.claude/agents` |
-| `--output <file>` | Also save the audit report as markdown to this path | none |
-| `--audit-only` | Report only, non-interactive — exit code 1 on required gaps (for CI gates) | `false` |
-| `--sync-only` | Skip the audit report, go straight to the sync flow | `false` |
-| `--dry-run` | With `--sync-only`: show what would be added/updated without writing or prompting | `false` |
+| `--dir <path>` | Target repo directory | current directory |
+| `--agent-dir <path>` | Directory containing the agent definitions | `.claude/agents` |
+| `--audit-only` | Report only, non-interactive. Exit code 1 on required gaps (for CI) | `false` |
+| `--sync-only` | Skip the report and go straight to the sync | `false` |
+| `--check-drafts` | Read-only check of completed drafts (see below) | `false` |
+| `--output <file>` | Also save the audit report as Markdown | none |
+| `--dry-run` | With `--sync-only` or `baseline`: show what would happen, no writes, no prompts | `false` |
+| `--yes` | With `baseline`: skip the confirmation prompt | `false` |
+| `--mode <single\|mono>` | Override the detected repo mode | auto-detect |
 
-`curate` tracks a fixed set of sections at the **content** level, not just heading
-presence, keyed off a manifest at `.caf/.generate-manifest.json` (a hash of each
-section's content as of the last generate/sync). Comparing baseline vs. current file
-vs. current template classifies every present section as `IN_SYNC`, `DRIFT` (safe to
-auto-sync — the file hasn't changed since baseline, only the template has),
-`CUSTOMIZATION` or `CONFLICT` (file was hand-edited — never auto-written, always
-reported for manual review), or `UNTRACKED` (no baseline yet). This is what makes
-`curate sync` safe to re-run after you've hand-edited an agent file: only `DRIFT`
-sections are ever touched.
+#### Section tracking
 
-### `caf-init curate baseline`
+For sections whose content depends only on the agent's kind, `curate` compares the
+actual content against the current template, so a template fix can reach agents
+generated earlier.
 
-Backfill for projects that ran `caf-init curate` before this manifest existed (every
-section would otherwise read as `UNTRACKED`). Records the **current** content of every
-untracked, syncable section as its baseline as-is — never edits file content, never
-guesses whether it matches the latest template. Review sections manually first if you
-haven't already.
+Tracked sections: `Allowed Tools`, `Input`, `Output`, `Working Pattern (PIV)`,
+`Retry Logic`, `What to Look For` (Auditor only) and `Report Format` (Auditor,
+Reviewer, QA).
+
+Not tracked: `Role`, `Scope`, `Verify Checklist`, `Constraints`, `Skills`. They hold
+per-project data.
+
+Each tracked section has a baseline hash in `.caf/.generate-manifest.json`.
+Comparing baseline, current file and current template gives one of five statuses:
+
+| Status | Meaning | What `curate` sync does |
+|---|---|---|
+| `IN_SYNC` | File matches baseline and template | nothing |
+| `DRIFT` | File unchanged since baseline, template changed | updates the section and the baseline |
+| `CUSTOMIZATION` | File edited since baseline, template unchanged | never written; reported |
+| `CONFLICT` | Both file and template changed | never written; reported |
+| `UNTRACKED` | No baseline yet | never written; run `curate baseline` |
+
+Only `DRIFT` is ever written, and `DRIFT` requires the file to match its baseline
+exactly. A section you edited by hand can therefore never be overwritten.
+
+> **Known issue.** Two sections can read as `DRIFT` right after `curate baseline`,
+> although nobody changed the template:
+>
+> - `Input` of the QA and Reviewer agents in a monorepo. A sync would replace it
+>   with a generic version without the app names.
+> - `Working Pattern (PIV)` of the PM and UX Designer agents. A sync would replace
+>   it with the generic wording.
+>
+> Run `curate --sync-only --dry-run` first and review what it would change.
+
+#### `caf-init curate baseline`
+
+Records the current content of every untracked section as its baseline. It never
+edits file content and does not check whether that content matches the template, so
+review the sections first.
+
+#### `caf-init curate --check-drafts`
+
+Read-only check after `/caf-complete-drafts` or manual editing. Exit code 1 on any
+`FAIL`. Cannot be combined with `--audit-only` or `--sync-only`.
+
+| Check | Level |
+|---|---|
+| A tracked agent section changed or was removed since its baseline | `FAIL` |
+| A `<pm> run <script>` command names a script that does not exist in the relevant `package.json` | `FAIL` |
+| A generate-time `{{...}}` placeholder is left (runtime tokens like `{{TICKET-ID}}` are fine) | `FAIL` |
+| A golden-example path in a `RULES.md` table does not exist | `FAIL` |
+| An agent's `## Skills` section points at a skill file that does not exist | `FAIL` |
+| A tracked agent section has no baseline, so it cannot be verified | `WARN` |
+| A file path cited in `CLAUDE.md`, `AGENTS.md` or `docs/` does not exist | `WARN` |
+| The `DRAFT` banner is gone from `CLAUDE.md`, `AGENTS.md`, a `RULES.md` or a `docs/` file | `WARN` |
+| An agent's `## Skills` section points at a skill that still has its `DRAFT` banner | `WARN` |
+| A skill has open `TODO` lines but no `DRAFT` banner | `WARN` |
+| A skill's `DRAFT` banner was only partly removed, so agents would ignore the skill forever | `WARN` |
+| `TODO`s still open, per file (in a skill: only lines that start with `TODO`) | `INFO` |
+
+The check covers what code can verify. Whether the business content is true is still
+yours to review. Agent frontmatter (`tools:`) is not covered by the baseline; check
+it in the diff.
+
+### `caf-init docs`
+
+Scaffolds optional reference docs. None of them is required for the CAF pipeline,
+existing files are never overwritten, and interactive mode asks per item.
+
+| Item (`--include`) | File |
+|---|---|
+| `product` | `docs/product/prd.md` |
+| `architecture` | `docs/architecture/system-overview.md` |
+| `schema` | `docs/schema/erd.md` |
+| `testing-strategy` | `docs/testing-strategy.md` |
+| `api-contract` | `docs/api-contract.md` (only offered when frontend and backend are separate apps in the same repo) |
+| `--feature <name...>` | `docs/product/features/<name>.md` |
+
+Also accepts `--dir`, `--dry-run` and `--mode`.
+
+### `caf-init export`
+
+Copies the Claude Code agent definitions, slash commands or both to other AI
+runners, converting the format where needed.
+
+| Runner | Agents go to | Commands go to | Scope enforcement |
+|---|---|---|---|
+| OpenCode | `.opencode/agent/` | `.opencode/commands/` | known enforcement bugs |
+| Cline | `.cline/agents/` | `.clinerules/workflows/` | relies on model compliance only |
+| Cursor | `.cursor/agents/` | `.cursor/commands/` | not yet validated |
+| Kiro | `.kiro/agents/` | `.kiro/steering/` | not yet validated |
+
+Only Claude Code is validated to technically enforce an agent's tool and scope
+restrictions. Before it writes, the command shows this warning and asks you to
+confirm the risk (default: No). You can also publish to a custom folder. Skills are
+not exported.
 
 | Option | Description | Default |
 |---|---|---|
-| `--dir <path>` | Target repo directory | `cwd` |
-| `--agent-dir <path>` | Directory containing existing agent definitions | `.claude/agents` |
-| `--dry-run` | Show what would be baselined without writing or prompting | `false` |
-| `--yes` | Skip the confirmation prompt | `false` |
+| `--dir <path>` | Target repo directory | current directory |
+| `--agent-dir <path>` | Source directory of the agent definitions | `.claude/agents` |
+| `--kind <agent\|command\|both>` | What to publish | `agent` |
+| `--dry-run` | Show what would be published without writing | `false` |
+| `--force` | Overwrite files that already exist at the destination | `false` |
 
-## Generated file structure
+`--kind` defaults to `agent` only. Pass `--kind both` (or `--kind command`) if the
+companion slash commands need republishing too; otherwise a `--force` run refreshes
+the agents and leaves stale commands at the destination.
 
-```
-.claude/
-  agents/
-    caf-planner.md
-    caf-architect.md
-    caf-frontend.md
-    caf-backend.md
-    caf-qa.md
-    caf-reviewer.md
-    caf-documentation.md
-    ...
-  commands/
-    caf-plan-ticket.md
-    ...
-.caf/
-  tasks/
-    README.md
-  knowledge/
-    INDEX.md
-    golden-examples/
-    decisions/
-  workflows/
-    piv-workflow.md
-    agent-handoff.md
-    task-completion.md
-  .generate-manifest.json
-```
+## Working with CAF Orchestrator
 
-- **`.claude/agents/`** — one file per role, containing each agent's instructions and
-  access boundaries (for example, the Reviewer is read-only until an explicit approval
-  gate is granted). Frontend/Backend can each cover more than one app — see
-  `caf-init scaffold agents` above.
-- **`.claude/commands/`** — companion slash commands generated alongside certain
-  roles (Planner, Architect, QA, Reviewer, Auditor, PM, ...).
-- **`.caf/.generate-manifest.json`** — per-section content hashes used by
-  `curate`/`curate baseline` to tell `DRIFT` (safe to auto-sync) apart from a
-  hand-edited section — see `caf-init curate` above.
-- **`.caf/tasks/README.md`** — describes the artifact handoff convention. The
-  per-ticket folders under `.caf/tasks/{TICKET-ID}/` (`requirements.md`,
-  `tasks.md`, `verify-report.md`, ...) are written at runtime by the agents
-  during a pipeline run — CAF Initiator only scaffolds the convention, not the
-  ticket folders themselves.
+You do not need [CAF Orchestrator](/docs/caf-orchestrator) to use what `caf-init`
+generates. The agents also run directly in Claude Code, or through the generated
+`/caf-run-pipeline` command.
+
+If you do use it, three things in your repo matter:
+
+- **Agent filenames.** The Orchestrator calls agents by name: `caf-planner`,
+  `caf-frontend`, `caf-backend`, `caf-qa`, `caf-reviewer`, `caf-documentation`. It
+  does not call `caf-implementer`, so in a single-package repo generate the
+  implementation agent with `--role frontend` or `--role backend` (see
+  [Repo mode](#repo-mode-monorepo-vs-single_repo)).
+- **Report formats.** Agents hand over through files in `.caf/tasks/<TICKET-ID>/`,
+  and the Orchestrator parses their status lines word for word. Those lines live in
+  the tracked sections `Retry Logic` and `Report Format`; leave them as generated.
+- **Skills.** Agents started by the Orchestrator read skills through the `## Skills`
+  pointers, the same as anywhere else.
+
+## Repo mode: `MONOREPO` vs `SINGLE_REPO`
+
+Every command that runs stack detection first decides the repo mode.
+
+- **`MONOREPO`**: the root has a `workspaces` field, `pnpm-workspace.yaml`,
+  `turbo.json`, `nx.json` or `lerna.json`, or `apps/*` / `packages/*` contain a
+  `package.json`. The apps are the workspace packages.
+- **`SINGLE_REPO`**: anything else. This is not an error. The repo root is the only
+  app.
+
+`--mode single` or `--mode mono` overrides detection on `scaffold`, `docs` and
+`curate`. The mode is not stored; pass it again on later runs.
+
+What changes in `SINGLE_REPO`:
+
+- One root `CLAUDE.md`; `RULES.md` sits directly in `.caf/knowledge/golden-examples/`.
+- `scaffold agents` offers one implementation agent, `caf-implementer`, instead of
+  the frontend/backend split. Verify commands are the root scripts, unscoped.
+- `--scope domain,application` limits that agent to those directories. Every
+  directory must exist.
+- `--role frontend` or `--role backend` writes the same agent as `caf-frontend.md`
+  or `caf-backend.md`. Use this when the project runs through CAF Orchestrator,
+  which routes only those two filenames. The role is your choice; it is never
+  inferred from the framework.
+
+`--scope` and `--role` are refused in `MONOREPO`. With bare `scaffold`, use the comma
+form for `--scope` so the directories are not read as the target argument.
+
+The package manager comes from the root `packageManager` field, then from the
+lockfile. If neither exists, `CLAUDE.md` gets a `TODO` and workspace-scoped commands
+are written as `TODO` lines. The one exception: unscoped root commands fall back to
+`npm run <script>`, so check those.
+
+## Safety guarantees
+
+- **Existing files are never overwritten.** The exceptions are explicit: `--force`,
+  and the cases below.
+- **`curate` sync rewrites a section only when it is `DRIFT`**, which means you have
+  not touched it since its baseline.
+- **`curate` sync adds a missing tracked section** only after you confirm it,
+  section by section.
+- **`scaffold skills` adds a `## Skills` section to an existing agent** only after
+  your confirmation, and only when the result is the old file plus that one section.
+- **Setup appends its ignore rules to an existing `.gitignore`** and leaves every
+  other line alone.
+- **`--dry-run` uses the same code path as a real run** and writes nothing.
+- **No guessing.** Undetected values become `TODO`s (one exception: the `npm run`
+  fallback described under [Repo mode](#repo-mode-monorepo-vs-single_repo)). A
+  leftover generate-time placeholder such as `{{APP_1}}` aborts the write.
+- **No AI calls.** Output is deterministic.

@@ -50,10 +50,10 @@
     "copyright": "© {year} Coderium. All rights reserved."
   },
   "hero": {
-    "badge": "CAF v0.1.6 — early access",
+    "badge": "CAF v0.1.9 — early access",
     "new": "New",
     "title": "Coderium Agent Framework",
-    "description": "CAF menjalankan setiap fase — Plan, Implement, Verify, PR — dengan checkpoint human-review wajib. Tidak ada auto-merge. Gratis dan open, jalan langsung di repo kamu sendiri.",
+    "description": "CAF menjalankan seluruh rantai agent — Plan, Implement, Verify, PR — di balik quality gate, lalu berhenti menunggu manusia. Tidak ada auto-merge. Gratis dan open, jalan langsung di repo kamu sendiri.",
     "getStarted": "Get Started",
     "github": "View on GitHub",
     "npm": "View on npm"
@@ -64,23 +64,23 @@
     "items": [
       {
         "title": "Disiplin PIV",
-        "description": "Setiap task berjalan lewat Plan → Implement → Verify, retry sekali kalau gagal sebelum diserahkan ke manusia."
+        "description": "Setiap task berjalan lewat Plan → Implement → Verify. Gate yang gagal di-retry sekali, lalu berhenti dengan Draft PR dan diserahkan ke manusia."
       },
       {
         "title": "Artifact handoff via Markdown",
         "description": "Hasil tiap fase disimpan sebagai file Markdown di repo — bukan context chat yang hilang begitu sesi berakhir."
       },
       {
-        "title": "Pipeline trigger dari Linear",
-        "description": "Orchestrator terhubung langsung ke Linear — trigger otomatis dari perubahan status ticket. Dukungan Jira direncanakan."
+        "title": "Pipeline trigger dari ticket",
+        "description": "Orchestrator terpicu otomatis begitu ticket siap — workflow state di Linear atau label di GitHub Issue. Dukungan Jira direncanakan."
       },
       {
-        "title": "Human review wajib",
-        "description": "Setiap checkpoint — Plan, Implement, Verify, PR — butuh approval manusia eksplisit. Tidak ada auto-merge."
+        "title": "Merge diputuskan manusia",
+        "description": "Rantai agent jalan sendiri sampai pull request terbuka. Merge selalu keputusan eksplisit manusia — tidak ada auto-merge."
       },
       {
-        "title": "Scanner agent read-only",
-        "description": "Agent yang membaca dan menganalisis kode tidak punya write access sampai ada approval gate eksplisit."
+        "title": "Gate yang melapor, bukan memperbaiki",
+        "description": "Agent QA dan Reviewer mengecek hasil kerja dan menulis report. Mereka tidak mengubah kode yang sedang dicek — kegagalan dikembalikan ke agent implementasi."
       }
     ]
   },
@@ -90,11 +90,11 @@
     "initiator": {
       "eyebrow": "CLI scaffold generator",
       "title": "CAF Initiator",
-      "description": "Deteksi stack proyek kamu secara otomatis, lalu generate seluruh knowledge base yang dibutuhkan agent — dari definisi agent sampai template task.",
+      "description": "Mendeteksi stack proyek kamu secara otomatis, lalu generate seluruh knowledge base yang dibutuhkan agent — dari definisi agent sampai skill. Deterministik: tidak pernah memanggil model AI.",
       "points": [
-        "Auto-deteksi stack: framework, package manager, struktur repo",
-        "Generate .claude/agents/ — definisi tiap agent role",
-        "Generate .caf/tasks/ — template artifact handoff"
+        "Auto-detect stack: framework, package manager, monorepo atau single repo",
+        "Generate .claude/agents/, slash command, dan skill CAF opsional",
+        "Meninggalkan TODO alih-alih menebak — /caf-complete-drafts membantu mengisinya"
       ]
     },
     "orchestrator": {
@@ -102,8 +102,8 @@
       "title": "CAF Orchestrator",
       "description": "Fastify + BullMQ + Redis, jalan di VPS kecil milik kamu sendiri. Menerima webhook dari tracker, lalu spawn agent Claude Code headless untuk tiap fase.",
       "points": [
-        "Trigger otomatis dari perubahan status ticket di Linear (Jira direncanakan)",
-        "Queue per-fase dengan BullMQ + Redis",
+        "Trigger otomatis dari Linear atau GitHub Issues (Jira direncanakan)",
+        "Gate yang gagal membuka Draft PR yang bisa dilanjutkan dengan /caf-retry-pipeline",
         "Self-hosted — jalan di VPS kamu, bukan SaaS Coderium"
       ]
     }
@@ -113,12 +113,12 @@
     "title": "Rangkaian agent jalan sendiri — merge tidak pernah otomatis",
     "description": "Seluruh rangkaian agent berjalan otomatis begitu ticket siap. Satu-satunya langkah yang menunggu manusia adalah {review} — tidak ada jalur yang melewatkannya.",
     "reviewHighlight": "Merge",
-    "ariaLabel": "Diagram pipeline CAF Orchestrator: ticket pindah ke state Ready for AI di Linear, lalu mengalir otomatis lewat agent Plan, Implement, QA, Reviewer, dan Docs, membuka pull request, lalu menunggu manusia untuk merge — tidak ada auto-merge.",
+    "ariaLabel": "Diagram pipeline CAF Orchestrator: ticket jadi Ready for AI di Linear atau GitHub Issues, lalu mengalir otomatis lewat agent Plan, Implement, QA, Reviewer, dan Docs, membuka pull request, lalu menunggu manusia untuk merge — tidak ada auto-merge.",
     "stages": {
       "ticket": {
         "title": "Ticket",
-        "subtitle": "Linear · Ready for AI",
-        "detail": "Trigger begitu ticket pindah ke workflow state \"Ready for AI\" di Linear — satu-satunya trigger yang didukung saat ini. Dukungan Jira direncanakan, belum diimplementasikan."
+        "subtitle": "Linear · GitHub Issues",
+        "detail": "Trigger begitu ticket pindah ke workflow state \"Ready for AI\" di Linear, atau GitHub Issue mendapat label ready-for-ai. Dukungan Jira direncanakan, belum diimplementasikan."
       },
       "plan": {
         "title": "Plan",
@@ -132,13 +132,13 @@
       },
       "qa": {
         "title": "QA",
-        "subtitle": "Scanner read-only",
-        "detail": "Agent scanner read-only menjalankan lint, test, dan review otomatis. Bisa menandai masalah tapi tidak punya akses tulis untuk memperbaikinya."
+        "subtitle": "Melapor, tidak memperbaiki",
+        "detail": "Agent QA mengecek hasil kerja terhadap acceptance criteria dan menjalankan test serta build. Ia menulis qa-report.md dengan status PASS atau FAIL dan tidak mengubah kode."
       },
       "reviewer": {
         "title": "Reviewer",
-        "subtitle": "Ringkasan diff",
-        "detail": "Agent read-only menyiapkan ringkasan diff dan checklist (review-notes.md) supaya manusia bisa approve/reject lebih cepat."
+        "subtitle": "Verdict",
+        "detail": "Agent Reviewer me-review diff dan menulis review-notes.md berisi verdict, supaya manusia bisa approve/reject lebih cepat."
       },
       "docs": {
         "title": "Docs",
@@ -153,7 +153,7 @@
       "merge": {
         "title": "Merge",
         "subtitle": "Tanpa auto-merge",
-        "detail": "Satu-satunya checkpoint manusia yang wajib. Kalau QA gagal atau reviewer beri verdict \"changes requested\", pipeline retry sekali, lalu berhenti dan diserahkan ke manusia — tidak pernah ada merge otomatis."
+        "detail": "Satu-satunya checkpoint manusia yang wajib. Kalau QA gagal atau reviewer beri verdict \"changes requested\", pipeline retry sekali, lalu membuka Draft PR dan diserahkan ke manusia — tidak pernah ada merge otomatis."
       }
     }
   },
@@ -163,7 +163,7 @@
     "items": [
       {
         "question": "Apa itu CAF?",
-        "answer": "CAF (Coderium Agent Framework) adalah framework orkestrasi AI agent yang menjalankan siklus Plan → Implement → Verify → PR dengan governance ketat — setiap checkpoint butuh review manusia eksplisit."
+        "answer": "CAF (Coderium Agent Framework) adalah framework orkestrasi AI agent yang menjalankan siklus Plan → Implement → Verify → PR dengan governance ketat — quality gate otomatis di sepanjang jalan, dan keputusan manusia sebelum apa pun di-merge."
       },
       {
         "question": "Apakah CAF gratis?",
@@ -171,15 +171,15 @@
       },
       {
         "question": "Tracker apa saja yang didukung?",
-        "answer": "Linear didukung secara native lewat CAF Orchestrator saat ini. Dukungan Jira direncanakan, belum diimplementasikan."
+        "answer": "Linear dan GitHub Issues didukung lewat CAF Orchestrator saat ini. Dukungan Jira direncanakan, belum diimplementasikan."
       },
       {
         "question": "AI runner apa yang dipakai?",
-        "answer": "Claude Code — dijalankan headless per fase (Plan, Implement, Verify, PR) oleh CAF Orchestrator."
+        "answer": "Claude Code. CAF Orchestrator menjalankan tiap agent — Planner, implementasi, QA, Reviewer, Documentation — sebagai proses Claude Code headless. Agent yang sama juga bisa jalan langsung di sesi Claude Code."
       },
       {
         "question": "Apakah CAF bisa auto-merge?",
-        "answer": "Tidak. Setiap fase punya checkpoint human-review wajib. Tidak ada jalur otomatis yang melewati approval manusia sebelum PR dibuat atau digabungkan."
+        "answer": "Tidak. CAF Orchestrator membuka pull request secara otomatis setelah quality gate lolos, tapi tidak punya langkah merge. Merge selalu keputusan manusia."
       },
       {
         "question": "Apakah CAF menyimpan kode saya di server pihak ketiga?",
@@ -198,8 +198,8 @@
     "heading": "Dibuat oleh Coderium",
     "p1": "CAF (Coderium Agent Framework) dibuat dan dirawat oleh <strong>Coderium</strong>, studio yang membangun tooling developer dengan fokus pada agentic coding yang tetap bisa dipercaya — bukan cuma cepat.",
     "h2Why": "Kenapa CAF dibuat",
-    "p2": "Banyak agent coding tool yang ada sekarang punya scope sempit (cuma bantu satu bagian kecil dari siklus development) atau punya governance yang longgar (langsung auto-merge tanpa jaminan review manusia). CAF dibuat untuk mengisi celah itu: cakupan implementasi yang luas — dari ticket sampai PR — dipadukan dengan governance ketat di setiap fase.",
-    "p3": "Kami percaya agent AI bisa mempercepat development tanpa mengorbankan kontrol. Itu sebabnya setiap checkpoint di CAF — Plan, Implement, Verify, PR — mewajibkan review manusia eksplisit, dan kenapa CAF Orchestrator sengaja jalan di infrastruktur kamu sendiri, bukan sebagai layanan yang dikelola Coderium.",
+    "p2": "Banyak agent coding tool yang ada sekarang punya scope sempit (cuma bantu satu bagian kecil dari siklus development) atau punya governance yang longgar (langsung auto-merge tanpa jaminan review manusia). CAF dibuat untuk mengisi celah itu: cakupan implementasi yang luas — dari ticket sampai PR — dipadukan dengan governance ketat: quality gate di antara tiap tahap dan keputusan manusia di akhir.",
+    "p3": "Kami percaya agent AI bisa mempercepat development tanpa mengorbankan kontrol. Itu sebabnya setiap perubahan melewati gate otomatis — verify, QA, review — sebelum PR dibuka, kenapa gate yang gagal berhenti dan diserahkan ke manusia alih-alih dipaksakan lanjut, kenapa tidak ada yang pernah di-merge otomatis, dan kenapa CAF Orchestrator sengaja jalan di infrastruktur kamu sendiri, bukan sebagai layanan yang dikelola Coderium.",
     "h2Coderium": "Coderium",
     "p4": "CAF adalah proyek terpisah dari situs utama Coderium. Untuk tahu lebih banyak tentang Coderium sebagai studio, kunjungi <span class=\"text-mute\">situs utama Coderium (segera hadir)</span>."
   },
@@ -208,14 +208,49 @@
     "metaDescription": "Histori rilis CAF (Coderium Agent Framework).",
     "eyebrow": "Changelog",
     "heading": "Histori rilis",
-    "intro": "CAF masih di v0.1.6 — halaman ini akan terus bertambah seiring rilis berikutnya.",
+    "intro": "CAF masih di v0.1.9 — halaman ini akan terus bertambah seiring rilis berikutnya.",
     "releases": [
+      {
+        "version": "v0.1.9",
+        "date": "2026",
+        "items": [
+          "CAF skills (CAF-SKILLS-01): caf-init scaffold skills menulis lima skill universal ke .claude/skills/ — caf-verify, caf-scope-discipline, caf-no-guess, caf-escalate, caf-piv",
+          "Definisi agent dapat section opsional ## Skills berisi pointer Read ke skill; agent yang di-generate setelah skill ada langsung mendapat pointernya",
+          "Agent yang sudah ada ditawari section ## Skills dengan preview dan konfirmasi per file — hanya ditulis kalau hasilnya adalah file lama plus persis satu section itu",
+          "caf-verify dibangun dari script yang terdeteksi di package.json; script yang tidak ada meninggalkan baris TODO dan banner DRAFT, dan agent mengabaikan skill DRAFT",
+          "curate --check-drafts sekarang mencakup skill: file skill yang tidak ada, pointer ke skill DRAFT, TODO terbuka tanpa banner, dan banner DRAFT yang baru dihapus setengah",
+          "/caf-complete-drafts menangani skill DRAFT dan tidak pernah mengarang verification command",
+          "README ditulis ulang"
+        ]
+      },
+      {
+        "version": "v0.1.8",
+        "date": "2026",
+        "items": [
+          "Dukungan SINGLE_REPO: repo tanpa workspaces sekarang jadi mode resmi, bukan error — root repo adalah satu-satunya app",
+          "Flag baru --mode (single atau mono) di scaffold, docs, dan curate untuk meng-override deteksi repo mode",
+          "Agent implementasi single-repo caf-implementer, dengan --scope untuk membatasinya ke direktori tertentu dan --role frontend atau --role backend untuk men-generate-nya sebagai caf-frontend.md / caf-backend.md bagi CAF Orchestrator",
+          "AI-assisted draft completion: scaffold complete-drafts men-generate command /caf-complete-drafts — mengisi TODO dari kode dan bertanya dulu untuk konten milik manusia",
+          "curate --check-drafts: pengecekan read-only atas draft yang sudah diisi (section ter-track yang berubah, script yang tidak ada, placeholder tersisa, path golden example yang hilang)",
+          "Placeholder template generate-time yang tersisa sekarang membatalkan penulisan",
+          "Output MONOREPO dibekukan dengan snapshot test"
+        ]
+      },
+      {
+        "version": "v0.1.7",
+        "date": "2026",
+        "items": [
+          "Report Format dan Retry Logic role-aware untuk kind qa dan reviewer",
+          "caf-qa.md dapat Report Format sendiri: qa-report.md dengan baris Status berisi PASS atau FAIL, sesuai yang di-parse CAF Orchestrator",
+          "Retry Logic QA dan Reviewer sekarang menyebut file report-nya sendiri, bukan verify-report.md"
+        ]
+      },
       {
         "version": "v0.1.6",
         "date": "2026",
         "items": [
           "Report Format kind-aware untuk caf-reviewer (CAF-REVIEWER-FORMAT-01)",
-          "caf-reviewer.md dapat section Report Format sendiri — skeleton Verdict (APPROVE | CHANGES REQUESTED | DEFER) yang sudah diperbaiki, ditulis ke .caf/tasks/review-notes.md",
+          "caf-reviewer.md dapat section Report Format sendiri — skeleton Verdict (APPROVE / CHANGES REQUESTED / DEFER) yang sudah diperbaiki, ditulis ke .caf/tasks/review-notes.md",
           "Sebelumnya hanya kind auditor yang punya Report Format; branch reviewer ditambahkan ke buildReportFormatSection(kind)",
           "buildAuditContractSections(kind): reviewer hanya dapat Report Format (tanpa What to Look For — scoped ke kontrak Verdict, bukan kriteria review)",
           "Skeleton disalin verbatim dari buildInitialReviewPrompt() milik caf-orchestrator supaya tetap kompatibel kata-per-kata dengan parser Verdict strict/loose di report-reader.ts (tidak ada shared import antar package — risiko drift dicatat di kode)",
@@ -269,7 +304,7 @@
       "s3Title": "3. Disediakan \"sebagaimana adanya\"",
       "s3Body": "CAF gratis dan disediakan <strong>as-is</strong>, tanpa jaminan (warranty) dalam bentuk apa pun, tersurat maupun tersirat. Tidak ada SLA (service level agreement) di versi gratis — tidak ada komitmen waktu respons atau uptime, karena CAF Orchestrator berjalan di infrastruktur kamu sendiri, bukan milik Coderium.",
       "s4Title": "4. Batasan tanggung jawab",
-      "s4Body1": "Agent AI yang dijalankan CAF bisa menghasilkan kode yang salah, tidak lengkap, atau tidak sesuai maksud. Ini konsisten dengan prinsip governance CAF sendiri: <strong>review manusia wajib</strong> di setiap checkpoint sebelum kode digabungkan. Kamu — bukan Coderium — bertanggung jawab penuh atas keputusan untuk me-review, meng-approve, atau menggabungkan perubahan apa pun yang dihasilkan agent.",
+      "s4Body1": "Agent AI yang dijalankan CAF bisa menghasilkan kode yang salah, tidak lengkap, atau tidak sesuai maksud. Ini konsisten dengan prinsip governance CAF sendiri: <strong>review manusia wajib</strong> sebelum kode apa pun digabungkan. Kamu — bukan Coderium — bertanggung jawab penuh atas keputusan untuk me-review, meng-approve, atau menggabungkan perubahan apa pun yang dihasilkan agent.",
       "s4Body2": "Coderium tidak bertanggung jawab atas kerugian yang timbul dari penggunaan CAF, termasuk namun tidak terbatas pada kesalahan kode yang lolos review manusia.",
       "s5Title": "5. Perubahan Terms",
       "s5Body": "Ketentuan ini bisa berubah seiring perkembangan CAF. Perubahan akan diumumkan di <a href=\"{changelogHref}\">changelog</a> proyek."

@@ -50,10 +50,10 @@
     "copyright": "© {year} Coderium. All rights reserved."
   },
   "hero": {
-    "badge": "CAF v0.1.6 — early access",
+    "badge": "CAF v0.1.9 — early access",
     "new": "New",
     "title": "Coderium Agent Framework",
-    "description": "CAF runs every phase — Plan, Implement, Verify, PR — with a mandatory human-review checkpoint. No auto-merge. Free and open, running directly in your own repo.",
+    "description": "CAF runs the whole agent chain — Plan, Implement, Verify, PR — behind quality gates, then stops for a human. No auto-merge. Free and open, running directly in your own repo.",
     "getStarted": "Get Started",
     "github": "View on GitHub",
     "npm": "View on npm"
@@ -64,23 +64,23 @@
     "items": [
       {
         "title": "PIV discipline",
-        "description": "Every task runs through Plan → Implement → Verify, retrying once on failure before handing off to a human."
+        "description": "Every task runs through Plan → Implement → Verify. A failing gate retries once, then stops with a Draft PR and hands off to a human."
       },
       {
         "title": "Artifact handoff via Markdown",
         "description": "Each phase's output is stored as a Markdown file in the repo — not chat context that disappears once the session ends."
       },
       {
-        "title": "Linear-triggered pipeline",
-        "description": "The Orchestrator connects directly to Linear — automatically triggered by ticket status changes. Jira support is planned."
+        "title": "Ticket-triggered pipeline",
+        "description": "The Orchestrator is triggered automatically when a ticket becomes ready — a Linear workflow state or a GitHub Issue label. Jira support is planned."
       },
       {
-        "title": "Mandatory human review",
-        "description": "Every checkpoint — Plan, Implement, Verify, PR — requires explicit human approval. No auto-merge."
+        "title": "Human decides the merge",
+        "description": "The agent chain runs by itself up to an open pull request. Merging is always an explicit human decision — there is no auto-merge."
       },
       {
-        "title": "Read-only scanner agent",
-        "description": "The agent that reads and analyzes code has no write access until an explicit approval gate is granted."
+        "title": "Gates that report, not fix",
+        "description": "QA and Reviewer agents check the work and write a report. They don't change the code they are checking — a failure goes back to the implementation agent."
       }
     ]
   },
@@ -90,11 +90,11 @@
     "initiator": {
       "eyebrow": "CLI scaffold generator",
       "title": "CAF Initiator",
-      "description": "Automatically detects your project's stack, then generates the entire knowledge base your agents need — from agent definitions to task templates.",
+      "description": "Automatically detects your project's stack, then generates the entire knowledge base your agents need — from agent definitions to skills. Deterministic: it never calls an AI model.",
       "points": [
-        "Auto-detects your stack: framework, package manager, repo structure",
-        "Generates .claude/agents/ — definitions for each agent role",
-        "Generates .caf/tasks/ — the artifact handoff template"
+        "Auto-detects your stack: framework, package manager, monorepo or single repo",
+        "Generates .claude/agents/, slash commands and optional CAF skills",
+        "Leaves a TODO instead of guessing — /caf-complete-drafts helps you fill them in"
       ]
     },
     "orchestrator": {
@@ -102,8 +102,8 @@
       "title": "CAF Orchestrator",
       "description": "Fastify + BullMQ + Redis, running on your own small VPS. Receives webhooks from your tracker, then spawns headless Claude Code agents for each phase.",
       "points": [
-        "Triggered automatically by ticket status changes in Linear (Jira planned)",
-        "Per-phase queue with BullMQ + Redis",
+        "Triggered automatically from Linear or GitHub Issues (Jira planned)",
+        "Gate failures open a Draft PR you can resume with /caf-retry-pipeline",
         "Self-hosted — runs on your own VPS, not a Coderium SaaS"
       ]
     }
@@ -113,12 +113,12 @@
     "title": "The agent chain runs itself — merging never does",
     "description": "The whole agent chain runs automatically once a ticket is ready. The only step that waits on a human is {review} — there's no path that skips it.",
     "reviewHighlight": "Merge",
-    "ariaLabel": "CAF Orchestrator pipeline diagram: a ticket transitions to Ready for AI in Linear, then flows automatically through Plan, Implement, QA, Reviewer, and Docs agents, opens a pull request, and waits for a human to merge it — there is no auto-merge.",
+    "ariaLabel": "CAF Orchestrator pipeline diagram: a ticket becomes Ready for AI in Linear or GitHub Issues, then flows automatically through Plan, Implement, QA, Reviewer, and Docs agents, opens a pull request, and waits for a human to merge it — there is no auto-merge.",
     "stages": {
       "ticket": {
         "title": "Ticket",
-        "subtitle": "Linear · Ready for AI",
-        "detail": "Triggered when a ticket transitions into Linear's \"Ready for AI\" workflow state — the only supported trigger today. Jira support is planned but not yet implemented."
+        "subtitle": "Linear · GitHub Issues",
+        "detail": "Triggered when a ticket moves into Linear's \"Ready for AI\" workflow state, or a GitHub Issue gets the ready-for-ai label. Jira support is planned but not yet implemented."
       },
       "plan": {
         "title": "Plan",
@@ -132,13 +132,13 @@
       },
       "qa": {
         "title": "QA",
-        "subtitle": "Read-only scanner",
-        "detail": "A read-only scanner agent runs lint, tests, and automated review. It can flag problems but has no write access to fix them."
+        "subtitle": "Reports, never fixes",
+        "detail": "The QA agent checks the work against the acceptance criteria and runs tests and build. It writes qa-report.md with a PASS or FAIL status and does not change code."
       },
       "reviewer": {
         "title": "Reviewer",
-        "subtitle": "Diff summary",
-        "detail": "A read-only agent prepares a diff summary and checklist (review-notes.md) so a human can approve or reject faster."
+        "subtitle": "Verdict",
+        "detail": "The Reviewer agent reviews the diff and writes review-notes.md with a verdict, so a human can approve or reject faster."
       },
       "docs": {
         "title": "Docs",
@@ -153,7 +153,7 @@
       "merge": {
         "title": "Merge",
         "subtitle": "No auto-merge",
-        "detail": "The one mandatory human checkpoint. On a QA failure or a reviewer \"changes requested\" verdict, the pipeline retries once, then stops and hands off to a human — nothing ever merges automatically."
+        "detail": "The one mandatory human checkpoint. On a QA failure or a reviewer \"changes requested\" verdict, the pipeline retries once, then opens a Draft PR and hands off to a human — nothing ever merges automatically."
       }
     }
   },
@@ -163,7 +163,7 @@
     "items": [
       {
         "question": "What is CAF?",
-        "answer": "CAF (Coderium Agent Framework) is an AI agent orchestration framework that runs the Plan → Implement → Verify → PR cycle with strict governance — every checkpoint requires explicit human review."
+        "answer": "CAF (Coderium Agent Framework) is an AI agent orchestration framework that runs the Plan → Implement → Verify → PR cycle with strict governance — automated quality gates along the way, and a human decision before anything is merged."
       },
       {
         "question": "Is CAF free?",
@@ -171,15 +171,15 @@
       },
       {
         "question": "Which trackers are supported?",
-        "answer": "Linear is natively supported through CAF Orchestrator today. Jira support is planned but not yet implemented."
+        "answer": "Linear and GitHub Issues are supported through CAF Orchestrator today. Jira support is planned but not yet implemented."
       },
       {
         "question": "Which AI runner does it use?",
-        "answer": "Claude Code — run headlessly per phase (Plan, Implement, Verify, PR) by CAF Orchestrator."
+        "answer": "Claude Code. CAF Orchestrator runs each agent — Planner, implementation, QA, Reviewer, Documentation — as a headless Claude Code process. The same agents also run directly in a Claude Code session."
       },
       {
         "question": "Can CAF auto-merge?",
-        "answer": "No. Every phase has a mandatory human-review checkpoint. There's no automated path that bypasses human approval before a PR is created or merged."
+        "answer": "No. CAF Orchestrator opens the pull request automatically once the quality gates pass, but it has no merge step. Merging is always a human decision."
       },
       {
         "question": "Does CAF store my code on a third-party server?",
@@ -198,8 +198,8 @@
     "heading": "Built by Coderium",
     "p1": "CAF (Coderium Agent Framework) is built and maintained by <strong>Coderium</strong>, a studio building developer tooling with a focus on agentic coding you can actually trust — not just fast.",
     "h2Why": "Why CAF was built",
-    "p2": "Many of today's agent coding tools have a narrow scope (helping with just one small part of the development cycle) or loose governance (auto-merging with no guarantee of human review). CAF was built to fill that gap: a wide implementation scope — from ticket to PR — paired with strict governance at every phase.",
-    "p3": "We believe AI agents can speed up development without sacrificing control. That's why every checkpoint in CAF — Plan, Implement, Verify, PR — requires explicit human review, and why CAF Orchestrator deliberately runs on your own infrastructure, not as a service managed by Coderium.",
+    "p2": "Many of today's agent coding tools have a narrow scope (helping with just one small part of the development cycle) or loose governance (auto-merging with no guarantee of human review). CAF was built to fill that gap: a wide implementation scope — from ticket to PR — paired with strict governance: quality gates between the stages and a human decision at the end.",
+    "p3": "We believe AI agents can speed up development without sacrificing control. That's why every change passes automated gates — verify, QA, review — before a PR is opened, why a failing gate stops and hands off to a human instead of pushing on, why nothing is ever merged automatically, and why CAF Orchestrator deliberately runs on your own infrastructure, not as a service managed by Coderium.",
     "h2Coderium": "Coderium",
     "p4": "CAF is a separate project from Coderium's main site. To learn more about Coderium as a studio, visit <span class=\"text-mute\">Coderium's main site (coming soon)</span>."
   },
@@ -208,14 +208,49 @@
     "metaDescription": "Release history for CAF (Coderium Agent Framework).",
     "eyebrow": "Changelog",
     "heading": "Release history",
-    "intro": "CAF is still at v0.1.6 — this page will keep growing with future releases.",
+    "intro": "CAF is still at v0.1.9 — this page will keep growing with future releases.",
     "releases": [
+      {
+        "version": "v0.1.9",
+        "date": "2026",
+        "items": [
+          "CAF skills (CAF-SKILLS-01): caf-init scaffold skills writes five universal skills into .claude/skills/ — caf-verify, caf-scope-discipline, caf-no-guess, caf-escalate, caf-piv",
+          "Agent definitions get an optional ## Skills section with Read pointers to the skills; agents generated after the skills exist get their pointers automatically",
+          "Existing agents are offered the ## Skills section with a preview and per-file confirmation — written only when the result is the old file plus exactly that one section",
+          "caf-verify is built from the scripts detected in package.json; a missing script leaves a TODO line and a DRAFT banner, and agents ignore a DRAFT skill",
+          "curate --check-drafts now covers skills: missing skill files, pointers to DRAFT skills, open TODOs without a banner, and a half-removed DRAFT banner",
+          "/caf-complete-drafts handles DRAFT skills and never invents a verification command",
+          "README rewritten"
+        ]
+      },
+      {
+        "version": "v0.1.8",
+        "date": "2026",
+        "items": [
+          "SINGLE_REPO support: a repo without workspaces is now a first-class mode, not an error — the repo root is the only app",
+          "New --mode flag (single or mono) on scaffold, docs and curate to override repo-mode detection",
+          "Single-repo implementation agent caf-implementer, with --scope to limit it to directories and --role frontend or --role backend to generate it as caf-frontend.md / caf-backend.md for CAF Orchestrator",
+          "AI-assisted draft completion: scaffold complete-drafts generates the /caf-complete-drafts command — it fills TODOs from the code and asks first for human-owned content",
+          "curate --check-drafts: a read-only check of completed drafts (changed tracked sections, non-existent scripts, leftover placeholders, missing golden-example paths)",
+          "A leftover generate-time template placeholder now aborts the write",
+          "MONOREPO output is frozen by a snapshot test"
+        ]
+      },
+      {
+        "version": "v0.1.7",
+        "date": "2026",
+        "items": [
+          "Role-aware Report Format and Retry Logic for the qa and reviewer kinds",
+          "caf-qa.md gets its own Report Format: qa-report.md with a Status line of PASS or FAIL, matching what CAF Orchestrator parses",
+          "QA and Reviewer Retry Logic now name their own report file instead of verify-report.md"
+        ]
+      },
       {
         "version": "v0.1.6",
         "date": "2026",
         "items": [
           "Kind-aware Report Format for caf-reviewer (CAF-REVIEWER-FORMAT-01)",
-          "caf-reviewer.md gets its own Report Format section — fixed Verdict skeleton (APPROVE | CHANGES REQUESTED | DEFER) written to .caf/tasks/review-notes.md",
+          "caf-reviewer.md gets its own Report Format section — fixed Verdict skeleton (APPROVE / CHANGES REQUESTED / DEFER) written to .caf/tasks/review-notes.md",
           "Previously only the auditor kind had a Report Format; reviewer branch added to buildReportFormatSection(kind)",
           "buildAuditContractSections(kind): reviewer gets Report Format only (no What to Look For — scoped to the Verdict contract, not review criteria)",
           "Skeleton copied verbatim from caf-orchestrator's buildInitialReviewPrompt() to stay word-for-word compatible with report-reader.ts's strict/loose Verdict parsers (no shared import between packages — drift risk noted in code)",
@@ -269,7 +304,7 @@
       "s3Title": "3. Provided \"as is\"",
       "s3Body": "CAF is free and provided <strong>as-is</strong>, without warranty of any kind, express or implied. There's no SLA (service level agreement) on the free version — no commitment to response time or uptime, since CAF Orchestrator runs on your own infrastructure, not Coderium's.",
       "s4Title": "4. Limitation of liability",
-      "s4Body1": "Agents run by CAF may produce code that is incorrect, incomplete, or doesn't match intent. This is consistent with CAF's own governance principle: <strong>mandatory human review</strong> at every checkpoint before code is merged. You — not Coderium — are fully responsible for the decision to review, approve, or merge any change an agent produces.",
+      "s4Body1": "Agents run by CAF may produce code that is incorrect, incomplete, or doesn't match intent. This is consistent with CAF's own governance principle: <strong>mandatory human review</strong> before any code is merged. You — not Coderium — are fully responsible for the decision to review, approve, or merge any change an agent produces.",
       "s4Body2": "Coderium is not liable for any loss arising from the use of CAF, including but not limited to code defects that pass human review.",
       "s5Title": "5. Changes to these Terms",
       "s5Body": "These terms may change as CAF evolves. Changes will be announced in the project's <a href=\"{changelogHref}\">changelog</a>."

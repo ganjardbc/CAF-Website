@@ -3,10 +3,13 @@ title: Environment Variables
 description: Every .env variable used by CAF Orchestrator, gathered in one page.
 ---
 
-A full reference of the `.env` variables mentioned across the other docs pages —
-gathered here so you don't have to jump between pages during setup. Structural
-(non-secret) config — server port, agent retries, dashboard, OpenRouter routing —
-lives in `caf.config.yaml` instead; copy it from `caf.config.example.yaml`.
+A full reference of the `.env` variables used by CAF Orchestrator — secrets and
+operational toggles. Structural (non-secret) config lives in `caf.config.yaml`
+instead; copy it from `caf.config.example.yaml`. See
+[Structural config](#structural-config-cafconfigyaml) below for the fields people
+most often look for here.
+
+CAF Initiator needs no environment variables.
 
 ## Core
 
@@ -14,15 +17,14 @@ lives in `caf.config.yaml` instead; copy it from `caf.config.example.yaml`.
 |---|---|---|
 | `REDIS_URL` | Yes | Connection to the Redis instance used for the BullMQ queue |
 | `LINEAR_WEBHOOK_SECRET` | Yes | Secret used to verify incoming Linear webhook payloads |
-| `LINEAR_API_KEY` | Yes | Personal API key with read access to your Linear workspace |
-| `LINEAR_READY_STATE_ID` | Yes | UUID of the Linear workflow state that triggers the pipeline (your "Ready for AI" state) |
+| `LINEAR_API_KEY` | Yes | Linear API key, used to read tickets and post comments |
 
 ## Git host
 
 | Variable | Required | Description |
 |---|---|---|
-| `GITHUB_TOKEN` | Yes | Fine-grained PAT with `Contents` and `Pull requests` scope, used to push branches and open PRs |
-| `GITHUB_WEBHOOK_SECRET` | Yes, for automated PR review | Secret used to verify incoming GitHub webhook payloads (`/webhooks/github`) |
+| `GITHUB_TOKEN` | Yes | Fine-grained PAT used to push branches, open PRs and post comments/reviews |
+| `GITHUB_WEBHOOK_SECRET` | Yes | Secret used to verify incoming GitHub webhook payloads (`/webhooks/github`) |
 
 ## Claude Code / model auth
 
@@ -30,22 +32,42 @@ One of the following is required, or the Orchestrator fails to start:
 
 | Variable | Description |
 |---|---|
-| `CLAUDE_CODE_OAUTH_TOKEN` | Native Claude Code CLI auth, passed through unchanged to spawned agents |
-| `OPENAI_API_KEY` | Required if `caf.config.yaml`'s `openai.useOpenai` is `true` — routes spawned agents through OpenRouter |
+| `CLAUDE_CODE_OAUTH_TOKEN` | Native Claude Code CLI auth, passed through unchanged to spawned agents. Used when `openai.useOpenai` is `false` (the default) |
+| `OPENAI_API_KEY` | Required if `caf.config.yaml`'s `openai.useOpenai` is `true` — routes spawned agents through an Anthropic-compatible endpoint (OpenRouter by default) |
 
 ## Feature flags
 
 | Variable | Required | Default | Description |
 |---|---|---|---|
-| `ENABLE_PIPELINE_TRIGGER` | No | `true` | Master switch for whether incoming webhooks trigger a pipeline run |
+| `ENABLE_PIPELINE_TRIGGER` | No | `true` | Kill switch for every webhook trigger (ticket pipeline, resume and PR review) |
 | `AGENT_SKIP_ENABLED` | No | `false` | Honors a `## Skip Agents` section in `tasks.md` to skip agents not relevant to a ticket |
+
+Accepted values: `true`, `false`, `1`, `0`.
 
 ## Optional
 
 | Variable | Required | Description |
 |---|---|---|
-| `TELEGRAM_BOT_TOKEN` / `TELEGRAM_CHAT_ID` | Both together, or neither | Pipeline completion/failure notifications |
-| `DASHBOARD_BASIC_AUTH_PASSWORD` | If `dashboard.enabled: true` in `caf.config.yaml` | Basic-auth password for the Bull Board dashboard at `/admin/queues` |
+| `TELEGRAM_BOT_TOKEN` / `TELEGRAM_CHAT_ID` | Both together, or neither | Pipeline start/completion/failure notifications |
+| `DASHBOARD_BASIC_AUTH_PASSWORD` | If `dashboard.enabled: true` in `caf.config.yaml` | Basic-auth password for the monitoring dashboard at `/dashboard` |
+| `NODE_ENV`, `LOG_LEVEL` | No | Runtime environment and log verbosity |
+
+`CAF_HEADLESS` is **not** configurable: the Orchestrator always sets it to `1` on
+every agent it spawns. Don't put it in `.env`.
+
+## Structural config (`caf.config.yaml`)
+
+These are not environment variables:
+
+| Field | Required | Description |
+|---|---|---|
+| `linear.readyStateId` | Yes | UUID of the Linear workflow state that triggers the pipeline (your "Ready for AI" state) |
+| `projects:` | Yes, at least one | Per-project `ticketPrefix`, `repoCloneUrl`, `baseBranch`, `workspaceDir` |
+| `github.readyLabel` | No (default `ready-for-ai`) | Label that triggers the pipeline from a GitHub Issue |
+| `server.port` | No (default `3000`) | Port of the web server |
+| `dashboard.enabled` / `dashboard.basicAuthUser` | No | Turn on the dashboard and set its username |
+
+See [CAF Orchestrator](/docs/caf-orchestrator#configuration) for the rest.
 
 ## Not yet available
 
@@ -55,4 +77,5 @@ Jira and GitLab are on the roadmap but not implemented — there are no
 for current status.
 
 Details on how to obtain each credential are on their respective pages:
-[CAF Orchestrator](/docs/caf-orchestrator) and [Linear](/docs/integrations/linear).
+[Linear](/docs/integrations/linear) and
+[GitHub / GitLab](/docs/integrations/github-gitlab).

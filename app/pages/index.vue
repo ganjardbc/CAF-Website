@@ -10,7 +10,7 @@ useSchemaOrg([
   defineSoftwareApp({
     name: 'CAF (Coderium Agent Framework)',
     description:
-      'AI agent orchestration framework dengan governance ketat — Plan, Implement, Verify, PR, dengan checkpoint human-review wajib di setiap fase.',
+      'AI agent orchestration framework with strict governance — Plan, Implement, Verify, PR, behind quality gates, with a human deciding every merge.',
     applicationCategory: 'DeveloperApplication',
     operatingSystem: 'Linux, macOS',
     offers: { price: 0, priceCurrency: 'USD' },
