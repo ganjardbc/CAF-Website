@@ -37,6 +37,13 @@ the full pipeline runs for it. The project is matched by repository (each projec
 `repoCloneUrl`), and the ticket key becomes `<ticketPrefix>-<issue number>`. Results
 are posted back as a comment on the issue.
 
+If the Planner's spec has an open `BLOCKING` question, the pipeline stops and asks it
+in a comment on the issue (starting `❓ CAF-CLARIFY`). Answer in a comment, then remove
+and re-apply the ready label to continue. An issue that also carries the
+`github.specGateLabel` label (default `spec-approval`) stops at a Draft PR holding the
+spec until someone comments `/caf-approve-spec` on it. See
+[CAF Orchestrator](/docs/caf-orchestrator#clarify-and-the-spec-gate).
+
 ## PR comment commands
 
 On a PR this pipeline opened (head branch `ai-agent/<TICKET-KEY>`):
@@ -44,6 +51,7 @@ On a PR this pipeline opened (head branch `ai-agent/<TICKET-KEY>`):
 | Comment | What it does |
 |---|---|
 | `/caf-retry-pipeline` | Resumes a pipeline that stopped at a gate (on its Draft PR) |
+| `/caf-approve-spec` | Approves the spec on a spec-gate Draft PR and continues with implementation |
 | `/caf-review` | Runs a full AI review and posts it as a GitHub PR review |
 | `/caf-fix-review` | The Reviewer addresses every review comment on the PR |
 | A reply in an inline review thread | The Reviewer addresses that one thread |
@@ -58,8 +66,13 @@ Comments from bot accounts are ignored. See
 1. Clones the repo and pushes the branch `ai-agent/<TICKET-KEY>`
 2. Opens a pull request once the
    [Layer 4 quality gates](/docs/core-concepts/layer-4) pass — or a **Draft PR**
-   carrying the failing report when a gate is exhausted
+   carrying the failing report when a gate is exhausted, or the spec when the spec
+   gate applies. A resumed run that finally succeeds marks that PR Ready for review
 3. Posts comments, replies and PR reviews
+
+The token is never written to the workspace: each git network command authenticates
+with a per-process header, so it is in neither the remote URL nor `.git/config`. This
+needs `git` 2.31 or newer on the Orchestrator host.
 
 ## The Orchestrator never merges a PR
 

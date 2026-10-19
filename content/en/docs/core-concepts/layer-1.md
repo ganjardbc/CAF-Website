@@ -13,7 +13,9 @@ Without a Project Knowledge Base, every agent would have to re-guess your stack,
 folder structure, and code conventions each time it runs — leading to inconsistent
 results across tickets, and agents that might make decisions conflicting with
 existing patterns in the repo. Layer 1 ensures every agent — Planner, implementation
-agents, QA, Reviewer — reads the same context before starting work.
+agents, Validator, Reviewer — reads the same context before starting work. The Planner
+also reads the ADRs whose name relates to the ticket and names them in a `Finding:` of
+the spec.
 
 ## What it contains
 

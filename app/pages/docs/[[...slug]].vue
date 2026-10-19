@@ -79,6 +79,10 @@ useSchemaOrg([
   @apply text-inherit no-underline;
 }
 
+.docs-prose img {
+  @apply mt-md h-auto w-full rounded-md border border-hairline shadow-[0px_2px_2px_rgba(0,0,0,0.04),0px_8px_24px_-8px_rgba(0,0,0,0.12)];
+}
+
 .docs-prose blockquote {
   @apply mt-md border-l-2 border-hairline pl-md text-sm text-mute;
 }

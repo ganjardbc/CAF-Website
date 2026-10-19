@@ -23,7 +23,7 @@ CAF Initiator tidak butuh environment variable.
 
 | Variable | Wajib | Deskripsi |
 |---|---|---|
-| `GITHUB_TOKEN` | Ya | Fine-grained PAT untuk push branch, membuka PR, dan memposting comment/review |
+| `GITHUB_TOKEN` | Ya | Fine-grained PAT untuk push branch, membuka PR, dan memposting comment/review. Tidak pernah ditulis ke workspace; dikirim ke git per perintah lewat header environment (butuh `git` 2.31+) |
 | `GITHUB_WEBHOOK_SECRET` | Ya | Secret untuk memverifikasi payload webhook GitHub yang masuk (`/webhooks/github`) |
 
 ## Claude Code / model auth
@@ -55,6 +55,11 @@ Nilai yang diterima: `true`, `false`, `1`, `0`.
 `CAF_HEADLESS` **tidak** bisa dikonfigurasi: Orchestrator selalu men-set-nya ke `1`
 di setiap agent yang di-spawn. Jangan taruh di `.env`.
 
+`caf-validator` berjalan tanpa `REDIS_URL`, `LINEAR_WEBHOOK_SECRET`, `LINEAR_API_KEY`,
+`GITHUB_TOKEN`, `GITHUB_WEBHOOK_SECRET`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, dan
+`DASHBOARD_BASIC_AUTH_PASSWORD` di environment-nya (lihat
+[Validator terbatas](/id/docs/caf-orchestrator#validator-terbatas)).
+
 ## Config struktural (`caf.config.yaml`)
 
 Ini bukan environment variable:
@@ -64,7 +69,9 @@ Ini bukan environment variable:
 | `linear.readyStateId` | Ya | UUID workflow state Linear yang memicu pipeline (state "Ready for AI" kamu) |
 | `projects:` | Ya, minimal satu | `ticketPrefix`, `repoCloneUrl`, `baseBranch`, `workspaceDir` per project |
 | `github.readyLabel` | Tidak (default `ready-for-ai`) | Label yang memicu pipeline dari GitHub Issue |
-| `server.port` | Tidak (default `3000`) | Port web server |
+| `linear.specGateLabel` / `github.specGateLabel` | Tidak (default `spec-approval`) | Label yang menghentikan ticket di Draft PR persetujuan spec; bisa di-override per project |
+| `agents.validator.restrictBash` / `agents.validator.allowedCommands` | Tidak (default `true` / allowlist `pnpm` dan `npm`) | Membatasi apa yang boleh dijalankan `caf-validator` |
+| `server.port` | Tidak (default `3000` di contoh config; setup Docker memakai `3030`) | Port web server |
 | `dashboard.enabled` / `dashboard.basicAuthUser` | Tidak | Mengaktifkan dashboard dan menentukan username-nya |
 
 Lihat [CAF Orchestrator](/id/docs/caf-orchestrator#konfigurasi) untuk sisanya.

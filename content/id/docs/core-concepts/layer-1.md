@@ -12,8 +12,9 @@ tapi keputusan dan konvensi yang berlaku di repo kamu sendiri.
 Tanpa Project Knowledge Base, setiap agent harus menebak ulang stack, struktur
 folder, dan konvensi kode kamu tiap kali jalan — hasilnya tidak konsisten antar
 ticket, dan agent bisa membuat keputusan yang bertentangan dengan pola yang sudah
-ada di repo. Layer 1 memastikan setiap agent — Planner, agent implementasi, QA,
-Reviewer — membaca konteks yang sama sebelum mulai bekerja.
+ada di repo. Layer 1 memastikan setiap agent — Planner, agent implementasi, Validator,
+Reviewer — membaca konteks yang sama sebelum mulai bekerja. Planner juga membaca ADR
+yang namanya berkaitan dengan ticket dan menyebutnya di `Finding:` pada spec.
 
 ## Apa isinya
 

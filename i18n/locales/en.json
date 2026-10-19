@@ -5,7 +5,8 @@
       "title": "Getting Started",
       "introduction": "Introduction",
       "quickStart": "Quick Start",
-      "piv": "PIV Concept"
+      "piv": "PIV Concept",
+      "sdd": "Spec-Driven Development"
     },
     "coreConcepts": {
       "title": "Core Concepts",
@@ -40,7 +41,8 @@
     "about": "About",
     "github": "View on GitHub",
     "toggleTheme": "Toggle color theme",
-    "toggleMenu": "Toggle navigation menu"
+    "toggleMenu": "Toggle navigation menu",
+    "backToTop": "Back to top"
   },
   "footer": {
     "about": "About",
@@ -50,10 +52,10 @@
     "copyright": "© {year} Coderium. All rights reserved."
   },
   "hero": {
-    "badge": "CAF v0.1.9 — early access",
+    "badge": "CAF v0.1.11 — early access",
     "new": "New",
     "title": "Coderium Agent Framework",
-    "description": "CAF runs the whole agent chain — Plan, Implement, Verify, PR — behind quality gates, then stops for a human. No auto-merge. Free and open, running directly in your own repo.",
+    "description": "CAF takes a ticket from a written spec to a pull request — Plan, Implement, Validate, Review — behind quality gates, then stops for a human. No auto-merge. Free and open, running directly in your own repo.",
     "getStarted": "Get Started",
     "github": "View on GitHub",
     "npm": "View on npm"
@@ -62,6 +64,10 @@
     "eyebrow": "What is CAF?",
     "title": "A framework, not a black box",
     "items": [
+      {
+        "title": "Spec-driven",
+        "description": "The Planner writes a spec with numbered acceptance criteria first. A blocking question stops the run and is asked on the ticket, and an approved spec is never edited by an agent."
+      },
       {
         "title": "PIV discipline",
         "description": "Every task runs through Plan → Implement → Verify. A failing gate retries once, then stops with a Draft PR and hands off to a human."
@@ -75,12 +81,12 @@
         "description": "The Orchestrator is triggered automatically when a ticket becomes ready — a Linear workflow state or a GitHub Issue label. Jira support is planned."
       },
       {
-        "title": "Human decides the merge",
-        "description": "The agent chain runs by itself up to an open pull request. Merging is always an explicit human decision — there is no auto-merge."
+        "title": "Gates that report, not fix",
+        "description": "The Validator checks every acceptance criterion and the Reviewer checks the diff against the spec. They write a report and don't change the code they are checking — a failure goes back to the implementation agent."
       },
       {
-        "title": "Gates that report, not fix",
-        "description": "QA and Reviewer agents check the work and write a report. They don't change the code they are checking — a failure goes back to the implementation agent."
+        "title": "Human decides the merge",
+        "description": "The agent chain runs by itself up to an open pull request, and can wait for you to approve the spec first. Merging is always an explicit human decision — there is no auto-merge."
       }
     ]
   },
@@ -90,10 +96,10 @@
     "initiator": {
       "eyebrow": "CLI scaffold generator",
       "title": "CAF Initiator",
-      "description": "Automatically detects your project's stack, then generates the entire knowledge base your agents need — from agent definitions to skills. Deterministic: it never calls an AI model.",
+      "description": "Automatically detects your project's stack, then generates the knowledge base your agents need — five agents, five slash commands and nine skills. Deterministic: it never calls an AI model.",
       "points": [
         "Auto-detects your stack: framework, package manager, monorepo or single repo",
-        "Generates .claude/agents/, slash commands and optional CAF skills",
+        "Generates .claude/agents/, slash commands and the CAF skills, including the spec skills",
         "Leaves a TODO instead of guessing — /caf-complete-drafts helps you fill them in"
       ]
     },
@@ -103,9 +109,58 @@
       "description": "Fastify + BullMQ + Redis, running on your own small VPS. Receives webhooks from your tracker, then spawns headless Claude Code agents for each phase.",
       "points": [
         "Triggered automatically from Linear or GitHub Issues (Jira planned)",
+        "Asks on the ticket when the spec has an open question, and can wait for /caf-approve-spec",
         "Gate failures open a Draft PR you can resume with /caf-retry-pipeline",
         "Self-hosted — runs on your own VPS, not a Coderium SaaS"
       ]
+    }
+  },
+  "showcase": {
+    "eyebrow": "See it in action",
+    "title": "From the terminal to the agent floor",
+    "description": "One CLI to set up your repo, and a live dashboard to watch every agent run on your own server.",
+    "enlarge": "Click to enlarge",
+    "close": "Close",
+    "items": {
+      "cli": {
+        "tab": "CAF Initiator",
+        "title": "One command sets up your repo",
+        "description": "caf-init detects your stack and writes the knowledge base, agents, commands and skills — as drafts you review, never guesses.",
+        "points": [
+          "scaffold, curate, docs, export",
+          "Deterministic, no AI calls",
+          "Dry-run first"
+        ],
+        "alt": "The caf-init command in a terminal, listing the scaffold, export, curate and docs commands",
+        "cta": "Read the CAF Initiator docs",
+        "link": "/docs/caf-initiator"
+      },
+      "dashboard": {
+        "tab": "Dashboard",
+        "title": "Every pipeline run, live",
+        "description": "The Orchestrator's dashboard shows each run's PIV phase, retries, real cost and artifacts, updated in real time.",
+        "points": [
+          "Plan · Implement · Verify per run",
+          "Retries and real cost",
+          "Artifact links and PR reviews"
+        ],
+        "alt": "The CAF dashboard: counters for active, completed and needs-attention runs plus a grid of pipeline runs with their phase, retries and cost",
+        "cta": "Read about the dashboard",
+        "link": "/docs/caf-orchestrator#monitoring-dashboard"
+      },
+      "floor": {
+        "tab": "Agent Floor",
+        "title": "Watch the agents work",
+        "description": "A read-only, animated office where the Planner, implementation agents, Reviewer and Manager move as a run progresses. Live, replay and demo modes.",
+        "points": [
+          "Live, replay and demo",
+          "Per-agent status and events",
+          "No auto-merge at the PR gate"
+        ],
+        "alt": "The CAF Agent Floor: a pixel-art office with agents at their desks, a PR gate and a meeting room, with agent status and events panels",
+        "cta": "Read about the Agent Floor",
+        "link": "/docs/caf-orchestrator#monitoring-dashboard"
+      }
     }
   },
   "pipeline": {
@@ -113,7 +168,7 @@
     "title": "The agent chain runs itself — merging never does",
     "description": "The whole agent chain runs automatically once a ticket is ready. The only step that waits on a human is {review} — there's no path that skips it.",
     "reviewHighlight": "Merge",
-    "ariaLabel": "CAF Orchestrator pipeline diagram: a ticket becomes Ready for AI in Linear or GitHub Issues, then flows automatically through Plan, Implement, QA, Reviewer, and Docs agents, opens a pull request, and waits for a human to merge it — there is no auto-merge.",
+    "ariaLabel": "CAF Orchestrator pipeline diagram: a ticket becomes Ready for AI in Linear or GitHub Issues, then flows through the Planner, an optional spec approval, the implementation agents, the Validator, the Reviewer and an optional Docs agent, opens a pull request, and waits for a human to merge it — there is no auto-merge.",
     "stages": {
       "ticket": {
         "title": "Ticket",
@@ -122,38 +177,43 @@
       },
       "plan": {
         "title": "Plan",
-        "subtitle": "Planner agent",
-        "detail": "The Planner agent reads the ticket and drafts requirements.md and tasks.md — the plan the rest of the chain works from."
+        "subtitle": "Planner writes the spec",
+        "detail": "The Planner agent reads the ticket and writes requirements.md with numbered acceptance criteria, plus tasks.md — the spec the rest of the chain works from. An open blocking question stops the run and is asked on the ticket."
+      },
+      "approve": {
+        "title": "Spec gate",
+        "subtitle": "Optional human approval",
+        "detail": "A ticket with the spec-approval label stops at a Draft PR that holds only the spec. A human reviews it and comments /caf-approve-spec to continue. Tickets without the label skip this step."
       },
       "implement": {
         "title": "Implement",
         "subtitle": "Frontend/backend",
-        "detail": "Frontend and backend agents write the code per the plan, each restricted to their own app's scope."
+        "detail": "Frontend and backend agents write the code per the spec and its tasks, each restricted to its own scope, and report one line of evidence per acceptance criterion."
       },
-      "qa": {
-        "title": "QA",
+      "validate": {
+        "title": "Validate",
         "subtitle": "Reports, never fixes",
-        "detail": "The QA agent checks the work against the acceptance criteria and runs tests and build. It writes qa-report.md with a PASS or FAIL status and does not change code."
+        "detail": "The Validator agent checks every acceptance criterion by running its evidence itself. It writes validate-report.md with PASS, FAIL or UNVERIFIED per criterion and does not change code."
       },
       "reviewer": {
         "title": "Reviewer",
         "subtitle": "Verdict",
-        "detail": "The Reviewer agent reviews the diff and writes review-notes.md with a verdict, so a human can approve or reject faster."
+        "detail": "The Reviewer agent reviews the diff against the spec and writes review-notes.md with a verdict, so a human can approve or reject faster."
       },
       "docs": {
         "title": "Docs",
-        "subtitle": "Docs agent",
-        "detail": "A documentation agent updates any docs affected by the change."
+        "subtitle": "Optional docs agent",
+        "detail": "If the repo has a documentation agent, it updates any docs affected by the change. Repos without one skip this step."
       },
       "pr": {
         "title": "PR",
         "subtitle": "Branch pushed",
-        "detail": "The branch is pushed and a pull request is opened automatically, with a description summarizing the artifact chain."
+        "detail": "The branch is pushed and a pull request is opened automatically, with an acceptance-criteria summary and the artifact chain in its description."
       },
       "merge": {
         "title": "Merge",
         "subtitle": "No auto-merge",
-        "detail": "The one mandatory human checkpoint. On a QA failure or a reviewer \"changes requested\" verdict, the pipeline retries once, then opens a Draft PR and hands off to a human — nothing ever merges automatically."
+        "detail": "The one mandatory human checkpoint. On a validation failure or a reviewer \"changes requested\" verdict, the pipeline retries once, then opens a Draft PR and hands off to a human — nothing ever merges automatically."
       }
     }
   },
@@ -163,7 +223,11 @@
     "items": [
       {
         "question": "What is CAF?",
-        "answer": "CAF (Coderium Agent Framework) is an AI agent orchestration framework that runs the Plan → Implement → Verify → PR cycle with strict governance — automated quality gates along the way, and a human decision before anything is merged."
+        "answer": "CAF (Coderium Agent Framework) is an AI agent orchestration framework that takes a ticket from a written spec to a pull request through Plan → Implement → Verify, with strict governance — automated quality gates along the way, and a human decision before anything is merged."
+      },
+      {
+        "question": "What does spec-driven mean in CAF?",
+        "answer": "The unit of work is a written spec, not a chat message. The Planner writes it, a human can approve it, and implementation, validation and review are all checked against its acceptance criteria. Agents never edit an approved spec; they propose changes and a human decides. The code stays the source of truth — it is not generated from the spec."
       },
       {
         "question": "Is CAF free?",
@@ -175,7 +239,7 @@
       },
       {
         "question": "Which AI runner does it use?",
-        "answer": "Claude Code. CAF Orchestrator runs each agent — Planner, implementation, QA, Reviewer, Documentation — as a headless Claude Code process. The same agents also run directly in a Claude Code session."
+        "answer": "Claude Code. CAF Orchestrator runs each agent — Planner, implementation, Validator, Reviewer, and Documentation when the repo has it — as a headless Claude Code process. The same agents also run directly in a Claude Code session."
       },
       {
         "question": "Can CAF auto-merge?",
@@ -199,7 +263,7 @@
     "p1": "CAF (Coderium Agent Framework) is built and maintained by <strong>Coderium</strong>, a studio building developer tooling with a focus on agentic coding you can actually trust — not just fast.",
     "h2Why": "Why CAF was built",
     "p2": "Many of today's agent coding tools have a narrow scope (helping with just one small part of the development cycle) or loose governance (auto-merging with no guarantee of human review). CAF was built to fill that gap: a wide implementation scope — from ticket to PR — paired with strict governance: quality gates between the stages and a human decision at the end.",
-    "p3": "We believe AI agents can speed up development without sacrificing control. That's why every change passes automated gates — verify, QA, review — before a PR is opened, why a failing gate stops and hands off to a human instead of pushing on, why nothing is ever merged automatically, and why CAF Orchestrator deliberately runs on your own infrastructure, not as a service managed by Coderium.",
+    "p3": "We believe AI agents can speed up development without sacrificing control. That's why every change passes automated gates — verify, validate, review — before a PR is opened, why a failing gate stops and hands off to a human instead of pushing on, why nothing is ever merged automatically, and why CAF Orchestrator deliberately runs on your own infrastructure, not as a service managed by Coderium.",
     "h2Coderium": "Coderium",
     "p4": "CAF is a separate project from Coderium's main site. To learn more about Coderium as a studio, visit <span class=\"text-mute\">Coderium's main site (coming soon)</span>."
   },
@@ -208,8 +272,57 @@
     "metaDescription": "Release history for CAF (Coderium Agent Framework).",
     "eyebrow": "Changelog",
     "heading": "Release history",
-    "intro": "CAF is still at v0.1.9 — this page will keep growing with future releases.",
+    "intro": "CAF Initiator is at v0.1.11, and CAF Orchestrator is deployed from its main branch — this page will keep growing with future releases.",
     "releases": [
+      {
+        "version": "Unreleased",
+        "date": "Oct 2026",
+        "items": [
+          "caf-design and caf-breakdown are written without the DRAFT banner (their dispatch tests passed), so a new Planner is pointed at both",
+          "caf-architect is no longer offered in the agent picker: the Planner writes design.md. A caf-architect.md already in a repo is left alone"
+        ]
+      },
+      {
+        "version": "Orchestrator (main)",
+        "date": "Oct 2026",
+        "items": [
+          "Validation gate chosen from the checkout: caf-validator (validate-report.md) when .claude/agents/caf-validator.md exists, otherwise caf-qa. The docs step is skipped, not failed, when there is no caf-documentation agent (SDD-04a)",
+          "Acceptance-criteria summary at the top of the PR body, and the rule that a PASS report whose criteria are all UNVERIFIED becomes NEEDS_HUMAN. The gate is stored as validate; a stored qa is still read (SDD-04b, 04d)",
+          "Clarify via the ticket: a NEEDS_CLARIFICATION spec, or a DRAFT with an unanswered BLOCKING question, stops the run and asks in a ❓ CAF-CLARIFY comment (SDD-04c, 04d)",
+          "Spec gate: tickets with the spec-approval label stop at a Draft PR that holds the spec until /caf-approve-spec; a resumed run that succeeds marks the PR Ready for review (SDD-04c, 04d)",
+          "readFixReviewLog ends comment blocks on a ## line only after the Status line and outside a code fence (SDD-04e)",
+          "Restricted validator: caf-validator runs under dontAsk with an allowlist of Bash commands, writes limited to .caf/tasks/ and a stripped environment; agents.validator.restrictBash and allowedCommands (SDD-04f)",
+          "Git authentication without a token in the workspace: each network command uses a per-process extraheader. Needs git 2.31 or newer (SDD-04g)"
+        ]
+      },
+      {
+        "version": "v0.1.11",
+        "date": "Oct 2026",
+        "items": [
+          "caf-design skill and design.md: the Planner writes a technical design when a ticket spans apps, changes a schema or changes a contract (SDD-05a)",
+          "caf-breakdown skill and breakdown.md: the Planner proposes how to split a request with several outcomes and stops; /caf-plan may create the tickets one at a time after a yes (SDD-05b)",
+          "Planner artifact contract names design.md and breakdown.md in one place; an outline spec has no acceptance criteria and says Tidak ada (SDD-06)",
+          "Clearer agent text: ## Coverage in tasks.md, the reviewer's verdict for a finding only a human can settle, the validator's checklist scope and pipes in report tables (SDD-07)",
+          "caf-spec v4, aligned with the Planner: Tidak ada for an empty section, Assumption A-n:, and a fourth Status value NEEDS_HUMAN (SDD-10)",
+          "The Planner writes its artifacts in the language of the ticket author, not of text the ticket quotes (SDD-11, SDD-12)",
+          "CAF.md aligned with the spec-driven behavior (SDD-09)"
+        ]
+      },
+      {
+        "version": "v0.1.10",
+        "date": "Oct 2026",
+        "items": [
+          "Spec-driven Planner: Specify → Clarify → Plan → Tasks, requirements.md with numbered acceptance criteria and a Status line; caf-spec and caf-traceability skills (SDD-01, SDD-02)",
+          "Spec-aware implementation agents, Reviewer and review commands: read the spec first, stop on an unclear spec, report evidence per criterion, never edit an approved spec (SDD-03b, 03d)",
+          "New caf-validator agent and /caf-plan are part of the default scaffold, in place of caf-qa; the validator runs Verify: command: lines under strict rules (SDD-03b1, 03c2, 03e)",
+          "Five agents and eight commands are no longer scaffolded: Documentation, DevOps, PM, UX Designer, Auditor and the discovery, audit, design-ticket, qa-check, review-ticket and feature-catalog commands. Existing files stay (SDD-03c1)",
+          "SINGLE_REPO now gets caf-frontend and caf-backend instead of caf-implementer (SDD-03c3)",
+          "/caf-run-pipeline is now /caf-run, and /caf-plan-ticket is no longer written (SDD-03c2c)",
+          "Skill caf-verify renamed caf-self-verify, with a skill-renamed warning in curate audit (SDD-03c2d)",
+          "curate skips agent files of an unknown kind and reports them instead of rewriting them (SDD-03g)",
+          "curate reads the app list back from the Input of QA and Reviewer agents, so a sync no longer drops it; rollout warnings for frontmatter tools, skill pointers and the Planner's Constraints (SDD-03a2, 02d)"
+        ]
+      },
       {
         "version": "v0.1.9",
         "date": "2026",
@@ -300,7 +413,7 @@
       "s1Title": "1. What CAF is",
       "s1Body": "CAF (Coderium Agent Framework) is a framework — a set of code, conventions, and tooling you run yourself in your own repo and infrastructure. CAF is <strong>not</strong> a SaaS service hosted by Coderium. No instance of CAF Orchestrator is run or managed by Coderium on your behalf.",
       "s2Title": "2. License",
-      "s2Body": "CAF's code is distributed under the <strong>[License TBD]</strong> license — to be determined before the repo goes public. Until a final license is set, assume all rights reserved.",
+      "s2Body": "CAF's code — CAF Initiator and CAF Orchestrator — is distributed under the <strong>MIT</strong> license. See the LICENSE file in each repository.",
       "s3Title": "3. Provided \"as is\"",
       "s3Body": "CAF is free and provided <strong>as-is</strong>, without warranty of any kind, express or implied. There's no SLA (service level agreement) on the free version — no commitment to response time or uptime, since CAF Orchestrator runs on your own infrastructure, not Coderium's.",
       "s4Title": "4. Limitation of liability",

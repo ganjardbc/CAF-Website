@@ -2,11 +2,12 @@
 const { t, tm, rt } = useI18n()
 
 const icons = [
+  'lucide:clipboard-check',
   'lucide:repeat',
   'lucide:file-text',
   'lucide:columns-3',
-  'lucide:user-check',
   'lucide:eye',
+  'lucide:user-check',
 ]
 
 const features = computed(() =>

@@ -10,7 +10,9 @@ description: Jira support for CAF Orchestrator is planned but not yet implemente
 
 CAF Initiator already knows Jira as a tracker: `caf-init scaffold` detects it (or
 lets you pick it) and records it in `CLAUDE.md`. That affects the generated
-knowledge base only — it does not make the Orchestrator trigger from Jira.
+knowledge base only — it does not make the Orchestrator trigger from Jira. Clarify
+questions and the spec gate (`/caf-approve-spec`) are not available for Jira either,
+since they depend on the Linear or GitHub integration.
 
 ## Planned design
 

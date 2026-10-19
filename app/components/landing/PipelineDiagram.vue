@@ -1,7 +1,7 @@
 <script setup lang="ts">
 const { t } = useI18n()
 
-const stageKeys = ['ticket', 'plan', 'implement', 'qa', 'reviewer', 'docs', 'pr', 'merge'] as const
+const stageKeys = ['ticket', 'plan', 'approve', 'implement', 'validate', 'reviewer', 'docs', 'pr', 'merge'] as const
 
 const stages = computed(() =>
   stageKeys.map((key) => ({

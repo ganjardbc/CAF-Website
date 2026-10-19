@@ -59,3 +59,17 @@ sebagai comment di ticket.
 
 Memindahkan ticket kembali ke ready state saat branch `ai-agent/<TICKET-KEY>`-nya
 masih ada akan **melanjutkan** pipeline yang berhenti, bukan memulai yang baru.
+
+## Pertanyaan Clarify dan persetujuan spec
+
+Bila spec Planner punya pertanyaan `BLOCKING` yang terbuka, pipeline berhenti dan
+berkomentar di ticket berisi pertanyaannya (komentar diawali `❓ CAF-CLARIFY`). Jawab
+lewat comment di ticket dan pindahkan kembali ke ready state: Planner melanjutkan draft
+yang tersimpan dengan comment yang ditulis setelah permintaan klarifikasi terakhir
+(comment dari akun bot dilewati).
+
+Ticket dengan label yang di-set di `linear.specGateLabel` (default `spec-approval`)
+berhenti setelah Planner di Draft PR yang berisi spec, sampai seseorang berkomentar
+`/caf-approve-spec` di PR itu. Label dibaca saat ticket masuk ke ready state. Keduanya
+bisa di-override per project. Lihat
+[CAF Orchestrator](/id/docs/caf-orchestrator#clarify-dan-spec-gate).

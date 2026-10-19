@@ -36,21 +36,35 @@ caf-init scaffold
 
 1. Detect your project's stack (framework, package manager, repo mode) and tracker
 2. Write the knowledge-base drafts: `CLAUDE.md`, `AGENTS.md`, `.caf/knowledge/`
-3. Generate `.claude/agents/caf-*.md` and their companion slash commands
+3. Generate the five agents (`caf-planner`, `caf-frontend`, `caf-backend`,
+   `caf-validator`, `caf-reviewer`) in `.claude/agents/`, and their companion slash
+   commands (`/caf-plan`, `/caf-run`, `/caf-review`, `/caf-fix-review`)
 4. Draft the Definition of Done, the PIV workflow and the agent-handoff docs
 5. Generate `/caf-complete-drafts`, the command that fills in the remaining `TODO`s
 
 Everything it writes is a deterministic draft. Review it before your team or agents
 rely on it.
 
+## 2. Try the Planner
+
+You can use the generated agents without any server. In Claude Code, ask for a spec:
+
+```
+/caf-plan Add an email field to the signup form
+```
+
+The Planner writes `requirements.md` and `tasks.md` under `.caf/tasks/<ID>/` and stops.
+Review the spec, then let `/caf-run` take it through implementation, validation and
+review in the same session. See [Spec-Driven Development](/docs/sdd) for what the spec
+contains.
+
 See [CAF Initiator](/docs/caf-initiator) for the full command reference
 (`scaffold`, `curate`, `docs`, `export`).
 
-## 2. Connect CAF Orchestrator
+## 3. Connect CAF Orchestrator
 
-This step is optional — the generated agents already run directly in Claude Code.
-Set up CAF Orchestrator when you want tickets to run automatically once they become
-ready in Linear or GitHub Issues:
+This step is optional. Set up CAF Orchestrator when you want tickets to run
+automatically once they become ready in Linear or GitHub Issues:
 
 ```bash
 git clone https://github.com/coderiumid/caf-orchestrator.git
@@ -62,10 +76,9 @@ pnpm dev            # web server
 pnpm dev:worker     # worker, separate process
 ```
 
-The Orchestrator calls agents by filename. In a single-package repo, generate the
-implementation agent with `--role frontend` or `--role backend` so it is written as
-`caf-frontend.md` / `caf-backend.md` — see
-[Repo mode](/docs/caf-initiator#repo-mode-monorepo-vs-single_repo).
+The Orchestrator calls agents by filename, so keep the generated names
+(`caf-frontend.md` / `caf-backend.md`, including in a single-package repo). It runs
+`caf-validator` when the repo has that file and `caf-qa` otherwise.
 
 See [CAF Orchestrator](/docs/caf-orchestrator) for full setup, requirements,
 and the webhook configuration.

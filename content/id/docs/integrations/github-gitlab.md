@@ -37,6 +37,13 @@ issue dan pipeline penuh jalan untuknya. Project dicocokkan berdasarkan reposito
 (`repoCloneUrl` tiap project), dan ticket key-nya jadi
 `<ticketPrefix>-<nomor issue>`. Hasilnya diposting balik sebagai comment di issue.
 
+Bila spec Planner punya pertanyaan `BLOCKING` yang terbuka, pipeline berhenti dan
+menanyakannya lewat comment di issue (diawali `❓ CAF-CLARIFY`). Jawab lewat comment,
+lalu hapus dan pasang lagi label ready untuk melanjutkan. Issue yang juga membawa label
+`github.specGateLabel` (default `spec-approval`) berhenti di Draft PR berisi spec sampai
+seseorang berkomentar `/caf-approve-spec` di sana. Lihat
+[CAF Orchestrator](/id/docs/caf-orchestrator#clarify-dan-spec-gate).
+
 ## Command lewat comment PR
 
 Di PR yang dibuka pipeline ini (head branch `ai-agent/<TICKET-KEY>`):
@@ -44,6 +51,7 @@ Di PR yang dibuka pipeline ini (head branch `ai-agent/<TICKET-KEY>`):
 | Comment | Fungsinya |
 |---|---|
 | `/caf-retry-pipeline` | Melanjutkan pipeline yang berhenti di sebuah gate (di Draft PR-nya) |
+| `/caf-approve-spec` | Menyetujui spec di Draft PR spec gate dan melanjutkan ke implementasi |
 | `/caf-review` | Menjalankan AI review penuh dan mempostingnya sebagai GitHub PR review |
 | `/caf-fix-review` | Reviewer menangani semua comment review di PR |
 | Reply di inline review thread | Reviewer menangani satu thread itu |
@@ -58,8 +66,13 @@ akun bot diabaikan. Lihat
 1. Clone repo dan push branch `ai-agent/<TICKET-KEY>`
 2. Membuka pull request setelah
    [quality gate Layer 4](/id/docs/core-concepts/layer-4) lolos — atau **Draft PR**
-   berisi report yang gagal kalau sebuah gate habis
+   berisi report yang gagal kalau sebuah gate habis, atau berisi spec bila spec gate
+   berlaku. Run lanjutan yang akhirnya sukses menandai PR itu Ready for review
 3. Memposting comment, reply, dan PR review
+
+Token tidak pernah ditulis ke workspace: tiap perintah jaringan git mengautentikasi
+dengan header per-proses, jadi token tidak ada di URL remote maupun `.git/config`. Ini
+butuh `git` 2.31 atau lebih baru di host Orchestrator.
 
 ## Orchestrator tidak pernah me-merge PR
 

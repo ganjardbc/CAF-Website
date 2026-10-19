@@ -8,67 +8,78 @@ definisinya sendiri di `.claude/agents/` — di-generate oleh
 `caf-init scaffold agents`, sudah dibekali konteks dari
 [Layer 1: Project Knowledge Base](/id/docs/core-concepts/layer-1).
 
-## Role yang tersedia
+## Roster
 
-CAF Initiator menawarkan roster untuk dipilih: Planner, Architect, Frontend dan
-Backend (per app yang di-assign), agent implementasi tambahan per app, QA, Reviewer,
-Documentation, Auditor, PM, dan UX Designer. CAF menyarankan mulai dari Planner plus
-satu agent implementasi.
-
-Pipeline CAF Orchestrator menjalankan sebagian dari mereka secara berurutan,
-dipanggil berdasarkan nama file:
+Roster final CAF adalah lima agent, dipanggil berdasarkan nama file:
 
 | File | Role | Tools |
 |---|---|---|
-| `caf-planner.md` | Menyusun `requirements.md` dan `tasks.md` dari ticket | `Read`, `Write` — hanya artifact, tidak menyentuh kode |
-| `caf-frontend.md` / `caf-backend.md` | Menulis kode sesuai plan, di dalam scope-nya sendiri | `Read`, `Write`, `Edit`, `Bash` |
-| `caf-qa.md` | Mengecek hasil kerja terhadap acceptance criteria, menjalankan test/build | `Read`, `Bash`, `Write` untuk `qa-report.md` — tidak mengubah kode |
-| `caf-reviewer.md` | Me-review diff dan menulis verdict | `Read`, `Bash`, `Write` untuk `review-notes.md` |
-| `caf-documentation.md` | Memperbarui dokumentasi yang terdampak perubahan | `Read`, `Write`, `Edit` |
+| `caf-planner.md` | Menulis spec dari ticket: `requirements.md`, `tasks.md`, dan `design.md` atau `breakdown.md` bila request membutuhkannya | `Read`, `Write`, `Glob`, `Grep` — hanya artifact, tidak menyentuh kode |
+| `caf-frontend.md` / `caf-backend.md` | Menulis kode sesuai spec, di dalam scope-nya sendiri, lalu self-verify | `Read`, `Write`, `Edit`, `Bash` |
+| `caf-validator.md` | Mengecek setiap acceptance criterion dengan menjalankan buktinya sendiri; tidak mengubah kode | `Read`, `Write` untuk `validate-report.md`, `Bash` |
+| `caf-reviewer.md` | Me-review diff terhadap spec dan menulis verdict | `Read`, `Write` untuk `review-notes.md`, `Bash` |
 
 `caf-reviewer.md` **tidak** menggantikan manusia. Verdict-nya memudahkan manusia
 mengambil keputusan — keputusan merge selalu ada di tangan manusia.
 
-Di repo single-package, `scaffold agents` menawarkan satu agent implementasi,
-`caf-implementer.md`, sebagai ganti pembagian frontend/backend. Orchestrator tidak
-me-routing nama file itu; pakai `--role frontend` atau `--role backend` untuk
-men-generate agent yang sama sebagai `caf-frontend.md` / `caf-backend.md`.
+Di monorepo, `scaffold agents` meng-assign Frontend dan Backend per app. Di repo
+single-package ia menulis dua agent seluruh-repo, `caf-frontend.md` dan
+`caf-backend.md`; `--role frontend` atau `--role backend` hanya men-generate salah satunya.
+
+### Role yang diganti dan dibuang
+
+Ini tidak lagi di-scaffold, dan repo baru tidak mendapatkannya. Repo yang di-scaffold
+lebih awal tetap memegang file-nya, dan `curate` masih mengenalinya:
+
+- `caf-qa` — diganti `caf-validator`. CAF Orchestrator menjalankan `caf-validator`
+  bila repo punya file itu dan fallback ke `caf-qa` bila tidak.
+- `caf-architect` — dilipat ke Planner, yang menulis `design.md` lewat skill `caf-design`.
+- `caf-implementer` — diganti `caf-frontend` + `caf-backend`.
+- `caf-documentation`, `caf-devops`, `caf-pm`, `caf-ux-designer`, `caf-auditor`.
+  Orchestrator menjalankan `caf-documentation` hanya bila file itu ada.
+
+File agent yang namanya bukan kind yang dikenal maupun slug app dilewati `curate` dan
+dilaporkan sebagai `unknown-kind`.
 
 ## Isi sebuah file definisi
 
 - **Role** dan **Scope** — batas tanggung jawab role tersebut
 - **Allowed Tools** — tool yang boleh dipakai agent (lihat tabel di atas)
 - **Input** / **Output** — artifact yang dibaca dan wajib ditulis (lihat
-  [Layer 3: Artifact Handoff](/id/docs/core-concepts/layer-3))
-- **Working Pattern (PIV)** dan **Verify Checklist**
-- **Retry Logic** dan, untuk QA, Reviewer, dan Auditor, **Report Format** — baris
+  [Layer 3: Artifact Handoff](/id/docs/core-concepts/layer-3)). Aturan spec-driven
+  tiap agent ada di `Output`
+- **Working Pattern (PIV)** dan **Verify Checklist**. Validator dan Reviewer punya pola
+  sendiri, karena mereka membaca dan melapor, bukan merencanakan dan mengimplementasikan
+- **Retry Logic** dan, untuk Validator, Reviewer, dan QA, **Report Format** — baris
   status persis yang di-parse CAF Orchestrator
 - **Skills** — pointer opsional ke skill CAF (di bawah)
 - **Constraints**
 
 ## Skills
 
-`caf-init scaffold skills` menulis lima skill universal ke
-`.claude/skills/<name>/SKILL.md`: `caf-verify`, `caf-scope-discipline`,
-`caf-no-guess`, `caf-escalate`, dan `caf-piv`. Agent membacanya lewat pointer `Read`
-di section `## Skills`; sesi Claude Code manual memakainya lewat description-nya.
-Skill adalah panduan — enforcement tetap di tahap Verify, QA, dan Reviewer. Lihat
+`caf-init scaffold skills` menulis sembilan skill ke `.claude/skills/<name>/SKILL.md`:
+`caf-self-verify`, `caf-scope-discipline`, `caf-no-guess`, `caf-escalate`, `caf-piv`,
+dan skill spec `caf-spec`, `caf-traceability`, `caf-design`, dan `caf-breakdown`. Agent
+membacanya lewat pointer `Read` di section `## Skills`; sesi Claude Code manual
+memakainya lewat description-nya. Skill yang masih punya banner `DRAFT` diabaikan agent
+(`caf-traceability` lahir seperti itu). Skill adalah panduan — enforcement tetap di
+tahap Validator dan Reviewer. Lihat
 [CAF Initiator](/id/docs/caf-initiator#caf-init-scaffold-skills).
 
 ## Kustomisasi
 
 File-file ini bukan konfigurasi yang terkunci. `Role`, `Scope`, `Verify Checklist`,
-`Constraints`, dan `Skills` berisi data per proyek dan bebas kamu edit — misalnya
-menambah aturan di `caf-backend.md` seperti "selalu tulis test untuk setiap function
-baru."
+`Constraints`, dan `Skills` berisi data per-project dan boleh kamu edit — misalnya
+menambah aturan di `caf-backend.md` seperti "selalu tulis test untuk setiap fungsi baru."
 
 Section lainnya **di-track**: `caf-init curate` membandingkannya dengan template
-terbaru supaya perbaikan template bisa sampai ke agent yang di-generate sebelumnya.
-Section ter-track yang kamu edit manual akan dilaporkan, tidak pernah ditimpa. Kalau
-kamu pakai CAF Orchestrator, biarkan `Retry Logic` dan `Report Format` apa adanya —
-Orchestrator mem-parse baris statusnya kata per kata.
+terbaru supaya perbaikan template bisa sampai ke agent yang di-generate lebih awal.
+Section ter-track yang kamu edit manual dilaporkan, tidak pernah ditimpa. Kalau kamu
+jalan lewat CAF Orchestrator, biarkan `Retry Logic` dan `Report Format` seperti hasil
+generate — Orchestrator mem-parse baris status-nya kata per kata.
 
 ## Hubungan dengan layer lain
 
-Layer 2 memakai konteks dari **Layer 1** dan menentukan format artifact yang ditulis
-ke [Layer 3: Artifact Handoff](/id/docs/core-concepts/layer-3) di akhir setiap fase.
+Layer 2 mengonsumsi konteks dari **Layer 1** dan menentukan format artifact yang
+ditulis ke [Layer 3: Artifact Handoff](/id/docs/core-concepts/layer-3) di akhir setiap
+fase.

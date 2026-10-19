@@ -34,17 +34,26 @@ customizations (see [Layer 2: Agent Definitions](/docs/core-concepts/layer-2)).
 There is no baseline yet. Review the agent sections, then run
 `caf-init curate baseline`.
 
-**A section shows as `DRIFT` right after `curate baseline`**
+**`curate` reports `unknown-kind` for an agent file**
 
-Known issue for `Input` of the QA and Reviewer agents in a monorepo, and for
-`Working Pattern (PIV)` of the PM and UX Designer agents. Run
-`caf-init curate --sync-only --dry-run` and review what it would change before
-syncing.
+The file name is neither a known CAF kind (`caf-<kind>.md`) nor the slug of a detected
+app, so `curate` skips it on purpose: it is never synced, baselined or offered a
+`## Skills` section. Rename it to a known kind, or leave it alone. If the repo mode
+was detected wrong, pass `--mode single` or `--mode mono`.
+
+**A repo scaffolded earlier doesn't get the new agent text**
+
+Only tracked sections move through `caf-init curate`: run it and accept the `DRIFT`
+sections (the spec rules live in `## Output`). Frontmatter `tools:`, `## Skills`, the
+Planner's `## Constraints`, slash commands, skills, `agent-handoff.md` and
+`piv-workflow.md` are not synced: `curate audit` warns about the first three, and for
+the rest you delete the file and scaffold it again.
 
 **Agents ignore a skill**
 
-The skill still has its `DRAFT` banner — usually `caf-verify`, when one of the lint,
-typecheck, test or build scripts is missing from `package.json`. Resolve the `TODO`
+The skill still has its `DRAFT` banner — usually `caf-self-verify`, when one of the
+lint, typecheck, test or build scripts is missing from `package.json`, or
+`caf-traceability`, which is written as a `DRAFT` in every repo. Resolve the `TODO`
 lines and remove the whole banner (both lines of it), then re-run
 `caf-init scaffold skills`: it offers the pointer to agents without a `## Skills`
 section, and names the line to add yourself for agents that already have one.
@@ -52,9 +61,16 @@ section, and names the line to add yourself for agents that already have one.
 
 **The Orchestrator never runs my implementation agent (single-package repo)**
 
-In `SINGLE_REPO` mode the agent is generated as `caf-implementer.md`, which the
-Orchestrator does not route. Regenerate it with `--role frontend` or
-`--role backend`.
+The Orchestrator routes only `caf-frontend` and `caf-backend`, by the
+`## Frontend Tasks` / `## Backend Tasks` headers of `tasks.md`. A repo that has only an
+older `caf-implementer.md` needs `caf-init scaffold agents` (or `--role frontend` /
+`--role backend`), which adds the two agents next to it.
+
+**The Orchestrator ran `caf-qa` instead of `caf-validator`**
+
+It picks the gate from the checkout: `caf-validator` only if
+`.claude/agents/caf-validator.md` exists. Run `caf-init scaffold agents` to add it, and
+commit the file to the branch the Orchestrator clones.
 
 ## CAF Orchestrator
 
@@ -75,7 +91,7 @@ Check, in order:
    `repoCloneUrl`, and the person who applied it has `write` access or higher
 6. `ENABLE_PIPELINE_TRIGGER` isn't set to `false`
 
-**A `/caf-review` or `/caf-retry-pipeline` comment is ignored**
+**A `/caf-review`, `/caf-retry-pipeline` or `/caf-approve-spec` comment is ignored**
 
 These only work on PRs the pipeline opened (head branch `ai-agent/<TICKET-KEY>`),
 from a user with `write`, `maintain` or `admin` permission. The comment must start
@@ -101,15 +117,47 @@ most common cause is an incorrect `REDIS_URL` or Redis not running yet.
 This isn't a bug — a gate was still failing after its retries (see
 [Layer 4: Quality Gates](/docs/core-concepts/layer-4)). The Draft PR body carries
 the failing report; the same file is in `.caf/tasks/<TICKET-KEY>/`
-(`verify-report.md`, `qa-report.md` or `review-notes.md`). Fix it by hand, or
-comment `/caf-retry-pipeline` on the Draft PR to resume.
+(`verify-report.md`, `validate-report.md`, `qa-report.md` or `review-notes.md`). Fix it
+by hand, or comment `/caf-retry-pipeline` on the Draft PR to resume.
+
+A validator report that says `Status: PASS` while every acceptance criterion is
+`UNVERIFIED` also stops here, as `NEEDS_HUMAN`: nothing was proven. Give the criteria
+evidence the Validator can run (a named test or a `Verify: command:` line).
+
+**The pipeline stopped and commented `❓ CAF-CLARIFY`**
+
+The spec has an open `BLOCKING` question. Answer it in a comment on the ticket, then
+move a Linear ticket back to "Ready for AI", or remove and re-apply the
+`github.readyLabel` label. See
+[CAF Orchestrator](/docs/caf-orchestrator#clarify-and-the-spec-gate).
+
+**The pipeline stopped at a Draft PR that holds only the spec**
+
+The ticket carries the spec-approval label. Review the spec, then comment
+`/caf-approve-spec` on that PR. It is refused if the PR isn't waiting for approval, the
+spec is `NEEDS_CLARIFICATION`, or a `BLOCKING` question is unanswered.
+
+**A `Verify: command:` criterion is `UNVERIFIED`**
+
+The Validator only runs it when the spec says `Status: APPROVED`, as one command or an
+`&&` chain, and never when it contains `;`, `|`, a redirect, `$()`, a backtick, `sudo`,
+`rm`, `curl`, `wget` or `git push`. In the Orchestrator the command must also match
+`agents.validator.allowedCommands` (`npx`, `pnpm exec`, `yarn`, `bun` and `make` are
+not in the default list).
+
+**A git command fails with an authentication or version error**
+
+The Orchestrator authenticates git with an environment header and needs `git` 2.31 or
+newer in the worker environment (the Docker image included). Check `GITHUB_TOKEN`
+too.
+
 
 **`/caf-retry-pipeline` is rejected**
 
-Either there is nothing to resume (the pipeline already succeeded), the branch no
-longer exists on the remote, or the ticket has used up
-`orchestration.maxOrchestrationRetries`. The comment the Orchestrator posts says
-which.
+Either there is nothing to resume (the pipeline already succeeded, or the branch has
+no `orchestration-state.json`), the branch no longer exists on the remote, or the
+ticket has used up `orchestration.maxOrchestrationRetries`. The comment the
+Orchestrator posts says which.
 
 **An agent fails with a model `404`, or no model override is applied**
 

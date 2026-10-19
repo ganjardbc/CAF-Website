@@ -10,9 +10,10 @@ Built with [Nuxt 4](https://nuxt.com), [Tailwind CSS](https://tailwindcss.com), 
 
 - **Landing page** — Hero, feature grid, core components (CAF Initiator / CAF
   Orchestrator), pipeline diagram, FAQ
-- **Docs** — Getting Started, Core Concepts (5-layer architecture), CAF Initiator, CAF
-  Orchestrator, Integrations, Reference — powered by Nuxt Content, with a sidebar on
-  desktop and a dropdown nav on mobile/tablet
+- **Docs** — Getting Started (including Spec-Driven Development), Core Concepts
+  (5-layer architecture), CAF Initiator, CAF Orchestrator, Integrations, Reference —
+  powered by Nuxt Content, with a sidebar on desktop and a dropdown nav on mobile/tablet.
+  They document `caf-initiator` v0.1.11 and the current `caf-orchestrator`, one to one
 - **Dark mode** — system-aware by default, manual toggle, powered by
   `@nuxtjs/color-mode`
 - **Multi-language** — English (default, root paths) and Bahasa Indonesia (`/id/*`),
@@ -33,7 +34,7 @@ Built with [Nuxt 4](https://nuxt.com), [Tailwind CSS](https://tailwindcss.com), 
 │   └── assets/css/       Tailwind entry + design tokens (light/dark CSS variables)
 ├── content/
 │   ├── en/docs/          English docs (default locale, served at /docs/*)
-│   └── id/docs/          Indonesian docs (served at /id/docs/*)
+│   └── id/docs/          Indonesian docs (served at /id/docs/*), same files as en/
 ├── i18n/
 │   ├── i18n.config.ts    vue-i18n config (loads locale message files)
 │   └── locales/          en.json, id.json — UI copy for every component/page
@@ -51,6 +52,27 @@ Reference docs for the project itself:
   typography, spacing, component specs
 - [`PLAN-v1.1.md`](./PLAN-v1.1.md) — plan for dark mode, sticky navbar, and i18n
 
+`PLAN.md` and `PLAN-v1.1.md` are historical planning documents. What the site says about
+CAF itself is defined by the two CAF repositories, not by them (see below).
+
+## Keeping the docs in sync with CAF
+
+The docs under `content/` and the copy in `i18n/locales/` describe two other projects, and
+those projects are the source of truth. When one of them changes, update this site in the
+same pass:
+
+| This site | Source of truth |
+|---|---|
+| `content/*/docs/caf-initiator.md`, `core-concepts/layer-2.md`, `core-concepts/layer-3.md`, `sdd.md` | `caf-initiator/README.md`, `caf-initiator/CLAUDE.md`, `CAF.md`, and `SKILL_NAMES` / `SKILLS_BY_KIND` in `src/templates/skill-md.js` |
+| `content/*/docs/caf-orchestrator.md`, `integrations/*`, `reference/*`, `core-concepts/layer-4.md`, `core-concepts/layer-5.md` | `caf-orchestrator/README.md`, `caf-orchestrator/CLAUDE.md`, `caf.config.example.yaml` and `src/config/schema.ts` |
+| `i18n/locales/*.json` — hero badge, pipeline stages, FAQ, changelog | the same two repos; the version in the hero badge is the `caf-initiator` version in `package.json` |
+
+Where the READMEs and the code disagree, trust the code (for example the list of skills
+and which agents the picker offers).
+
+Every docs page exists in both languages. A change to `content/en/docs/x.md` needs the
+matching change in `content/id/docs/x.md`, and a new string in `en.json` needs the same key
+in `id.json`.
 ## Getting started
 
 ```bash

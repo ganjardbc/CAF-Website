@@ -5,7 +5,8 @@
       "title": "Getting Started",
       "introduction": "Introduction",
       "quickStart": "Quick Start",
-      "piv": "Konsep PIV"
+      "piv": "Konsep PIV",
+      "sdd": "Spec-Driven Development"
     },
     "coreConcepts": {
       "title": "Core Concepts",
@@ -40,7 +41,8 @@
     "about": "About",
     "github": "View on GitHub",
     "toggleTheme": "Ganti tema warna",
-    "toggleMenu": "Buka/tutup menu navigasi"
+    "toggleMenu": "Buka/tutup menu navigasi",
+    "backToTop": "Kembali ke atas"
   },
   "footer": {
     "about": "About",
@@ -50,10 +52,10 @@
     "copyright": "© {year} Coderium. All rights reserved."
   },
   "hero": {
-    "badge": "CAF v0.1.9 — early access",
+    "badge": "CAF v0.1.11 — early access",
     "new": "New",
     "title": "Coderium Agent Framework",
-    "description": "CAF menjalankan seluruh rantai agent — Plan, Implement, Verify, PR — di balik quality gate, lalu berhenti menunggu manusia. Tidak ada auto-merge. Gratis dan open, jalan langsung di repo kamu sendiri.",
+    "description": "CAF membawa ticket dari spec tertulis sampai pull request — Plan, Implement, Validate, Review — di balik quality gate, lalu berhenti menunggu manusia. Tidak ada auto-merge. Gratis dan open, jalan langsung di repo kamu sendiri.",
     "getStarted": "Get Started",
     "github": "View on GitHub",
     "npm": "View on npm"
@@ -62,6 +64,10 @@
     "eyebrow": "Apa itu CAF?",
     "title": "Framework, bukan black box",
     "items": [
+      {
+        "title": "Spec-driven",
+        "description": "Planner menulis spec dengan acceptance criteria bernomor lebih dulu. Pertanyaan yang memblokir menghentikan run dan ditanyakan di ticket, dan spec yang sudah disetujui tidak pernah diubah oleh agent."
+      },
       {
         "title": "Disiplin PIV",
         "description": "Setiap task berjalan lewat Plan → Implement → Verify. Gate yang gagal di-retry sekali, lalu berhenti dengan Draft PR dan diserahkan ke manusia."
@@ -75,12 +81,12 @@
         "description": "Orchestrator terpicu otomatis begitu ticket siap — workflow state di Linear atau label di GitHub Issue. Dukungan Jira direncanakan."
       },
       {
-        "title": "Merge diputuskan manusia",
-        "description": "Rantai agent jalan sendiri sampai pull request terbuka. Merge selalu keputusan eksplisit manusia — tidak ada auto-merge."
+        "title": "Gate yang melapor, bukan memperbaiki",
+        "description": "Validator mengecek setiap acceptance criterion dan Reviewer mengecek diff terhadap spec. Keduanya menulis report dan tidak mengubah kode yang sedang dicek — kegagalan dikembalikan ke agent implementasi."
       },
       {
-        "title": "Gate yang melapor, bukan memperbaiki",
-        "description": "Agent QA dan Reviewer mengecek hasil kerja dan menulis report. Mereka tidak mengubah kode yang sedang dicek — kegagalan dikembalikan ke agent implementasi."
+        "title": "Merge diputuskan manusia",
+        "description": "Rantai agent jalan sendiri sampai pull request terbuka, dan bisa menunggu kamu menyetujui spec lebih dulu. Merge selalu keputusan eksplisit manusia — tidak ada auto-merge."
       }
     ]
   },
@@ -90,10 +96,10 @@
     "initiator": {
       "eyebrow": "CLI scaffold generator",
       "title": "CAF Initiator",
-      "description": "Mendeteksi stack proyek kamu secara otomatis, lalu generate seluruh knowledge base yang dibutuhkan agent — dari definisi agent sampai skill. Deterministik: tidak pernah memanggil model AI.",
+      "description": "Mendeteksi stack proyek kamu secara otomatis, lalu generate knowledge base yang dibutuhkan agent — lima agent, lima slash command, dan sembilan skill. Deterministik: tidak pernah memanggil model AI.",
       "points": [
         "Auto-detect stack: framework, package manager, monorepo atau single repo",
-        "Generate .claude/agents/, slash command, dan skill CAF opsional",
+        "Generate .claude/agents/, slash command, dan skill CAF, termasuk skill spec",
         "Meninggalkan TODO alih-alih menebak — /caf-complete-drafts membantu mengisinya"
       ]
     },
@@ -103,9 +109,58 @@
       "description": "Fastify + BullMQ + Redis, jalan di VPS kecil milik kamu sendiri. Menerima webhook dari tracker, lalu spawn agent Claude Code headless untuk tiap fase.",
       "points": [
         "Trigger otomatis dari Linear atau GitHub Issues (Jira direncanakan)",
+        "Bertanya di ticket saat spec punya pertanyaan terbuka, dan bisa menunggu /caf-approve-spec",
         "Gate yang gagal membuka Draft PR yang bisa dilanjutkan dengan /caf-retry-pipeline",
         "Self-hosted — jalan di VPS kamu, bukan SaaS Coderium"
       ]
+    }
+  },
+  "showcase": {
+    "eyebrow": "Lihat langsung",
+    "title": "Dari terminal sampai agent floor",
+    "description": "Satu CLI untuk menyiapkan repo kamu, dan dashboard live untuk memantau setiap run agent di server kamu sendiri.",
+    "enlarge": "Klik untuk memperbesar",
+    "close": "Tutup",
+    "items": {
+      "cli": {
+        "tab": "CAF Initiator",
+        "title": "Satu command menyiapkan repo kamu",
+        "description": "caf-init mendeteksi stack kamu dan menulis knowledge base, agent, command, dan skill — sebagai draft untuk kamu review, tidak pernah menebak.",
+        "points": [
+          "scaffold, curate, docs, export",
+          "Deterministik, tanpa panggilan AI",
+          "Dry-run dulu"
+        ],
+        "alt": "Command caf-init di terminal, menampilkan daftar command scaffold, export, curate, dan docs",
+        "cta": "Baca docs CAF Initiator",
+        "link": "/docs/caf-initiator"
+      },
+      "dashboard": {
+        "tab": "Dashboard",
+        "title": "Setiap run pipeline, secara live",
+        "description": "Dashboard Orchestrator menampilkan fase PIV, retry, biaya nyata, dan artifact tiap run, diperbarui real-time.",
+        "points": [
+          "Plan · Implement · Verify per run",
+          "Retry dan biaya nyata",
+          "Link artifact dan PR review"
+        ],
+        "alt": "Dashboard CAF: penghitung run aktif, selesai, dan butuh perhatian, serta grid run pipeline dengan fase, retry, dan biayanya",
+        "cta": "Baca soal dashboard",
+        "link": "/docs/caf-orchestrator#dashboard-monitoring"
+      },
+      "floor": {
+        "tab": "Agent Floor",
+        "title": "Lihat para agent bekerja",
+        "description": "Kantor beranimasi yang read-only, tempat Planner, agent implementasi, Reviewer, dan Manager bergerak seiring run berjalan. Mode live, replay, dan demo.",
+        "points": [
+          "Live, replay, dan demo",
+          "Status dan event per agent",
+          "Tanpa auto-merge di PR gate"
+        ],
+        "alt": "CAF Agent Floor: kantor pixel-art dengan agent di mejanya, PR gate, dan ruang meeting, beserta panel status dan event agent",
+        "cta": "Baca soal Agent Floor",
+        "link": "/docs/caf-orchestrator#dashboard-monitoring"
+      }
     }
   },
   "pipeline": {
@@ -113,7 +168,7 @@
     "title": "Rangkaian agent jalan sendiri — merge tidak pernah otomatis",
     "description": "Seluruh rangkaian agent berjalan otomatis begitu ticket siap. Satu-satunya langkah yang menunggu manusia adalah {review} — tidak ada jalur yang melewatkannya.",
     "reviewHighlight": "Merge",
-    "ariaLabel": "Diagram pipeline CAF Orchestrator: ticket jadi Ready for AI di Linear atau GitHub Issues, lalu mengalir otomatis lewat agent Plan, Implement, QA, Reviewer, dan Docs, membuka pull request, lalu menunggu manusia untuk merge — tidak ada auto-merge.",
+    "ariaLabel": "Diagram pipeline CAF Orchestrator: ticket jadi Ready for AI di Linear atau GitHub Issues, lalu mengalir lewat Planner, persetujuan spec opsional, agent implementasi, Validator, Reviewer, dan agent Docs opsional, membuka pull request, lalu menunggu manusia untuk merge — tidak ada auto-merge.",
     "stages": {
       "ticket": {
         "title": "Ticket",
@@ -122,38 +177,43 @@
       },
       "plan": {
         "title": "Plan",
-        "subtitle": "Planner agent",
-        "detail": "Agent Planner membaca ticket dan membuat draft requirements.md serta tasks.md — rencana yang jadi acuan rangkaian agent berikutnya."
+        "subtitle": "Planner menulis spec",
+        "detail": "Agent Planner membaca ticket dan menulis requirements.md berisi acceptance criteria bernomor, plus tasks.md — spec yang jadi acuan rangkaian agent berikutnya. Pertanyaan blocking yang terbuka menghentikan run dan ditanyakan di ticket."
+      },
+      "approve": {
+        "title": "Spec gate",
+        "subtitle": "Persetujuan manusia (opsional)",
+        "detail": "Ticket berlabel spec-approval berhenti di Draft PR yang hanya berisi spec. Manusia me-review dan komentar /caf-approve-spec untuk lanjut. Ticket tanpa label melewati langkah ini."
       },
       "implement": {
         "title": "Implement",
         "subtitle": "Frontend/backend",
-        "detail": "Agent frontend dan backend menulis kode sesuai plan, masing-masing terbatas ke scope app-nya sendiri."
+        "detail": "Agent frontend dan backend menulis kode sesuai spec dan task-nya, masing-masing terbatas ke scope-nya sendiri, dan melaporkan satu baris bukti per acceptance criterion."
       },
-      "qa": {
-        "title": "QA",
+      "validate": {
+        "title": "Validate",
         "subtitle": "Melapor, tidak memperbaiki",
-        "detail": "Agent QA mengecek hasil kerja terhadap acceptance criteria dan menjalankan test serta build. Ia menulis qa-report.md dengan status PASS atau FAIL dan tidak mengubah kode."
+        "detail": "Agent Validator mengecek setiap acceptance criterion dengan menjalankan buktinya sendiri. Ia menulis validate-report.md dengan PASS, FAIL, atau UNVERIFIED per criterion dan tidak mengubah kode."
       },
       "reviewer": {
         "title": "Reviewer",
         "subtitle": "Verdict",
-        "detail": "Agent Reviewer me-review diff dan menulis review-notes.md berisi verdict, supaya manusia bisa approve/reject lebih cepat."
+        "detail": "Agent Reviewer me-review diff terhadap spec dan menulis review-notes.md berisi verdict, supaya manusia bisa approve/reject lebih cepat."
       },
       "docs": {
         "title": "Docs",
-        "subtitle": "Agent docs",
-        "detail": "Agent dokumentasi meng-update dokumentasi yang terdampak oleh perubahan."
+        "subtitle": "Agent docs (opsional)",
+        "detail": "Kalau repo punya agent dokumentasi, ia meng-update dokumentasi yang terdampak oleh perubahan. Repo tanpa agent itu melewati langkah ini."
       },
       "pr": {
         "title": "PR",
         "subtitle": "Branch di-push",
-        "detail": "Branch di-push dan pull request dibuka otomatis, dengan deskripsi yang merangkum rangkaian artifact."
+        "detail": "Branch di-push dan pull request dibuka otomatis, dengan ringkasan acceptance criteria dan rangkaian artifact di deskripsinya."
       },
       "merge": {
         "title": "Merge",
         "subtitle": "Tanpa auto-merge",
-        "detail": "Satu-satunya checkpoint manusia yang wajib. Kalau QA gagal atau reviewer beri verdict \"changes requested\", pipeline retry sekali, lalu membuka Draft PR dan diserahkan ke manusia — tidak pernah ada merge otomatis."
+        "detail": "Satu-satunya checkpoint manusia yang wajib. Kalau validasi gagal atau reviewer beri verdict \"changes requested\", pipeline retry sekali, lalu membuka Draft PR dan diserahkan ke manusia — tidak pernah ada merge otomatis."
       }
     }
   },
@@ -163,7 +223,11 @@
     "items": [
       {
         "question": "Apa itu CAF?",
-        "answer": "CAF (Coderium Agent Framework) adalah framework orkestrasi AI agent yang menjalankan siklus Plan → Implement → Verify → PR dengan governance ketat — quality gate otomatis di sepanjang jalan, dan keputusan manusia sebelum apa pun di-merge."
+        "answer": "CAF (Coderium Agent Framework) adalah framework orkestrasi AI agent yang membawa ticket dari spec tertulis sampai pull request lewat Plan → Implement → Verify, dengan governance ketat — quality gate otomatis di sepanjang jalan, dan keputusan manusia sebelum apa pun di-merge."
+      },
+      {
+        "question": "Apa arti spec-driven di CAF?",
+        "answer": "Unit kerjanya adalah spec tertulis, bukan pesan chat. Planner menulisnya, manusia bisa menyetujuinya, lalu implementasi, validasi, dan review semuanya dicek terhadap acceptance criteria-nya. Agent tidak pernah mengubah spec yang sudah disetujui; mereka mengusulkan perubahan dan manusia yang memutuskan. Kode tetap jadi sumber kebenaran — kode tidak di-generate dari spec."
       },
       {
         "question": "Apakah CAF gratis?",
@@ -175,7 +239,7 @@
       },
       {
         "question": "AI runner apa yang dipakai?",
-        "answer": "Claude Code. CAF Orchestrator menjalankan tiap agent — Planner, implementasi, QA, Reviewer, Documentation — sebagai proses Claude Code headless. Agent yang sama juga bisa jalan langsung di sesi Claude Code."
+        "answer": "Claude Code. CAF Orchestrator menjalankan tiap agent — Planner, implementasi, Validator, Reviewer, dan Documentation kalau repo punya — sebagai proses Claude Code headless. Agent yang sama juga bisa jalan langsung di sesi Claude Code."
       },
       {
         "question": "Apakah CAF bisa auto-merge?",
@@ -199,7 +263,7 @@
     "p1": "CAF (Coderium Agent Framework) dibuat dan dirawat oleh <strong>Coderium</strong>, studio yang membangun tooling developer dengan fokus pada agentic coding yang tetap bisa dipercaya — bukan cuma cepat.",
     "h2Why": "Kenapa CAF dibuat",
     "p2": "Banyak agent coding tool yang ada sekarang punya scope sempit (cuma bantu satu bagian kecil dari siklus development) atau punya governance yang longgar (langsung auto-merge tanpa jaminan review manusia). CAF dibuat untuk mengisi celah itu: cakupan implementasi yang luas — dari ticket sampai PR — dipadukan dengan governance ketat: quality gate di antara tiap tahap dan keputusan manusia di akhir.",
-    "p3": "Kami percaya agent AI bisa mempercepat development tanpa mengorbankan kontrol. Itu sebabnya setiap perubahan melewati gate otomatis — verify, QA, review — sebelum PR dibuka, kenapa gate yang gagal berhenti dan diserahkan ke manusia alih-alih dipaksakan lanjut, kenapa tidak ada yang pernah di-merge otomatis, dan kenapa CAF Orchestrator sengaja jalan di infrastruktur kamu sendiri, bukan sebagai layanan yang dikelola Coderium.",
+    "p3": "Kami percaya agent AI bisa mempercepat development tanpa mengorbankan kontrol. Itu sebabnya setiap perubahan melewati gate otomatis — verify, validate, review — sebelum PR dibuka, kenapa gate yang gagal berhenti dan diserahkan ke manusia alih-alih dipaksakan lanjut, kenapa tidak ada yang pernah di-merge otomatis, dan kenapa CAF Orchestrator sengaja jalan di infrastruktur kamu sendiri, bukan sebagai layanan yang dikelola Coderium.",
     "h2Coderium": "Coderium",
     "p4": "CAF adalah proyek terpisah dari situs utama Coderium. Untuk tahu lebih banyak tentang Coderium sebagai studio, kunjungi <span class=\"text-mute\">situs utama Coderium (segera hadir)</span>."
   },
@@ -208,8 +272,57 @@
     "metaDescription": "Histori rilis CAF (Coderium Agent Framework).",
     "eyebrow": "Changelog",
     "heading": "Histori rilis",
-    "intro": "CAF masih di v0.1.9 — halaman ini akan terus bertambah seiring rilis berikutnya.",
+    "intro": "CAF Initiator ada di v0.1.11, dan CAF Orchestrator di-deploy dari branch main-nya — halaman ini akan terus bertambah seiring rilis berikutnya.",
     "releases": [
+      {
+        "version": "Unreleased",
+        "date": "Okt 2026",
+        "items": [
+          "caf-design dan caf-breakdown ditulis tanpa banner DRAFT (dispatch test-nya lolos), jadi Planner baru langsung diarahkan ke keduanya",
+          "caf-architect tidak lagi ditawarkan di picker agent: Planner yang menulis design.md. caf-architect.md yang sudah ada di repo dibiarkan"
+        ]
+      },
+      {
+        "version": "Orchestrator (main)",
+        "date": "Okt 2026",
+        "items": [
+          "Gate validasi dipilih dari checkout: caf-validator (validate-report.md) bila .claude/agents/caf-validator.md ada, selain itu caf-qa. Langkah docs dilewati, bukan gagal, bila tidak ada agent caf-documentation (SDD-04a)",
+          "Ringkasan acceptance criteria di bagian atas body PR, dan aturan bahwa report PASS yang semua criterion-nya UNVERIFIED menjadi NEEDS_HUMAN. Gate disimpan sebagai validate; qa lama tetap terbaca (SDD-04b, 04d)",
+          "Clarify lewat ticket: spec NEEDS_CLARIFICATION, atau DRAFT dengan pertanyaan BLOCKING yang belum dijawab, menghentikan run dan bertanya lewat komentar ❓ CAF-CLARIFY (SDD-04c, 04d)",
+          "Spec gate: ticket berlabel spec-approval berhenti di Draft PR berisi spec sampai /caf-approve-spec; run lanjutan yang sukses menandai PR Ready for review (SDD-04c, 04d)",
+          "readFixReviewLog mengakhiri blok komentar pada baris ## hanya setelah baris Status dan di luar code fence (SDD-04e)",
+          "Validator terbatas: caf-validator berjalan dengan dontAsk dan allowlist perintah Bash, tulis hanya ke .caf/tasks/, serta environment yang dibersihkan; agents.validator.restrictBash dan allowedCommands (SDD-04f)",
+          "Autentikasi git tanpa token di workspace: tiap perintah jaringan memakai extraheader per-proses. Butuh git 2.31 atau lebih baru (SDD-04g)"
+        ]
+      },
+      {
+        "version": "v0.1.11",
+        "date": "Okt 2026",
+        "items": [
+          "Skill caf-design dan design.md: Planner menulis desain teknis bila ticket melintasi beberapa app, mengubah skema, atau mengubah kontrak (SDD-05a)",
+          "Skill caf-breakdown dan breakdown.md: Planner mengusulkan cara memecah request dengan beberapa hasil lalu berhenti; /caf-plan boleh membuat ticket satu per satu setelah dijawab ya (SDD-05b)",
+          "Kontrak artifact Planner menyebut design.md dan breakdown.md di satu tempat; spec garis besar tidak punya acceptance criteria dan menulis Tidak ada (SDD-06)",
+          "Teks agent lebih jelas: ## Coverage di tasks.md, verdict reviewer untuk temuan yang hanya bisa diputuskan manusia, cakupan checklist validator dan pipe di tabel report (SDD-07)",
+          "caf-spec v4, diselaraskan dengan Planner: Tidak ada untuk section kosong, Assumption A-n:, dan nilai Status keempat NEEDS_HUMAN (SDD-10)",
+          "Planner menulis artifact-nya dalam bahasa penulis ticket, bukan bahasa teks yang dikutip ticket (SDD-11, SDD-12)",
+          "CAF.md diselaraskan dengan perilaku spec-driven (SDD-09)"
+        ]
+      },
+      {
+        "version": "v0.1.10",
+        "date": "Okt 2026",
+        "items": [
+          "Planner spec-driven: Specify → Clarify → Plan → Tasks, requirements.md dengan acceptance criteria bernomor dan baris Status; skill caf-spec dan caf-traceability (SDD-01, SDD-02)",
+          "Agent implementasi, Reviewer, dan command review yang sadar spec: baca spec dulu, berhenti bila spec belum jelas, laporkan bukti per criterion, tidak pernah mengubah spec yang sudah disetujui (SDD-03b, 03d)",
+          "Agent caf-validator baru dan /caf-plan masuk scaffold default, menggantikan caf-qa; validator menjalankan baris Verify: command: dengan aturan ketat (SDD-03b1, 03c2, 03e)",
+          "Lima agent dan delapan command tidak lagi di-scaffold: Documentation, DevOps, PM, UX Designer, Auditor, serta command discovery, audit, design-ticket, qa-check, review-ticket, dan feature-catalog. File yang sudah ada tetap (SDD-03c1)",
+          "SINGLE_REPO sekarang mendapat caf-frontend dan caf-backend, bukan caf-implementer (SDD-03c3)",
+          "/caf-run-pipeline sekarang /caf-run, dan /caf-plan-ticket tidak lagi ditulis (SDD-03c2c)",
+          "Skill caf-verify diganti nama menjadi caf-self-verify, dengan warning skill-renamed di curate audit (SDD-03c2d)",
+          "curate melewati file agent dengan kind tak dikenal dan melaporkannya, bukan menulis ulang (SDD-03g)",
+          "curate membaca kembali daftar app dari Input agent QA dan Reviewer sehingga sync tidak lagi menghilangkannya; rollout warning untuk tools di frontmatter, pointer skill, dan Constraints Planner (SDD-03a2, 02d)"
+        ]
+      },
       {
         "version": "v0.1.9",
         "date": "2026",
@@ -300,7 +413,7 @@
       "s1Title": "1. Apa itu CAF",
       "s1Body": "CAF (Coderium Agent Framework) adalah sebuah framework — kumpulan kode, konvensi, dan tooling yang kamu jalankan sendiri di repo dan infrastruktur kamu. CAF <strong>bukan</strong> layanan SaaS yang di-hosting oleh Coderium. Tidak ada instance CAF Orchestrator yang dijalankan atau dikelola oleh Coderium atas nama kamu.",
       "s2Title": "2. Lisensi",
-      "s2Body": "Kode CAF didistribusikan di bawah lisensi <strong>[Lisensi TBD]</strong> — akan ditentukan sebelum repo publik dirilis. Sampai lisensi final ditetapkan, anggap semua hak dilindungi.",
+      "s2Body": "Kode CAF — CAF Initiator dan CAF Orchestrator — didistribusikan di bawah lisensi <strong>MIT</strong>. Lihat file LICENSE di tiap repository.",
       "s3Title": "3. Disediakan \"sebagaimana adanya\"",
       "s3Body": "CAF gratis dan disediakan <strong>as-is</strong>, tanpa jaminan (warranty) dalam bentuk apa pun, tersurat maupun tersirat. Tidak ada SLA (service level agreement) di versi gratis — tidak ada komitmen waktu respons atau uptime, karena CAF Orchestrator berjalan di infrastruktur kamu sendiri, bukan milik Coderium.",
       "s4Title": "4. Batasan tanggung jawab",

@@ -17,5 +17,6 @@ useSeoMeta({
       </main>
     </div>
     <SharedFooter />
+    <SharedBackToTop />
   </div>
 </template>

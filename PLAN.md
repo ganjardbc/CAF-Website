@@ -1,5 +1,13 @@
 # Plan Website CAF (Coderium Agent Framework) — v1.0.0
 
+> **Dokumen historis.** Ini rencana awal situs, sebelum Spec-Driven Development masuk ke
+> CAF. Isi teknis tentang CAF di bawah (roster agent, `QA`, alur pipeline, contoh command)
+> adalah keadaan waktu itu dan tidak lagi dipakai sebagai acuan. Acuan sekarang: `README.md`
+> repo ini (bagian "Keeping the docs in sync with CAF") dan repo `caf-initiator` serta
+> `caf-orchestrator`. Struktur situs (sitemap, stack, SEO) di bawah masih berlaku, kecuali
+> bagian yang ditandai berubah di `PLAN-v1.1.md` (dark mode, i18n). `server/api/github-stars.ts`
+> yang direncanakan di §4 tidak pernah dibuat.
+
 Project baru, terpisah dari `coderium-web-v2`. Stack: Nuxt 4 (struktur `app/`) + Tailwind CSS.
 Gaya referensi: opencode.ai (dev-tool marketing site, teknikal, to-the-point) untuk struktur konten
 dan copywriting. Sistem visual (warna, tipografi, spacing, komponen) mengikuti spesifikasi di

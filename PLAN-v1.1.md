@@ -1,5 +1,9 @@
 # Plan v1.1 — Dark Mode, Sticky Navbar, Multi-language (EN/ID)
 
+> **Status: sudah diimplementasikan.** Dark mode, sticky navbar, dan i18n EN/ID sudah ada di
+> situs (lihat `README.md`). Dokumen ini disimpan sebagai catatan keputusan. Docs sekarang 16
+> halaman per locale (bukan 19), termasuk `sdd.md`.
+
 Lanjutan dari `PLAN.md` (v1.0.0). Tiga fitur ini independen satu sama lain dan bisa
 dikerjakan secara terpisah/berurutan. Dokumen ini adalah **plan**, belum implementasi —
 tidak ada kode yang diubah oleh dokumen ini sendiri.

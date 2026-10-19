@@ -11,7 +11,8 @@ description: Dukungan Jira untuk CAF Orchestrator direncanakan tapi belum diimpl
 CAF Initiator sudah mengenal Jira sebagai tracker: `caf-init scaffold`
 mendeteksinya (atau membiarkan kamu memilihnya) dan mencatatnya di `CLAUDE.md`. Itu
 hanya memengaruhi knowledge base yang di-generate — tidak membuat Orchestrator
-terpicu dari Jira.
+terpicu dari Jira. Pertanyaan Clarify dan spec gate (`/caf-approve-spec`) juga belum
+tersedia untuk Jira, karena bergantung pada integrasi Linear atau GitHub.
 
 ## Desain yang direncanakan
 

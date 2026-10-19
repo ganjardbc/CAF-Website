@@ -4,12 +4,15 @@ description: A self-hosted webhook receiver (Fastify + BullMQ + Redis) that runs
 ---
 
 CAF Orchestrator is a small service that runs on your own VPS. When a ticket becomes
-"Ready for AI", it clones the target repo, runs a chain of headless
+"Ready for AI", it clones the target repo and runs a chain of headless
 `claude --agent <name>` processes (`caf-planner` → `caf-frontend` / `caf-backend` →
-`caf-qa` → `caf-reviewer` → `caf-documentation`), pushes an `ai-agent/<TICKET-KEY>`
-branch, opens a GitHub PR, and reports the result back on the ticket.
+`caf-validator` → `caf-reviewer`, plus `caf-documentation` when the repo has it),
+pushes an `ai-agent/<TICKET-KEY>` branch, opens a GitHub PR, and reports the result
+back on the ticket.
 
-It also runs AI review on existing PRs, driven by PR comments.
+It stops before implementation when the spec is unclear or not yet approved (see
+[Clarify and the spec gate](#clarify-and-the-spec-gate)), and it also runs AI review
+on existing PRs, driven by PR comments.
 
 > Linear and GitHub Issues can both trigger the pipeline today. Jira support is
 > planned but not implemented — see [Jira](/docs/integrations/jira) for status.
@@ -22,6 +25,8 @@ It also runs AI review on existing PRs, driven by PR comments.
 | Linear ticket moves into the `linear.readyStateId` state | `POST /webhooks/linear` | Full agent pipeline |
 | GitHub Issue gets the `github.readyLabel` label (default `ready-for-ai`) | `POST /webhooks/github` | Full agent pipeline |
 | `/caf-retry-pipeline` comment on a Draft PR, or a Linear ticket re-entering "Ready for AI" while its branch still exists | either webhook | Resume a pipeline that stopped at a gate |
+| Ticket re-triggered after a Clarify question was answered in a comment | either webhook | Resume the planner with the answers |
+| `/caf-approve-spec` comment on a spec Draft PR | `POST /webhooks/github` | Approve the spec and continue with implementation |
 | `/caf-review` comment on a PR | `POST /webhooks/github` | Full review, posted as a GitHub PR review |
 | `/caf-fix-review` comment on a PR | `POST /webhooks/github` | Reviewer addresses every review comment on the PR |
 | Reply inside an inline review thread | `POST /webhooks/github` | Reviewer addresses that one thread |
@@ -29,20 +34,27 @@ It also runs AI review on existing PRs, driven by PR comments.
 GitHub-side triggers require the commenter or labeler to have `write`, `maintain` or
 `admin` permission on the repo; anyone else is silently ignored. The PR-comment
 triggers only work on PRs this pipeline produced (head branch
-`ai-agent/<TICKET-KEY>`). `ENABLE_PIPELINE_TRIGGER=false` is a kill switch for all
-of them.
+`ai-agent/<TICKET-KEY>`). `ENABLE_PIPELINE_TRIGGER=false` is a kill switch for all of
+them.
 
 ## Requirements
 
 - Node.js 22 or newer
 - pnpm
 - Redis
-- `git`, with push access to the target repo(s)
+- `git` 2.31 or newer, with push access to the target repo(s)
 - The `claude` CLI available on PATH, with agent definitions (`caf-planner`,
-  `caf-frontend`, `caf-backend`, `caf-qa`, `caf-reviewer`, `caf-documentation`)
-  present in the **target repo's** `.claude/agents/` — this is what
-  [CAF Initiator](/docs/caf-initiator) scaffolds for you. The Orchestrator only
-  knows their names and invokes them
+  `caf-frontend`, `caf-backend`, `caf-validator` or `caf-qa`, `caf-reviewer`, and
+  optionally `caf-documentation`) present in the **target repo's** `.claude/agents/` —
+  this is what [CAF Initiator](/docs/caf-initiator) scaffolds for you. The Orchestrator
+  only knows their names and invokes them
+
+Both generations of target repo work without any config change. The pipeline looks at
+the checkout: with `.claude/agents/caf-validator.md` it runs `caf-validator` and reads
+`validate-report.md` (falling back to `qa-report.md`); otherwise it runs `caf-qa` and
+reads `qa-report.md`. Without `.claude/agents/caf-documentation.md` the docs step is
+skipped instead of failing. A single-app repo (not split front/back) uses the default
+`caf-frontend` + `caf-backend`; the Orchestrator never routes `caf-implementer`.
 
 ## Setup
 
@@ -97,13 +109,17 @@ Returns `200` with `{ status: "healthy", services: { redis, disk } }` when
 both the Redis connection and a write probe into `workspace.dir` succeed, or
 `503` with `status: "unhealthy"` otherwise.
 
+Other scripts: `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:coverage` and
+`pnpm db:migrate` (creates or upgrades the dashboard's SQLite database).
+
 ### Deploying with Docker
 
 The repo's `deploy.sh` pulls `origin/main`, rebuilds the image and restarts the
-services — meant to be run both manually and from CI. Flags include `--skip-pull`
-and `--skip-build`. The bundled GitHub Actions workflow runs typecheck, lint, test
-and build on every push and PR, then calls `deploy.sh` on the VPS over SSH for
-pushes to `main`.
+services — meant to be run both manually and from CI. The bundled GitHub Actions
+workflow runs typecheck, lint, test and build on every push and PR, then calls
+`deploy.sh` on the VPS over SSH for pushes to `main`. The image is based on
+`node:22-slim` (glibc, for `better-sqlite3`) and ships `git`, `openssh-client` and the
+`claude` CLI.
 
 ## Configuration
 
@@ -131,8 +147,10 @@ Commonly tuned:
 | Field | What it controls | Default |
 |---|---|---|
 | `github.readyLabel` | Label that makes a GitHub Issue "Ready for AI" | `ready-for-ai` |
+| `linear.specGateLabel` / `github.specGateLabel` | Label that puts a ticket behind [spec approval](#clarify-and-the-spec-gate); overridable per project | `spec-approval` |
 | `workspace.mode` | `ephemeral` (fresh clone per job) or `persistent` (reuse one checkout per repo) | `ephemeral` |
-| `agents.qa.maxRetries` / `agents.reviewer.maxRetries` | Gate retries within one run | `1` each |
+| `agents.qa.maxRetries` / `agents.reviewer.maxRetries` | Gate retries within one run. `agents.qa` governs the validation gate, `caf-validator` or `caf-qa` | `1` each |
+| `agents.validator.restrictBash` / `agents.validator.allowedCommands` | [Restricted validator](#restricted-validator) | `true` / see below |
 | `orchestration.maxOrchestrationRetries` | How many times a gate-exhausted ticket can be resumed; overridable per project | `2` |
 | `claude.agentTimeoutMs` | Timeout per agent process | 30 minutes |
 | `queue.workerConcurrency` | Concurrent pipeline jobs per worker | `1` |
@@ -151,32 +169,89 @@ Register the webhooks pointing at the Orchestrator:
   `Pull request review comments`. See
   [GitHub / GitLab](/docs/integrations/github-gitlab).
 
-Every payload's signature is verified, and deliveries are deduplicated by delivery
-ID.
+Every payload's signature is verified (Linear also checks a 60-second timestamp
+window), and deliveries are deduplicated by delivery ID.
 
 ## The pipeline
 
 1. Clone the target repo into the project's workspace and create branch
    `ai-agent/<TICKET-KEY>`. Linear tickets are routed to a project by ticket prefix,
    GitHub Issues by repository.
-2. Run `caf-planner`, which must produce `.caf/tasks/<TICKET-KEY>/tasks.md`.
-3. Read `tasks.md`: the `## Frontend Tasks` / `## Backend Tasks` headers decide
-   which implementation agents run (`caf-frontend`, then `caf-backend`).
-4. Run the implementation agent(s), then read `verify-report.md`.
-5. Run `caf-qa` → `qa-report.md`. On `FAIL`, re-run implementation up to
-   `agents.qa.maxRetries` times.
-6. Run `caf-reviewer` → `review-notes.md`. On `CHANGES REQUESTED`, re-run
-   implementation up to `agents.reviewer.maxRetries` times.
-7. If `tasks.md` has real `## Docs Tasks`, run `caf-documentation`. A docs failure
-   never fails the job.
-8. Commit, push, open the GitHub PR, and post the final comment (PR link plus the QA
-   and reviewer reports) on the Linear ticket or GitHub Issue.
+2. Run `caf-planner`, which writes the spec under `.caf/tasks/<TICKET-KEY>/`
+   (`requirements.md`, `tasks.md`, optionally `design.md` or `breakdown.md`).
+3. **Spec check.** Read the `Status:` line of `requirements.md`. An unclear or
+   not-yet-approved spec stops the run here — see
+   [Clarify and the spec gate](#clarify-and-the-spec-gate).
+4. Read `tasks.md`: the `## Frontend Tasks` / `## Backend Tasks` headers decide
+   which implementation agents run (`caf-frontend`, then `caf-backend`). Agents never
+   change an `APPROVED` spec; a proposed change is reported instead.
+5. Run the implementation agent(s), then read `verify-report.md`. Without `SUCCESS`,
+   the run stops with a Draft PR.
+6. **Validation gate.** Run `caf-validator` → `validate-report.md` (or `caf-qa` →
+   `qa-report.md` in a repo without a validator). On `FAIL`, or no report at all,
+   re-run implementation up to `agents.qa.maxRetries` times. With the validator the
+   PR also gets an [acceptance-criteria summary](#acceptance-criteria-summary).
+7. Run `caf-reviewer` → `review-notes.md`. On `CHANGES_REQUESTED`, re-run
+   implementation up to `agents.reviewer.maxRetries` times. `DEFER` only leaves a
+   comment for a human.
+8. If `tasks.md` has real `## Docs Tasks` and the repo has `caf-documentation`, run
+   it. A docs failure never fails the job.
+9. Commit, push, open the GitHub PR, and post the final comment (PR link plus the
+   gate and reviewer reports) on the Linear ticket or GitHub Issue.
 
 The Orchestrator never merges a PR itself.
 
+### Clarify and the spec gate
+
+The pipeline reads the spec right after the planner. If the repo has no
+`requirements.md`, or the file has no `Status:` line, none of this applies and the
+pipeline behaves as it did before spec-driven development.
+
+- **Clarify.** `Status: NEEDS_CLARIFICATION`, or `Status: DRAFT` with a `[BLOCKING]`
+  question that has no `— Answer:` yet, always stops the pipeline. The draft spec is
+  committed and pushed to `ai-agent/<TICKET-KEY>` (no PR), and a comment on the ticket
+  lists every unanswered question. The comment starts with `❓ CAF-CLARIFY`.
+  Answer in a comment on the ticket, then move a Linear ticket back to "Ready for
+  AI", or remove and re-apply the `github.readyLabel` label on a GitHub Issue. The
+  planner continues the saved draft with the comments written after the last
+  `❓ CAF-CLARIFY` comment (comments from bot accounts are skipped). If that comment
+  is deleted, every human comment on the ticket counts as an answer.
+- **Spec gate.** A ticket carrying the gate label (`spec-approval` by default)
+  stops after the planner with `Status: DRAFT` and no open question: the spec is
+  pushed and a Draft PR holding only the spec (including `design.md` or
+  `breakdown.md`) is opened. Review it, edit on the branch if needed, then comment
+  `/caf-approve-spec` on the PR. The Orchestrator changes only the `Status:` line to
+  `APPROVED`, commits, pushes and resumes from implementation, skipping the planner.
+  It refuses, and says why on the PR, if the PR is not waiting for approval, the spec
+  is `NEEDS_CLARIFICATION`, or a `BLOCKING` question is unanswered. The label is read
+  at the moment the ready trigger arrives. Tickets without the label run straight
+  through after the planner.
+- Waiting for a person is not a failure: neither a Clarify answer nor a spec approval
+  uses up `orchestration.maxOrchestrationRetries`.
+- When a resumed run (retry or approved spec) finally succeeds, the Orchestrator
+  updates that PR and marks it Ready for review through the GitHub GraphQL API. If
+  GitHub refuses, the PR stays a Draft and the ticket comment says why.
+- A ticket whose `ai-agent/<TICKET-KEY>` branch exists but has no
+  `orchestration-state.json` gets a "nothing to resume" comment when re-triggered;
+  delete the branch to restart it.
+
+### Acceptance criteria summary
+
+In a repo that ships `caf-validator` (the only gate agent that writes a per-criterion
+table), when `requirements.md` has `- AC-n:` lines, the Orchestrator counts each
+criterion against the report's table and puts a deterministic summary at the top of
+the PR body, normal and Draft PRs alike: PASS, FAIL and UNVERIFIED counts, the
+UNVERIFIED list with reasons, and any `Proposed Spec Changes:` line from the report. A
+criterion missing from the report counts as `UNVERIFIED`.
+
+The gate passes when nothing is `FAIL`. One exception: a report that says
+`Status: PASS` while *every* criterion is `UNVERIFIED` proved nothing, so it is treated
+as `NEEDS_HUMAN` (Draft PR and comment, no retry). A `caf-qa` repo gets neither the
+summary nor this rule.
+
 ### When a gate is exhausted
 
-When a gate (implementation verify, QA or reviewer) is still failing after its
+When a gate (implementation verify, validation or reviewer) is still failing after its
 retries, the work is not left stranded: the branch is pushed and a **Draft PR** is
 opened — or updated, if one is already open — with the failing report as its body.
 The pipeline then stops and comments for a human, who can either fix it by hand or
@@ -200,19 +275,20 @@ A gate-exhausted run isn't a dead end. Resume it either by:
   resumes it instead of starting a new ticket)
 
 Both paths converge on the same resume logic — neither has its own counter or
-gate-selection code.
+gate-selection code. Clarify answers and spec approvals use the same machinery.
 
 **How the state survives between invocations.** On every gate failure, the
 Orchestrator writes `orchestration-state.json` into
 `.caf/tasks/<TICKET-KEY>/` in the workspace — `orchestrationRetryCount`,
-`lastFailedGate` (`implementation`/`qa`/`reviewer`), `lastKnownCommitSha`, and
-the ticket's title/description (so a resume can rebuild the planner-less
-prompt without re-fetching the original ticket). That folder is part of the
-normal commit-and-push at the end of every run, so the file travels **on the
-branch itself** — it survives even with the default `ephemeral` workspace
-mode, which deletes the local clone after each job. On full pipeline success
-the file is deleted; its absence is what a resume trigger checks to reject a
-ticket that has nothing to resume.
+`lastFailedGate` (`implementation`/`validate`/`reviewer`; a stored `qa` from older
+runs is read as the same gate), `lastKnownCommitSha`, `waitingFor`
+(`clarify`/`spec-approval` while waiting for a person), and the ticket's
+title/description (so a resume can rebuild the planner-less prompt without
+re-fetching the original ticket). That folder is part of the normal commit-and-push
+at the end of every run, so the file travels **on the branch itself** — it survives
+even with the default `ephemeral` workspace mode, which deletes the local clone
+after each job. On full pipeline success the file is deleted; its absence is what a
+resume trigger checks to reject a ticket that has nothing to resume.
 
 **What a resume actually does:**
 
@@ -232,14 +308,16 @@ ticket that has nothing to resume.
    handed to the resumed agent as extra context — this never blocks the
    resume, only uncommitted residue from step 2 does.
 5. Skips the planner entirely. `lastFailedGate` selects which report
-   (`verify-report.md` / `qa-report.md` / `review-notes.md`) to read back as
-   context, then re-runs the implementation agent(s) and continues through the
-   normal QA → reviewer → docs → PR tail — the exact same tail code as a fresh
-   run, not a separate copy per gate.
+   (`verify-report.md` / `validate-report.md` or `qa-report.md` / `review-notes.md`)
+   to read back as context, then re-runs the implementation agent(s) and continues
+   through the normal validation → reviewer → docs → PR tail — the exact same tail
+   code as a fresh run, not a separate copy per gate.
 
 When the resume came from a PR comment, every status comment for that run —
 including the eventual success comment — goes back to that PR instead of the
-original ticket, since that's what the human is actually watching.
+original ticket, since that's what the human is actually watching. A resumed run
+that is turned away without running any agent (branch gone, workspace residue,
+retry budget spent, a rejected approval) never touches the ticket's dashboard row.
 
 ## Automated PR review
 
@@ -256,12 +334,56 @@ Three trigger paths, each mapped to a review **mode**:
 | Reply inside an inline review-comment thread | `scoped` | The same, scoped to just that one thread |
 
 In `global` and `scoped` mode each comment ends up `FIXED`, `SKIPPED` or
-`NOT_APPLICABLE`, recorded in `fix-review-log.md`.
+`NOT_APPLICABLE`, recorded in `fix-review-log.md`. These jobs never edit
+`requirements.md` or `tasks.md`: a comment asking for a spec change is logged under
+`## Proposed Spec Changes` in `fix-review-log.md` and marked `SKIPPED`.
 
 A comment posted by a bot account (including the Orchestrator's own summary
 comments) is always ignored — without this guard, the Orchestrator's own
 review output would re-trigger itself on delivery. PR-review jobs always clone into
-a fresh workspace, whatever `workspace.mode` says.
+a fresh workspace, whatever `workspace.mode` says. Unlike the ticket pipeline there
+are no gates here: a failure throws and BullMQ retries the job.
+
+## Agent execution and security
+
+Each agent runs as
+`claude --agent <name> --print --output-format json --permission-mode bypassPermissions`
+in the cloned workspace, with the prompt piped through stdin, `CAF_HEADLESS=1` in its
+environment and a `[SYSTEM CONTEXT: Environment = headless ...]` line at the top of the
+prompt. `bypassPermissions` is deliberate: a headless run cannot answer approval
+prompts, and each run happens inside the Orchestrator's own scratch workspace. The
+Orchestrator never invokes `/caf-run`, `/caf-plan` or a skill itself — only
+`claude --agent`. It does not use `--bare`, which would disable the target repo's agent
+discovery.
+
+### Restricted validator
+
+`caf-validator` is the one exception. With `agents.validator.restrictBash: true` (the
+default) it runs under `--permission-mode dontAsk --setting-sources project`:
+
+- Bash is limited to `agents.validator.allowedCommands`. The default list is
+  `pnpm run *`, `pnpm test [*]`, `pnpm --filter * run *`, `pnpm --filter * test [*]`,
+  `npm run *`, `npm test [*]`. `npx`, `pnpm dlx`, `pnpm exec`, `yarn`, `bun` and
+  `make` are left out on purpose, since they would allow arbitrary commands through the
+  runner; add them in config if a repo needs them. An empty list is valid and fails
+  closed.
+- Writes are limited to `.caf/tasks/`.
+- The worker user's own Claude settings (hooks, allow rules) are ignored.
+- Secrets are removed from its environment: `REDIS_URL`, `LINEAR_*`, `GITHUB_TOKEN`,
+  `GITHUB_WEBHOOK_SECRET`, `TELEGRAM_*` and `DASHBOARD_BASIC_AUTH_PASSWORD`.
+
+`restrictBash: false` restores the previous behavior. No other agent changes.
+
+### Git authentication
+
+`GITHUB_TOKEN` is never written to a workspace. The Orchestrator clones the plain
+`https://github.com/<owner>/<repo>.git` URL and authenticates each network command
+(`clone`, `push`, `fetch`, `ls-remote`) with a per-process `http.extraheader` passed
+through environment variables, so the token is in neither the remote URL, `.git/config`
+nor any argument. Errors are redacted. This needs `git` 2.31 or newer. A persistent
+workspace cloned by an older version has its remote URL cleaned on the next run; for a
+clone you will not reuse, run
+`git -C <workspace> remote set-url origin https://github.com/<owner>/<repo>.git`.
 
 ## Monitoring dashboard
 
@@ -270,6 +392,10 @@ PIV phase, retry counts per gate, real cost as reported by the `claude` CLI,
 artifact links and PR review runs, updated in real time. A second, read-only page at
 `/dashboard/agent-floor` shows the same runs as an animated office of agents, with
 live, replay and demo modes.
+
+![The CAF dashboard listing pipeline runs with phase, retries and cost](/images/caf-dashboard.webp)
+
+![The CAF Agent Floor, an animated office of agents](/images/caf-agent-floor.webp)
 
 It is off by default and basic-auth gated. To enable it:
 
@@ -298,8 +424,9 @@ Behind a reverse proxy, make sure `/dashboard`, `/api/pipelines*` and
   (nothing allowed) by default.
 - **Dynamic agent skip** — Planner can emit a `## Skip Agents` section in
   `tasks.md` to skip agents that aren't relevant for a ticket. Enable with
-  `AGENT_SKIP_ENABLED=true`. Skipping QA or Reviewer adds an explicit warning to the
-  PR body.
+  `AGENT_SKIP_ENABLED=true`. It never leaves zero implementation agents running, and
+  skipping the validation gate or the Reviewer adds an explicit warning to the PR
+  body.
 - **Persistent workspace** — `workspace.mode: persistent` reuses one checkout per
   repo instead of cloning per job. Use it only for large repos: a second job for the
   same repo is rejected while the first holds the workspace.
@@ -308,7 +435,7 @@ Behind a reverse proxy, make sure `/dashboard`, `/api/pipelines*` and
 
 Multi-repo/multi-team routing is live: `caf.config.yaml`'s `projects:` map
 holds one entry per project (`ticketPrefix`, `repoCloneUrl`, `baseBranch`,
-`workspaceDir`, optional `agents.modelOverrides` and
+`workspaceDir`, optional `agents.modelOverrides`, `specGateLabel` and
 `orchestration.maxOrchestrationRetries`). Incoming Linear tickets are routed by
 matching the ticket key's prefix (e.g. `ABC-123` → `ABC`) against a project's
 `ticketPrefix`; GitHub-triggered jobs are routed by repo, and the ticket key is
@@ -320,7 +447,13 @@ empty `projects:` map.
 
 - Worker concurrency defaults to 1 — concurrent Claude Code agent processes are
   expensive.
-- Only a pipeline that stopped cleanly at a gate can be resumed mid-way, and only on
-  request. Anything else retries from the Planner.
+- Only a pipeline that stopped cleanly at a gate, at a Clarify or at the spec gate can
+  be resumed mid-way, and only on request. Anything else retries from the Planner.
+- Only `caf-frontend` and `caf-backend` are routed as implementation agents;
+  `caf-architect` and `caf-implementer` are never run.
 - Persistent workspaces are locked in-process, so that mode assumes a single worker
   instance.
+- The validator's command limit is an allowlist plus the text rules in its agent
+  definition; the merge decision always stays with a human.
+- Trackers: Linear and GitHub Issues. Git host: GitHub only (the Ready-for-review
+  GraphQL call is built for github.com).

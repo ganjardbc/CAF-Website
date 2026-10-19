@@ -58,3 +58,17 @@ and the result is posted back as a comment on the ticket.
 
 Moving a ticket back into the ready state while its `ai-agent/<TICKET-KEY>` branch
 still exists **resumes** the stopped pipeline instead of starting a new one.
+
+## Clarify questions and spec approval
+
+If the Planner's spec has an open `BLOCKING` question, the pipeline stops and comments
+on the ticket with the questions (the comment starts with `❓ CAF-CLARIFY`). Answer in
+a comment on the ticket and move it back into the ready state: the Planner continues
+the saved draft with the comments written after the last clarification request
+(comments from bot accounts are skipped).
+
+A ticket with the label set in `linear.specGateLabel` (default `spec-approval`) stops
+after the Planner at a Draft PR that holds the spec, until someone comments
+`/caf-approve-spec` on that PR. The label is read at the moment the ticket enters the
+ready state. Both can be overridden per project. See
+[CAF Orchestrator](/docs/caf-orchestrator#clarify-and-the-spec-gate).

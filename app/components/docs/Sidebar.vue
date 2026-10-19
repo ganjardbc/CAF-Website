@@ -11,6 +11,7 @@ const sections = computed(() => [
       { label: t('docsSidebar.gettingStarted.introduction'), to: localePath('/docs') },
       { label: t('docsSidebar.gettingStarted.quickStart'), to: localePath('/docs/quick-start') },
       { label: t('docsSidebar.gettingStarted.piv'), to: localePath('/docs/piv') },
+      { label: t('docsSidebar.gettingStarted.sdd'), to: localePath('/docs/sdd') },
     ],
   },
   {

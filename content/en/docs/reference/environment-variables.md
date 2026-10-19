@@ -23,7 +23,7 @@ CAF Initiator needs no environment variables.
 
 | Variable | Required | Description |
 |---|---|---|
-| `GITHUB_TOKEN` | Yes | Fine-grained PAT used to push branches, open PRs and post comments/reviews |
+| `GITHUB_TOKEN` | Yes | Fine-grained PAT used to push branches, open PRs and post comments/reviews. Never written to a workspace; sent to git per command through an environment header (needs `git` 2.31+) |
 | `GITHUB_WEBHOOK_SECRET` | Yes | Secret used to verify incoming GitHub webhook payloads (`/webhooks/github`) |
 
 ## Claude Code / model auth
@@ -55,6 +55,11 @@ Accepted values: `true`, `false`, `1`, `0`.
 `CAF_HEADLESS` is **not** configurable: the Orchestrator always sets it to `1` on
 every agent it spawns. Don't put it in `.env`.
 
+`caf-validator` runs without `REDIS_URL`, `LINEAR_WEBHOOK_SECRET`, `LINEAR_API_KEY`,
+`GITHUB_TOKEN`, `GITHUB_WEBHOOK_SECRET`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` and
+`DASHBOARD_BASIC_AUTH_PASSWORD` in its environment (see
+[Restricted validator](/docs/caf-orchestrator#restricted-validator)).
+
 ## Structural config (`caf.config.yaml`)
 
 These are not environment variables:
@@ -64,7 +69,9 @@ These are not environment variables:
 | `linear.readyStateId` | Yes | UUID of the Linear workflow state that triggers the pipeline (your "Ready for AI" state) |
 | `projects:` | Yes, at least one | Per-project `ticketPrefix`, `repoCloneUrl`, `baseBranch`, `workspaceDir` |
 | `github.readyLabel` | No (default `ready-for-ai`) | Label that triggers the pipeline from a GitHub Issue |
-| `server.port` | No (default `3000`) | Port of the web server |
+| `linear.specGateLabel` / `github.specGateLabel` | No (default `spec-approval`) | Label that stops a ticket at a spec-approval Draft PR; overridable per project |
+| `agents.validator.restrictBash` / `agents.validator.allowedCommands` | No (default `true` / a `pnpm` and `npm` allowlist) | Limits what `caf-validator` may run |
+| `server.port` | No (default `3000` in the example config; the Docker setup uses `3030`) | Port of the web server |
 | `dashboard.enabled` / `dashboard.basicAuthUser` | No | Turn on the dashboard and set its username |
 
 See [CAF Orchestrator](/docs/caf-orchestrator#configuration) for the rest.
