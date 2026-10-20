@@ -55,33 +55,38 @@
     "badge": "CAF v0.1.11 — early access",
     "new": "New",
     "title": "Coderium Agent Framework",
-    "description": "CAF membawa ticket dari spec tertulis sampai pull request — Plan, Implement, Validate, Review — di balik quality gate, lalu berhenti menunggu manusia. Tidak ada auto-merge. Gratis dan open, jalan langsung di repo kamu sendiri.",
+    "description": "CAF mengubah ticket jadi pull request lewat agent AI. Merge selalu kamu yang putuskan.",
     "getStarted": "Get Started",
     "github": "View on GitHub",
-    "npm": "View on npm"
+    "npm": "View on npm",
+    "tags": {
+      "free": "Gratis",
+      "open": "Open source",
+      "selfHosted": "Self-hosted"
+    }
   },
   "featureGrid": {
-    "eyebrow": "Apa itu CAF?",
-    "title": "Framework, bukan black box",
+    "eyebrow": "Kenapa CAF",
+    "title": "Agent AI yang bekerja sendiri, tapi tidak merge sendiri",
     "items": [
       {
         "title": "Spec-driven",
         "description": "Planner menulis spec dengan acceptance criteria bernomor lebih dulu. Pertanyaan yang memblokir menghentikan run dan ditanyakan di ticket, dan spec yang sudah disetujui tidak pernah diubah oleh agent."
       },
       {
-        "title": "Disiplin PIV",
+        "title": "Plan → Implement → Verify",
         "description": "Setiap task berjalan lewat Plan → Implement → Verify. Gate yang gagal di-retry sekali, lalu berhenti dengan Draft PR dan diserahkan ke manusia."
       },
       {
-        "title": "Artifact handoff via Markdown",
+        "title": "Setiap fase meninggalkan file di repo",
         "description": "Hasil tiap fase disimpan sebagai file Markdown di repo — bukan context chat yang hilang begitu sesi berakhir."
       },
       {
-        "title": "Pipeline trigger dari ticket",
+        "title": "Mulai saat ticket siap",
         "description": "Orchestrator terpicu otomatis begitu ticket siap — workflow state di Linear atau label di GitHub Issue. Dukungan Jira direncanakan."
       },
       {
-        "title": "Gate yang melapor, bukan memperbaiki",
+        "title": "Pemeriksa tidak mengubah yang diperiksa",
         "description": "Validator mengecek setiap acceptance criterion dan Reviewer mengecek diff terhadap spec. Keduanya menulis report dan tidak mengubah kode yang sedang dicek — kegagalan dikembalikan ke agent implementasi."
       },
       {
@@ -91,10 +96,10 @@
     ]
   },
   "coreComponents": {
-    "eyebrow": "Dua komponen inti",
-    "title": "Scaffold di lokal, jalankan di VPS kamu",
+    "eyebrow": "Dua app",
+    "title": "Dua app, satu alur kerja",
     "initiator": {
-      "eyebrow": "CLI scaffold generator",
+      "eyebrow": "Langkah 1 · sekali per repo · caf-initiator",
       "title": "CAF Initiator",
       "description": "Mendeteksi stack proyek kamu secara otomatis, lalu generate knowledge base yang dibutuhkan agent — lima agent, lima slash command, dan sembilan skill. Deterministik: tidak pernah memanggil model AI.",
       "points": [
@@ -104,7 +109,7 @@
       ]
     },
     "orchestrator": {
-      "eyebrow": "Webhook-driven agent runner",
+      "eyebrow": "Langkah 2 · setiap ticket · caf-orchestrator",
       "title": "CAF Orchestrator",
       "description": "Fastify + BullMQ + Redis, jalan di VPS kecil milik kamu sendiri. Menerima webhook dari tracker, lalu spawn agent Claude Code headless untuk tiap fase.",
       "points": [
@@ -113,7 +118,10 @@
         "Gate yang gagal membuka Draft PR yang bisa dilanjutkan dengan /caf-retry-pipeline",
         "Self-hosted — jalan di VPS kamu, bukan SaaS Coderium"
       ]
-    }
+    },
+    "copy": "Salin",
+    "copied": "Tersalin",
+    "guide": "Panduan lengkap →"
   },
   "engagement": {
     "eyebrow": "Cara bekerja sama",
@@ -122,7 +130,7 @@
       "title": "Pasang sendiri",
       "subtitle": "Gratis dan open source.",
       "points": [
-        "Tim kamu memasang CAF atau AI Code Reviewer sendiri.",
+        "Tim kamu memasang CAF sendiri.",
         "Berjalan di server kamu."
       ],
       "cta": "Lihat produk"
@@ -154,14 +162,14 @@
   "showcase": {
     "eyebrow": "Lihat langsung",
     "title": "Dari terminal sampai agent floor",
-    "description": "Satu CLI untuk menyiapkan repo kamu, panel terminal dan dashboard live untuk menjalankan dan memantau setiap run agent di server kamu sendiri.",
+    "description": "Dua app: caf-initiator menyiapkan repo dengan satu perintah, caf-orchestrator menjalankan dan menampilkan setiap agent di server kamu sendiri.",
     "enlarge": "Klik untuk memperbesar",
     "close": "Tutup",
     "items": {
       "cli": {
-        "tab": "CAF Initiator",
+        "tab": "Initiator · CLI",
         "title": "Satu command menyiapkan repo kamu",
-        "description": "caf-init mendeteksi stack kamu dan menulis knowledge base, agent, command, dan skill — sebagai draft untuk kamu review, tidak pernah menebak.",
+        "description": "caf-init mendeteksi stack kamu dan membuat draft agent, command, dan skill untuk kamu review.",
         "points": [
           "scaffold, curate, docs, export",
           "Deterministik, tanpa panggilan AI",
@@ -172,9 +180,9 @@
         "link": "/docs/caf-initiator"
       },
       "tui": {
-        "tab": "Terminal UI",
+        "tab": "Orchestrator · Terminal UI",
         "title": "Panel kontrol di terminal kamu",
-        "description": "pnpm tui menyalakan dan mematikan server, worker, dan Cloudflare tunnel, serta menampilkan setiap run secara live — tanpa browser, tanpa login, tanpa web server yang harus jalan.",
+        "description": "Nyalakan dan matikan server, worker, dan tunnel, lalu ikuti setiap run secara live — di terminal, tanpa browser atau login.",
         "points": [
           "Start dan stop server, worker, dan tunnel",
           "Run, Agent Floor, dan log dalam satu layar",
@@ -185,9 +193,9 @@
         "link": "/docs/caf-orchestrator#terminal-ui"
       },
       "dashboard": {
-        "tab": "Dashboard",
+        "tab": "Orchestrator · Dashboard",
         "title": "Lihat para agent bekerja",
-        "description": "Kantor beranimasi yang read-only, tempat Planner, agent implementasi, Reviewer, dan Manager bergerak seiring run berjalan. Total dan rata-rata biaya tampil di header. Mode live, replay, dan demo.",
+        "description": "Kantor animasi read-only: tiap agent bergerak mengikuti progres run, dengan total dan rata-rata biaya di header.",
         "points": [
           "Live, replay, dan demo",
           "Status dan event per agent",
@@ -197,24 +205,26 @@
         "cta": "Baca soal Agent Floor",
         "link": "/docs/caf-orchestrator#dashboard-monitoring"
       }
-    }
+    },
+    "play": "Lanjutkan putar otomatis",
+    "pause": "Jeda putar otomatis"
   },
   "pipeline": {
     "eyebrow": "Pipeline",
     "title": "Rangkaian agent jalan sendiri — merge tidak pernah otomatis",
-    "description": "Seluruh rangkaian agent berjalan otomatis begitu ticket siap. Satu-satunya langkah yang menunggu manusia adalah {review} — tidak ada jalur yang melewatkannya.",
+    "description": "Begitu ticket siap, rangkaian agent berjalan sendiri sampai pull request terbuka. Ia berhenti menunggu manusia hanya saat ada pertanyaan terbuka, persetujuan spec (opsional), atau gate yang terus gagal — dan {review} selalu keputusan manusia.",
     "reviewHighlight": "Merge",
-    "ariaLabel": "Diagram pipeline CAF Orchestrator: ticket jadi Ready for AI di Linear atau GitHub Issues, lalu mengalir lewat Planner, persetujuan spec opsional, agent implementasi, Validator, Reviewer, dan agent Docs opsional, membuka pull request, lalu menunggu manusia untuk merge — tidak ada auto-merge.",
+    "ariaLabel": "Diagram pipeline CAF Orchestrator: ticket jadi Ready for AI di Linear atau GitHub Issues, lalu mengalir lewat Planner, persetujuan spec opsional, agent implementasi, Validator, Reviewer, dan agent Docs opsional, membuka pull request, lalu menunggu manusia untuk merge. Pertanyaan terbuka, persetujuan spec, atau gate yang terus gagal menghentikan run untuk manusia, dan tidak ada auto-merge.",
     "stages": {
       "ticket": {
         "title": "Ticket",
         "subtitle": "Linear · GitHub Issues",
-        "detail": "Trigger begitu ticket pindah ke workflow state \"Ready for AI\" di Linear, atau GitHub Issue mendapat label ready-for-ai. Dukungan Jira direncanakan, belum diimplementasikan."
+        "detail": "Trigger begitu ticket pindah ke workflow state \"Ready for AI\" di Linear, atau GitHub Issue mendapat label ready-for-ai. Trigger yang sama melanjutkan run yang berhenti menunggu jawaban: pindahkan ticket kembali ke Ready for AI, atau pasang ulang label. Dukungan Jira direncanakan, belum diimplementasikan."
       },
       "plan": {
         "title": "Plan",
         "subtitle": "Planner menulis spec",
-        "detail": "Agent Planner membaca ticket dan menulis requirements.md berisi acceptance criteria bernomor, plus tasks.md — spec yang jadi acuan rangkaian agent berikutnya. Pertanyaan blocking yang terbuka menghentikan run dan ditanyakan di ticket."
+        "detail": "Agent Planner membaca ticket dan menulis requirements.md berisi acceptance criteria bernomor, plus tasks.md — spec yang jadi acuan rangkaian agent berikutnya. Pertanyaan blocking yang terbuka menghentikan run: draft spec di-push ke branch, pertanyaan ditanyakan di ticket, dan Planner melanjutkan dari jawabanmu saat ticket di-trigger lagi."
       },
       "approve": {
         "title": "Spec gate",
@@ -224,34 +234,40 @@
       "implement": {
         "title": "Implement",
         "subtitle": "Frontend/backend",
-        "detail": "Agent frontend dan backend menulis kode sesuai spec dan task-nya, masing-masing terbatas ke scope-nya sendiri, dan melaporkan satu baris bukti per acceptance criterion."
+        "detail": "Agent frontend dan backend menulis kode dari section tasks.md masing-masing dan menulis verify-report.md berisi satu baris bukti per acceptance criterion. Kalau report itu bukan SUCCESS, run berhenti dengan Draft PR."
       },
       "validate": {
         "title": "Validate",
         "subtitle": "Melapor, tidak memperbaiki",
-        "detail": "Agent Validator mengecek setiap acceptance criterion dengan menjalankan buktinya sendiri. Ia menulis validate-report.md dengan PASS, FAIL, atau UNVERIFIED per criterion dan tidak mengubah kode."
+        "detail": "Agent Validator mengecek setiap acceptance criterion dengan menjalankan buktinya sendiri. Ia menulis validate-report.md dengan PASS, FAIL, atau UNVERIFIED per criterion dan tidak mengubah kode. Saat FAIL, agent implementasi retry sekali; kalau masih gagal, atau semua criterion UNVERIFIED, run berhenti dengan Draft PR."
       },
       "reviewer": {
         "title": "Reviewer",
         "subtitle": "Verdict",
-        "detail": "Agent Reviewer me-review diff terhadap spec dan menulis review-notes.md berisi verdict, supaya manusia bisa approve/reject lebih cepat."
+        "detail": "Agent Reviewer me-review diff terhadap spec dan menulis review-notes.md berisi verdict: APPROVE, CHANGES_REQUESTED, atau DEFER. CHANGES_REQUESTED mengembalikan pekerjaan ke implementasi sekali; kalau masih diminta berubah, run berhenti dengan Draft PR."
       },
       "docs": {
         "title": "Docs",
         "subtitle": "Agent docs (opsional)",
-        "detail": "Kalau repo punya agent dokumentasi, ia meng-update dokumentasi yang terdampak oleh perubahan. Repo tanpa agent itu melewati langkah ini."
+        "detail": "Kalau rencana memuat docs task dan repo punya agent dokumentasi, ia meng-update dokumentasi yang terdampak perubahan. Selain itu langkah ini dilewati. Error di docs tidak pernah menggagalkan run."
       },
       "pr": {
         "title": "PR",
         "subtitle": "Branch di-push",
-        "detail": "Branch di-push dan pull request dibuka otomatis, dengan ringkasan acceptance criteria dan rangkaian artifact di deskripsinya."
+        "detail": "Branch di-push dan pull request dibuka otomatis, dengan ringkasan acceptance criteria dan rangkaian artifact di deskripsinya, lalu link-nya diposting di ticket. Run yang dilanjutkan meng-update Draft PR yang sudah ada dan menandainya Ready for review."
       },
       "merge": {
         "title": "Merge",
         "subtitle": "Tanpa auto-merge",
-        "detail": "Satu-satunya checkpoint manusia yang wajib. Kalau validasi gagal atau reviewer beri verdict \"changes requested\", pipeline retry sekali, lalu membuka Draft PR dan diserahkan ke manusia — tidak pernah ada merge otomatis."
+        "detail": "Satu-satunya langkah yang selalu keputusan manusia. Saat gate terus gagal, run berhenti dengan Draft PR berisi report yang gagal — perbaiki manual, atau komentar /caf-retry-pipeline untuk melanjutkan. Tidak pernah ada merge otomatis."
       }
-    }
+    },
+    "legend": {
+      "agent": "Agent — jalan sendiri",
+      "human": "Manusia — perlu orang"
+    },
+    "who": "Manusia",
+    "onFail": "Kalau gagal: Draft PR untuk manusia"
   },
   "faq": {
     "eyebrow": "FAQ",
@@ -289,7 +305,7 @@
   },
   "index": {
     "title": "CAF — Coderium Agent Framework",
-    "description": "AI agent orchestration framework dengan governance ketat, dari ticket sampai PR."
+    "description": "CAF mengubah ticket jadi pull request lewat agent AI dengan governance ketat. Dua app: caf-initiator (CLI scaffold) dan caf-orchestrator (webhook runner)."
   },
   "about": {
     "title": "About",

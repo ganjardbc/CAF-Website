@@ -55,33 +55,38 @@
     "badge": "CAF v0.1.11 — early access",
     "new": "New",
     "title": "Coderium Agent Framework",
-    "description": "CAF takes a ticket from a written spec to a pull request — Plan, Implement, Validate, Review — behind quality gates, then stops for a human. No auto-merge. Free and open, running directly in your own repo.",
+    "description": "CAF turns a ticket into a pull request with AI agents. You decide every merge.",
     "getStarted": "Get Started",
     "github": "View on GitHub",
-    "npm": "View on npm"
+    "npm": "View on npm",
+    "tags": {
+      "free": "Free",
+      "open": "Open source",
+      "selfHosted": "Self-hosted"
+    }
   },
   "featureGrid": {
-    "eyebrow": "What is CAF?",
-    "title": "A framework, not a black box",
+    "eyebrow": "Why CAF",
+    "title": "AI agents that work on their own, but never merge on their own",
     "items": [
       {
         "title": "Spec-driven",
         "description": "The Planner writes a spec with numbered acceptance criteria first. A blocking question stops the run and is asked on the ticket, and an approved spec is never edited by an agent."
       },
       {
-        "title": "PIV discipline",
+        "title": "Plan → Implement → Verify",
         "description": "Every task runs through Plan → Implement → Verify. A failing gate retries once, then stops with a Draft PR and hands off to a human."
       },
       {
-        "title": "Artifact handoff via Markdown",
+        "title": "Every phase leaves a file in your repo",
         "description": "Each phase's output is stored as a Markdown file in the repo — not chat context that disappears once the session ends."
       },
       {
-        "title": "Ticket-triggered pipeline",
+        "title": "Starts when a ticket is ready",
         "description": "The Orchestrator is triggered automatically when a ticket becomes ready — a Linear workflow state or a GitHub Issue label. Jira support is planned."
       },
       {
-        "title": "Gates that report, not fix",
+        "title": "Checkers never edit what they check",
         "description": "The Validator checks every acceptance criterion and the Reviewer checks the diff against the spec. They write a report and don't change the code they are checking — a failure goes back to the implementation agent."
       },
       {
@@ -91,10 +96,10 @@
     ]
   },
   "coreComponents": {
-    "eyebrow": "Two core components",
-    "title": "Scaffold locally, run on your own VPS",
+    "eyebrow": "Two apps",
+    "title": "Two apps, one workflow",
     "initiator": {
-      "eyebrow": "CLI scaffold generator",
+      "eyebrow": "Step 1 · once per repo · caf-initiator",
       "title": "CAF Initiator",
       "description": "Automatically detects your project's stack, then generates the knowledge base your agents need — five agents, five slash commands and nine skills. Deterministic: it never calls an AI model.",
       "points": [
@@ -104,7 +109,7 @@
       ]
     },
     "orchestrator": {
-      "eyebrow": "Webhook-driven agent runner",
+      "eyebrow": "Step 2 · every ticket · caf-orchestrator",
       "title": "CAF Orchestrator",
       "description": "Fastify + BullMQ + Redis, running on your own small VPS. Receives webhooks from your tracker, then spawns headless Claude Code agents for each phase.",
       "points": [
@@ -113,7 +118,10 @@
         "Gate failures open a Draft PR you can resume with /caf-retry-pipeline",
         "Self-hosted — runs on your own VPS, not a Coderium SaaS"
       ]
-    }
+    },
+    "copy": "Copy",
+    "copied": "Copied",
+    "guide": "Full guide →"
   },
   "engagement": {
     "eyebrow": "Ways to work with us",
@@ -122,7 +130,7 @@
       "title": "Self-install",
       "subtitle": "Free and open source.",
       "points": [
-        "Your team installs CAF or AI Code Reviewer on its own.",
+        "Your team installs CAF on its own.",
         "Runs on your own server."
       ],
       "cta": "View product"
@@ -154,14 +162,14 @@
   "showcase": {
     "eyebrow": "See it in action",
     "title": "From the terminal to the agent floor",
-    "description": "One CLI to set up your repo, a terminal panel and a live dashboard to run and watch every agent run on your own server.",
+    "description": "Two apps: caf-initiator sets up your repo with one command, caf-orchestrator runs and shows every agent on your own server.",
     "enlarge": "Click to enlarge",
     "close": "Close",
     "items": {
       "cli": {
-        "tab": "CAF Initiator",
+        "tab": "Initiator · CLI",
         "title": "One command sets up your repo",
-        "description": "caf-init detects your stack and writes the knowledge base, agents, commands and skills — as drafts you review, never guesses.",
+        "description": "caf-init detects your stack and drafts the agents, commands and skills for you to review.",
         "points": [
           "scaffold, curate, docs, export",
           "Deterministic, no AI calls",
@@ -172,9 +180,9 @@
         "link": "/docs/caf-initiator"
       },
       "tui": {
-        "tab": "Terminal UI",
+        "tab": "Orchestrator · Terminal UI",
         "title": "A control panel in your terminal",
-        "description": "pnpm tui starts and stops the server, worker and Cloudflare tunnel, and shows every run live — no browser, no login, no running web server needed.",
+        "description": "Start and stop the server, worker and tunnel, and follow every run live — in your terminal, no browser or login.",
         "points": [
           "Start and stop server, worker and tunnel",
           "Runs, Agent Floor and logs in one screen",
@@ -185,9 +193,9 @@
         "link": "/docs/caf-orchestrator#terminal-ui"
       },
       "dashboard": {
-        "tab": "Dashboard",
+        "tab": "Orchestrator · Dashboard",
         "title": "Watch the agents work",
-        "description": "A read-only, animated office where the Planner, implementation agents, Reviewer and Manager move as a run progresses, with total and average cost in the header. Live, replay and demo modes.",
+        "description": "A read-only animated office: each agent moves as its run progresses, with total and average cost in the header.",
         "points": [
           "Live, replay and demo",
           "Per-agent status and events",
@@ -197,24 +205,26 @@
         "cta": "Read about the Agent Floor",
         "link": "/docs/caf-orchestrator#monitoring-dashboard"
       }
-    }
+    },
+    "play": "Resume autoplay",
+    "pause": "Pause autoplay"
   },
   "pipeline": {
     "eyebrow": "Pipeline",
     "title": "The agent chain runs itself — merging never does",
-    "description": "The whole agent chain runs automatically once a ticket is ready. The only step that waits on a human is {review} — there's no path that skips it.",
+    "description": "Once a ticket is ready, the agent chain runs on its own up to an open pull request. It pauses for a person only on an open question, an optional spec approval, or a gate that keeps failing — and {review} is always a human decision.",
     "reviewHighlight": "Merge",
-    "ariaLabel": "CAF Orchestrator pipeline diagram: a ticket becomes Ready for AI in Linear or GitHub Issues, then flows through the Planner, an optional spec approval, the implementation agents, the Validator, the Reviewer and an optional Docs agent, opens a pull request, and waits for a human to merge it — there is no auto-merge.",
+    "ariaLabel": "CAF Orchestrator pipeline diagram: a ticket becomes Ready for AI in Linear or GitHub Issues, then flows through the Planner, an optional spec approval, the implementation agents, the Validator, the Reviewer and an optional Docs agent, opens a pull request, and waits for a human to merge it. An open question, a spec approval or a gate that keeps failing pauses the run for a person, and there is no auto-merge.",
     "stages": {
       "ticket": {
         "title": "Ticket",
         "subtitle": "Linear · GitHub Issues",
-        "detail": "Triggered when a ticket moves into Linear's \"Ready for AI\" workflow state, or a GitHub Issue gets the ready-for-ai label. Jira support is planned but not yet implemented."
+        "detail": "Triggered when a ticket moves into Linear's \"Ready for AI\" workflow state, or a GitHub Issue gets the ready-for-ai label. The same trigger resumes a run that paused for an answer: move the ticket back to Ready for AI, or re-apply the label. Jira support is planned but not yet implemented."
       },
       "plan": {
         "title": "Plan",
         "subtitle": "Planner writes the spec",
-        "detail": "The Planner agent reads the ticket and writes requirements.md with numbered acceptance criteria, plus tasks.md — the spec the rest of the chain works from. An open blocking question stops the run and is asked on the ticket."
+        "detail": "The Planner agent reads the ticket and writes requirements.md with numbered acceptance criteria, plus tasks.md — the spec the rest of the chain works from. An open blocking question stops the run: the draft spec is pushed to the branch, the question is asked on the ticket, and the Planner continues from your answer when the ticket is triggered again."
       },
       "approve": {
         "title": "Spec gate",
@@ -224,34 +234,40 @@
       "implement": {
         "title": "Implement",
         "subtitle": "Frontend/backend",
-        "detail": "Frontend and backend agents write the code per the spec and its tasks, each restricted to its own scope, and report one line of evidence per acceptance criterion."
+        "detail": "Frontend and backend agents write the code from their own section of tasks.md and write verify-report.md with one line of evidence per acceptance criterion. If that report is not SUCCESS, the run stops with a Draft PR."
       },
       "validate": {
         "title": "Validate",
         "subtitle": "Reports, never fixes",
-        "detail": "The Validator agent checks every acceptance criterion by running its evidence itself. It writes validate-report.md with PASS, FAIL or UNVERIFIED per criterion and does not change code."
+        "detail": "The Validator agent checks every acceptance criterion by running its evidence itself. It writes validate-report.md with PASS, FAIL or UNVERIFIED per criterion and does not change code. On FAIL the implementation agents retry once; if it still fails, or every criterion is UNVERIFIED, the run stops with a Draft PR."
       },
       "reviewer": {
         "title": "Reviewer",
         "subtitle": "Verdict",
-        "detail": "The Reviewer agent reviews the diff against the spec and writes review-notes.md with a verdict, so a human can approve or reject faster."
+        "detail": "The Reviewer agent reviews the diff against the spec and writes review-notes.md with a verdict: APPROVE, CHANGES_REQUESTED or DEFER. CHANGES_REQUESTED sends the work back to implementation once; if it is still requested, the run stops with a Draft PR."
       },
       "docs": {
         "title": "Docs",
         "subtitle": "Optional docs agent",
-        "detail": "If the repo has a documentation agent, it updates any docs affected by the change. Repos without one skip this step."
+        "detail": "If the plan includes docs tasks and the repo has a documentation agent, it updates the docs affected by the change. Otherwise this step is skipped. A docs error never fails the run."
       },
       "pr": {
         "title": "PR",
         "subtitle": "Branch pushed",
-        "detail": "The branch is pushed and a pull request is opened automatically, with an acceptance-criteria summary and the artifact chain in its description."
+        "detail": "The branch is pushed and a pull request is opened automatically, with an acceptance-criteria summary and the artifact chain in its description, and the link is posted on the ticket. A resumed run updates the existing Draft PR and marks it Ready for review."
       },
       "merge": {
         "title": "Merge",
         "subtitle": "No auto-merge",
-        "detail": "The one mandatory human checkpoint. On a validation failure or a reviewer \"changes requested\" verdict, the pipeline retries once, then opens a Draft PR and hands off to a human — nothing ever merges automatically."
+        "detail": "The one step that is always a human decision. When a gate keeps failing, the run stops with a Draft PR holding the failing report — fix it by hand, or comment /caf-retry-pipeline to resume. Nothing ever merges automatically."
       }
-    }
+    },
+    "legend": {
+      "agent": "Agent — runs on its own",
+      "human": "Human — needs a person"
+    },
+    "who": "Human",
+    "onFail": "If it fails: Draft PR for a human"
   },
   "faq": {
     "eyebrow": "FAQ",
@@ -289,7 +305,7 @@
   },
   "index": {
     "title": "CAF — Coderium Agent Framework",
-    "description": "AI agent orchestration framework with strict governance, from ticket to PR."
+    "description": "CAF turns tickets into pull requests with AI agents under strict governance. Two apps: caf-initiator (CLI scaffold) and caf-orchestrator (webhook runner)."
   },
   "about": {
     "title": "About",

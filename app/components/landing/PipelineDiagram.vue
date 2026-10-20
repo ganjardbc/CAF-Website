@@ -3,13 +3,42 @@ const { t } = useI18n()
 
 const stageKeys = ['ticket', 'plan', 'approve', 'implement', 'validate', 'reviewer', 'docs', 'pr', 'merge'] as const
 
+type StageKey = (typeof stageKeys)[number]
+
+interface StageMeta {
+  icon: string
+  kind: 'agent' | 'human'
+  actor?: string
+  files?: string[]
+  gate?: boolean
+  optional?: boolean
+}
+
+const meta: Record<StageKey, StageMeta> = {
+  ticket: { icon: 'lucide:ticket', kind: 'human' },
+  plan: { icon: 'lucide:clipboard-list', kind: 'agent', actor: 'caf-planner', files: ['requirements.md', 'tasks.md'] },
+  approve: { icon: 'lucide:user-check', kind: 'human', optional: true },
+  implement: {
+    icon: 'lucide:code-xml',
+    kind: 'agent',
+    actor: 'caf-frontend · caf-backend',
+    files: ['verify-report.md'],
+    gate: true,
+  },
+  validate: { icon: 'lucide:shield-check', kind: 'agent', actor: 'caf-validator', files: ['validate-report.md'], gate: true },
+  reviewer: { icon: 'lucide:search-check', kind: 'agent', actor: 'caf-reviewer', files: ['review-notes.md'], gate: true },
+  docs: { icon: 'lucide:book-open-text', kind: 'agent', actor: 'caf-documentation', optional: true },
+  pr: { icon: 'lucide:git-pull-request-arrow', kind: 'agent', actor: 'caf-orchestrator' },
+  merge: { icon: 'lucide:lock', kind: 'human' },
+}
+
 const stages = computed(() =>
   stageKeys.map((key) => ({
     key,
     title: t(`pipeline.stages.${key}.title`),
     subtitle: t(`pipeline.stages.${key}.subtitle`),
     detail: t(`pipeline.stages.${key}.detail`),
-    highlight: key === 'merge',
+    ...meta[key],
   })),
 )
 
@@ -22,7 +51,7 @@ function toggleDetail(key: string) {
 
 <template>
   <section class="mx-auto max-w-[720px] px-lg pt-2xl pb-4xl sm:pt-3xl sm:pb-section">
-    <div class="mb-2xl text-center">
+    <div class="mb-xl text-center">
       <span class="font-mono text-xs font-medium uppercase tracking-wide text-mute">
         {{ t('pipeline.eyebrow') }}
       </span>
@@ -40,56 +69,103 @@ function toggleDetail(key: string) {
       </i18n-t>
     </div>
 
+    <ul class="mb-2xl flex flex-wrap items-center justify-center gap-x-lg gap-y-xs text-xs text-body sm:text-sm">
+      <li class="flex items-center gap-xs">
+        <span class="h-3 w-3 rounded-full border border-ink" aria-hidden="true" />
+        {{ t('pipeline.legend.agent') }}
+      </li>
+      <li class="flex items-center gap-xs">
+        <span class="h-3 w-3 rounded-sm border border-ink bg-ink" aria-hidden="true" />
+        {{ t('pipeline.legend.human') }}
+      </li>
+    </ul>
+
     <ol :aria-label="t('pipeline.ariaLabel')" class="flex flex-col">
       <li v-for="(stage, index) in stages" :key="stage.key" class="flex gap-md sm:gap-lg">
         <div class="flex flex-col items-center">
           <div
-            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border font-mono text-sm sm:h-12 sm:w-12 sm:text-base"
-            :class="
-              stage.highlight
-                ? 'border-ink bg-ink text-canvas-elevated'
-                : 'border-hairline bg-canvas-elevated text-faint'
-            "
+            class="flex h-10 w-10 shrink-0 items-center justify-center border border-ink sm:h-12 sm:w-12"
+            :class="[
+              stage.kind === 'human' ? 'rounded-md bg-ink text-canvas-elevated' : 'rounded-full bg-canvas-elevated text-ink',
+              stage.optional ? 'border-dashed' : '',
+            ]"
           >
-            <Icon v-if="stage.highlight" name="lucide:lock" class="h-5 w-5" />
-            <span v-else>{{ String(index + 1).padStart(2, '0') }}</span>
+            <Icon :name="stage.icon" class="h-5 w-5" />
           </div>
+
           <div v-if="index < stages.length - 1" class="my-xxs w-px flex-1 bg-hairline" />
         </div>
 
-        <div class="relative flex-1" :class="index === stages.length - 1 ? '' : 'pb-xl sm:pb-2xl'">
-          <button
-            type="button"
-            class="flex w-full items-center justify-between gap-sm pt-xxs text-left sm:pt-xs"
-            :aria-expanded="openKey === stage.key"
-            @click="toggleDetail(stage.key)"
+        <div class="min-w-0 flex-1" :class="index === stages.length - 1 ? '' : 'pb-md sm:pb-lg'">
+          <div
+            class="rounded-md border bg-canvas-elevated"
+            :class="
+              openKey === stage.key
+                ? 'border-ink/30 shadow-[0px_2px_2px_rgba(0,0,0,0.04),0px_8px_16px_-4px_rgba(0,0,0,0.04)]'
+                : 'border-hairline hover:border-ink/20'
+            "
           >
-            <p class="text-base font-semibold text-ink sm:text-lg">{{ stage.title }}</p>
+            <button
+              type="button"
+              class="flex w-full items-start gap-sm rounded-md p-md text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-link"
+              :aria-expanded="openKey === stage.key"
+              :aria-controls="`pipeline-detail-${stage.key}`"
+              @click="toggleDetail(stage.key)"
+            >
+              <div class="min-w-0 flex-1">
+                <div class="flex flex-wrap items-center gap-xs">
+                  <span class="font-mono text-xs text-faint">{{ String(index + 1).padStart(2, '0') }}</span>
+                  <span
+                    v-if="stage.kind === 'human'"
+                    class="rounded-pill bg-ink px-xs py-xxs font-mono text-[10px] uppercase tracking-wide text-canvas-elevated"
+                  >
+                    {{ t('pipeline.who') }}
+                  </span>
+                  <span
+                    v-else
+                    class="rounded-pill border border-hairline px-xs py-xxs font-mono text-[10px] tracking-wide text-body"
+                  >
+                    {{ stage.actor }}
+                  </span>
+                </div>
 
-            <Icon
-              name="lucide:chevron-down"
-              class="h-4 w-4 shrink-0 text-faint transition-transform duration-200"
-              :class="{ 'rotate-180': openKey === stage.key }"
-            />
-          </button>
+                <p class="mt-xs text-base font-semibold text-ink sm:text-lg">{{ stage.title }}</p>
+                <p class="mt-xxs text-sm text-mute sm:text-base">{{ stage.subtitle }}</p>
 
-          <p class="mt-xxs text-sm text-mute sm:text-base">{{ stage.subtitle }}</p>
+                <div
+                  v-if="stage.files || stage.gate"
+                  class="mt-sm flex flex-wrap items-center gap-x-sm gap-y-xs"
+                >
+                  <span
+                    v-for="file in stage.files"
+                    :key="file"
+                    class="inline-flex items-center gap-xxs rounded-sm border border-hairline bg-canvas px-xs py-xxs font-mono text-xs text-body"
+                  >
+                    <Icon name="lucide:file-text" class="h-3 w-3 text-mute" />
+                    {{ file }}
+                  </span>
+                  <span v-if="stage.gate" class="inline-flex items-center gap-xxs text-xs text-mute">
+                    <Icon name="lucide:corner-down-right" class="h-3 w-3" />
+                    {{ t('pipeline.onFail') }}
+                  </span>
+                </div>
+              </div>
 
-          <Transition
-            enter-active-class="transition ease-out duration-150"
-            enter-from-class="opacity-0 -translate-y-1"
-            enter-to-class="opacity-100 translate-y-0"
-            leave-active-class="transition ease-in duration-100"
-            leave-from-class="opacity-100 translate-y-0"
-            leave-to-class="opacity-0 -translate-y-1"
-          >
+              <Icon
+                name="lucide:chevron-down"
+                class="mt-xxs h-4 w-4 shrink-0 text-faint"
+                :class="{ 'rotate-180': openKey === stage.key }"
+              />
+            </button>
+
             <p
               v-if="openKey === stage.key"
-              class="mt-sm max-w-md rounded-md border border-hairline bg-canvas-elevated px-sm py-xs text-sm text-body shadow-[0px_2px_2px_rgba(0,0,0,0.04),0px_8px_16px_-4px_rgba(0,0,0,0.04)]"
+              :id="`pipeline-detail-${stage.key}`"
+              class="mx-md border-t border-hairline pt-sm pb-md text-sm text-body"
             >
               {{ stage.detail }}
             </p>
-          </Transition>
+          </div>
         </div>
       </li>
     </ol>

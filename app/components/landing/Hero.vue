@@ -1,6 +1,12 @@
 <script setup lang="ts">
 const { t } = useI18n()
 const localePath = useLocalePath()
+
+const tags = [
+  { key: 'free', icon: 'lucide:gift' },
+  { key: 'open', icon: 'lucide:code-xml' },
+  { key: 'selfHosted', icon: 'lucide:server' },
+] as const
 </script>
 
 <template>
@@ -33,6 +39,21 @@ const localePath = useLocalePath()
         {{ t('hero.description') }}
       </p>
 
+      <div class="my-xl flex w-full justify-center">
+        <LandingFlowStrip />
+      </div>
+
+      <ul class="flex flex-wrap items-center justify-center gap-xs">
+        <li
+          v-for="tag in tags"
+          :key="tag.key"
+          class="inline-flex items-center gap-xxs rounded-pill border border-hairline bg-canvas-elevated px-sm py-xxs font-mono text-xs text-body"
+        >
+          <Icon :name="tag.icon" class="h-3 w-3 text-mute" />
+          {{ t(`hero.tags.${tag.key}`) }}
+        </li>
+      </ul>
+
       <div class="mt-xl flex flex-col items-center gap-sm sm:flex-row">
         <NuxtLink
           :to="localePath('/docs')"
@@ -49,8 +70,6 @@ const localePath = useLocalePath()
           {{ t('hero.github') }}
         </a>
       </div>
-
-      <LandingCommandTabs class="mt-2xl" />
     </div>
   </section>
 </template>

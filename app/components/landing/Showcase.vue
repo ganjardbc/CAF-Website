@@ -13,9 +13,9 @@ type Slide = {
 }
 
 const slides: Slide[] = [
-  { key: 'dashboard', icon: 'lucide:layout-dashboard', src: '/images/caf-agent-floor.webp', width: 2000, height: 1256, chrome: true, url: 'your-vps/dashboard' },
-  { key: 'tui', icon: 'lucide:square-terminal', src: '/images/caf-tui.webp', width: 2000, height: 1390, chrome: false, url: '' },
   { key: 'cli', icon: 'lucide:terminal', src: '/images/caf-cli.webp', width: 2000, height: 1406, chrome: false, url: '' },
+  { key: 'tui', icon: 'lucide:square-terminal', src: '/images/caf-tui.webp', width: 2000, height: 1390, chrome: false, url: '' },
+  { key: 'dashboard', icon: 'lucide:layout-dashboard', src: '/images/caf-agent-floor.webp', width: 2000, height: 1256, chrome: true, url: 'your-vps/dashboard' },
 ]
 
 const active = ref(0)
@@ -26,6 +26,30 @@ const points = computed(() =>
 
 const lightbox = ref(false)
 
+// Autoplay: the progress bar on the active tab is a CSS animation, and its end
+// advances to the next slide. Every pause source just pauses that animation.
+// `autoplay` only turns on after mount, so the prerendered page has no bar and
+// reduced-motion visitors never get one.
+const root = ref<HTMLElement | null>(null)
+const autoplay = ref(false)
+const userPaused = ref(false)
+const hovering = ref(false)
+const inView = ref(true)
+const tabHidden = ref(false)
+const paused = computed(
+  () => userPaused.value || hovering.value || !inView.value || tabHidden.value || lightbox.value,
+)
+
+function next() {
+  active.value = (active.value + 1) % slides.length
+}
+
+let observer: IntersectionObserver | undefined
+
+function onVisibility() {
+  tabHidden.value = document.hidden
+}
+
 function onKey(e: KeyboardEvent) {
   if (e.key === 'Escape') lightbox.value = false
 }
@@ -35,22 +59,27 @@ watch(lightbox, (open) => {
   document.body.style.overflow = open ? 'hidden' : ''
 })
 
-onMounted(() => window.addEventListener('keydown', onKey))
+onMounted(() => {
+  window.addEventListener('keydown', onKey)
+  document.addEventListener('visibilitychange', onVisibility)
+
+  autoplay.value = !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  if (root.value && 'IntersectionObserver' in window) {
+    observer = new IntersectionObserver(([entry]) => (inView.value = !!entry?.isIntersecting), { threshold: 0.3 })
+    observer.observe(root.value)
+  }
+})
+
 onBeforeUnmount(() => {
   window.removeEventListener('keydown', onKey)
+  document.removeEventListener('visibilitychange', onVisibility)
+  observer?.disconnect()
   if (import.meta.client) document.body.style.overflow = ''
 })
 </script>
 
 <template>
-  <section class="relative overflow-hidden">
-    <div
-      class="pointer-events-none absolute inset-x-0 top-1/3 mx-auto h-[420px] max-w-[900px] opacity-20 blur-[110px] dark:opacity-30"
-      style="background: radial-gradient(40% 50% at 30% 50%, #0070f3 0%, transparent 100%),
-        radial-gradient(40% 50% at 70% 50%, #eb367f 0%, transparent 100%),
-        radial-gradient(30% 40% at 50% 40%, #f5a623 0%, transparent 100%);"
-    />
-
+  <section ref="root" class="relative overflow-hidden">
     <div class="relative mx-auto max-w-[1200px] px-lg pt-2xl pb-4xl sm:pt-3xl sm:pb-section">
       <div class="mb-xl text-center">
         <span class="font-mono text-xs font-medium uppercase tracking-wide text-mute">
@@ -64,7 +93,13 @@ onBeforeUnmount(() => {
         </p>
       </div>
 
-      <div class="grid items-start gap-xl lg:grid-cols-[340px_minmax(0,1fr)] lg:gap-xxl">
+      <div
+        class="grid items-start gap-xl lg:grid-cols-[340px_minmax(0,1fr)] lg:gap-xxl"
+        @mouseenter="hovering = true"
+        @mouseleave="hovering = false"
+        @focusin="hovering = true"
+        @focusout="hovering = false"
+      >
       <div class="min-w-0">
       <div
         role="tablist"
@@ -79,12 +114,19 @@ onBeforeUnmount(() => {
           role="tab"
           :aria-selected="active === index"
           :aria-controls="`showcase-panel-${slide.key}`"
-          class="flex min-w-0 flex-col items-center justify-center gap-xxs rounded-md px-xxs py-sm text-center text-xs font-medium leading-tight transition-colors sm:inline-flex sm:flex-row sm:gap-xs sm:rounded-pill sm:px-md sm:py-xs sm:text-sm lg:justify-start lg:rounded-md"
+          class="relative flex min-w-0 flex-col items-center justify-center gap-xxs overflow-hidden rounded-md px-xxs py-sm text-center text-xs font-medium leading-tight transition-colors sm:inline-flex sm:flex-row sm:gap-xs sm:rounded-pill sm:px-md sm:py-xs sm:text-sm lg:justify-start lg:rounded-md"
           :class="active === index ? 'bg-ink text-canvas-elevated' : 'text-body hover:text-ink'"
           @click="active = index"
         >
           <Icon :name="slide.icon" class="h-4 w-4" />
           {{ t(`showcase.items.${slide.key}.tab`) }}
+          <span
+            v-if="autoplay && active === index"
+            class="showcase-progress absolute inset-x-0 bottom-0 h-0.5 bg-canvas-elevated/50"
+            :style="{ animationPlayState: paused ? 'paused' : 'running' }"
+            aria-hidden="true"
+            @animationend="next"
+          />
         </button>
       </div>
 
@@ -107,7 +149,7 @@ onBeforeUnmount(() => {
           </ul>
         </div>
 
-        <div class="mt-lg text-center lg:text-left">
+        <div class="mt-lg flex items-center justify-center gap-md lg:justify-start">
           <NuxtLink
             :to="localePath(t(`showcase.items.${current.key}.link`))"
             class="inline-flex items-center gap-xxs text-sm font-medium text-link hover:underline"
@@ -115,6 +157,15 @@ onBeforeUnmount(() => {
             {{ t(`showcase.items.${current.key}.cta`) }}
             <Icon name="lucide:arrow-right" class="h-4 w-4" />
           </NuxtLink>
+          <button
+            v-if="autoplay"
+            type="button"
+            class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-hairline bg-canvas-elevated text-mute transition-colors hover:text-ink"
+            :aria-label="userPaused ? t('showcase.play') : t('showcase.pause')"
+            @click="userPaused = !userPaused"
+          >
+            <Icon :name="userPaused ? 'lucide:play' : 'lucide:pause'" class="h-3.5 w-3.5" />
+          </button>
         </div>
       </div>
 
@@ -211,3 +262,19 @@ onBeforeUnmount(() => {
     </Teleport>
   </section>
 </template>
+
+<style scoped>
+.showcase-progress {
+  transform-origin: left;
+  animation: showcase-progress 6s linear forwards;
+}
+
+@keyframes showcase-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+</style>
