@@ -21,9 +21,9 @@ const active = ref(0)
         {{ tab.label }}
       </button>
     </div>
-    <div class="flex items-center justify-between gap-sm px-md py-sm">
-      <code class="truncate font-mono text-sm text-ink">{{ tabs[active].command }}</code>
+    <div class="flex items-center justify-start gap-sm px-md py-sm">
       <span class="shrink-0 text-xs text-faint">$</span>
+      <code class="truncate font-mono text-sm text-ink">{{ tabs[active].command }}</code>
     </div>
   </div>
 </template>
