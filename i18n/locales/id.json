@@ -115,10 +115,46 @@
       ]
     }
   },
+  "engagement": {
+    "eyebrow": "Cara bekerja sama",
+    "title": "Cara kerja sama.",
+    "self": {
+      "title": "Pasang sendiri",
+      "subtitle": "Gratis dan open source.",
+      "points": [
+        "Tim kamu memasang CAF atau AI Code Reviewer sendiri.",
+        "Berjalan di server kamu."
+      ],
+      "cta": "Lihat produk"
+    },
+    "installed": {
+      "title": "Dipasang Coderium",
+      "subtitle": "Mulai dari audit gratis, lalu penawaran tertulis.",
+      "points": [
+        "Audit gratis 30-60 menit untuk melihat apakah AI memang membantu tim kamu.",
+        "Penawaran tertulis dengan lingkup tetap.",
+        "Kami memasang dan menyesuaikan di server kamu."
+      ],
+      "cta": "Pesan audit gratis"
+    },
+    "support": {
+      "title": "Dukungan bulanan",
+      "subtitle": "Opsional, setelah pemasangan.",
+      "points": [
+        "Pilihan setelah pemasangan selesai.",
+        "Jam kerja terbatas per bulan."
+      ],
+      "cta": "Tanya soal dukungan"
+    },
+    "partner": {
+      "title": "Program design partner",
+      "description": "Untuk 3 klien pertama, kami memberi harga khusus. Imbalannya, kamu mengizinkan kami menulis studi kasus dari pemasangan tersebut."
+    }
+  },
   "showcase": {
     "eyebrow": "Lihat langsung",
     "title": "Dari terminal sampai agent floor",
-    "description": "Satu CLI untuk menyiapkan repo kamu, dan dashboard live untuk memantau setiap run agent di server kamu sendiri.",
+    "description": "Satu CLI untuk menyiapkan repo kamu, panel terminal dan dashboard live untuk menjalankan dan memantau setiap run agent di server kamu sendiri.",
     "enlarge": "Klik untuk memperbesar",
     "close": "Tutup",
     "items": {
@@ -135,29 +171,29 @@
         "cta": "Baca docs CAF Initiator",
         "link": "/docs/caf-initiator"
       },
+      "tui": {
+        "tab": "Terminal UI",
+        "title": "Panel kontrol di terminal kamu",
+        "description": "pnpm tui menyalakan dan mematikan server, worker, dan Cloudflare tunnel, serta menampilkan setiap run secara live — tanpa browser, tanpa login, tanpa web server yang harus jalan.",
+        "points": [
+          "Start dan stop server, worker, dan tunnel",
+          "Run, Agent Floor, dan log dalam satu layar",
+          "Command palette dan retry job gagal"
+        ],
+        "alt": "Terminal UI CAF Orchestrator: status proses, kartu ringkasan, daftar run, Agent Floor versi teks dengan satu kartu per agent, sidebar kontrol berisi URL tunnel, dan laci log",
+        "cta": "Baca soal Terminal UI",
+        "link": "/docs/caf-orchestrator#terminal-ui"
+      },
       "dashboard": {
         "tab": "Dashboard",
-        "title": "Setiap run pipeline, secara live",
-        "description": "Dashboard Orchestrator menampilkan fase PIV, retry, biaya nyata, dan artifact tiap run, diperbarui real-time.",
-        "points": [
-          "Plan · Implement · Verify per run",
-          "Retry dan biaya nyata",
-          "Link artifact dan PR review"
-        ],
-        "alt": "Dashboard CAF: penghitung run aktif, selesai, dan butuh perhatian, serta grid run pipeline dengan fase, retry, dan biayanya",
-        "cta": "Baca soal dashboard",
-        "link": "/docs/caf-orchestrator#dashboard-monitoring"
-      },
-      "floor": {
-        "tab": "Agent Floor",
         "title": "Lihat para agent bekerja",
-        "description": "Kantor beranimasi yang read-only, tempat Planner, agent implementasi, Reviewer, dan Manager bergerak seiring run berjalan. Mode live, replay, dan demo.",
+        "description": "Kantor beranimasi yang read-only, tempat Planner, agent implementasi, Reviewer, dan Manager bergerak seiring run berjalan. Total dan rata-rata biaya tampil di header. Mode live, replay, dan demo.",
         "points": [
           "Live, replay, dan demo",
           "Status dan event per agent",
           "Tanpa auto-merge di PR gate"
         ],
-        "alt": "CAF Agent Floor: kantor pixel-art dengan agent di mejanya, PR gate, dan ruang meeting, beserta panel status dan event agent",
+        "alt": "CAF Agent Floor: kantor pixel-art dengan agent di mejanya, PR gate, dan ruang meeting, dengan total biaya di header, beserta panel status dan event agent",
         "cta": "Baca soal Agent Floor",
         "link": "/docs/caf-orchestrator#dashboard-monitoring"
       }
@@ -272,7 +308,7 @@
     "metaDescription": "Histori rilis CAF (Coderium Agent Framework).",
     "eyebrow": "Changelog",
     "heading": "Histori rilis",
-    "intro": "CAF Initiator ada di v0.1.11, dan CAF Orchestrator di-deploy dari branch main-nya — halaman ini akan terus bertambah seiring rilis berikutnya.",
+    "intro": "CAF Initiator ada di v0.1.11, dan CAF Orchestrator ada di v0.2.0 — halaman ini akan terus bertambah seiring rilis berikutnya.",
     "releases": [
       {
         "version": "Unreleased",
@@ -283,9 +319,13 @@
         ]
       },
       {
-        "version": "Orchestrator (main)",
+        "version": "Orchestrator v0.2.0",
         "date": "Okt 2026",
         "items": [
+          "Terminal UI, pnpm tui (pnpm start:tui setelah build): menyalakan dan mematikan web server, worker, dan Cloudflare tunnel; menampilkan antrean dan kesehatan Redis / DB / HTTP, kartu ringkasan, daftar run, Agent Floor versi teks, log live, command palette (ctrl+p), dan daftar job gagal dengan retry. Tanpa browser, login, atau web server yang harus jalan",
+          "Runner Cloudflare tunnel, pnpm tunnel, supaya webhook Linear dan GitHub sampai ke mesin lokal. TUNNEL_NAME, TUNNEL_URL, TUNNEL_TARGET_URL, dan CLOUDFLARED_BIN di .env; bisa juga dikontrol dari TUI",
+          "Halaman login dashboard di /dashboard/login dengan cookie sesi bertanda tangan, HttpOnly (12 jam) dan tombol Log out, menggantikan Basic Auth browser. Kredensialnya tetap dashboard.basicAuthUser dan DASHBOARD_BASIC_AUTH_PASSWORD",
+          "DASHBOARD_DEFAULT_VIEW (dashboard atau agent-floor) menentukan isi /dashboard. Agent Floor pindah dari /dashboard/agent-floor ke /dashboard/floor/*, dan header-nya menampilkan total dan rata-rata biaya per run",
           "Gate validasi dipilih dari checkout: caf-validator (validate-report.md) bila .claude/agents/caf-validator.md ada, selain itu caf-qa. Langkah docs dilewati, bukan gagal, bila tidak ada agent caf-documentation (SDD-04a)",
           "Ringkasan acceptance criteria di bagian atas body PR, dan aturan bahwa report PASS yang semua criterion-nya UNVERIFIED menjadi NEEDS_HUMAN. Gate disimpan sebagai validate; qa lama tetap terbaca (SDD-04b, 04d)",
           "Clarify lewat ticket: spec NEEDS_CLARIFICATION, atau DRAFT dengan pertanyaan BLOCKING yang belum dijawab, menghentikan run dan bertanya lewat komentar ❓ CAF-CLARIFY (SDD-04c, 04d)",

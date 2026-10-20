@@ -115,10 +115,46 @@
       ]
     }
   },
+  "engagement": {
+    "eyebrow": "Ways to work with us",
+    "title": "Same way of working.",
+    "self": {
+      "title": "Self-install",
+      "subtitle": "Free and open source.",
+      "points": [
+        "Your team installs CAF or AI Code Reviewer on its own.",
+        "Runs on your own server."
+      ],
+      "cta": "View product"
+    },
+    "installed": {
+      "title": "Installed by Coderium",
+      "subtitle": "Starts with a free audit, then a written quote.",
+      "points": [
+        "Free 30-60 minute audit to see whether AI actually helps your team.",
+        "Written quote with a fixed scope.",
+        "We install and tailor it on your server."
+      ],
+      "cta": "Book a free audit"
+    },
+    "support": {
+      "title": "Monthly support",
+      "subtitle": "Optional, after installation.",
+      "points": [
+        "Your choice once installation is done.",
+        "Limited hours per month."
+      ],
+      "cta": "Ask about support"
+    },
+    "partner": {
+      "title": "Design partner program",
+      "description": "For the first 3 clients we offer special pricing. In return, you let us write a case study from the installation."
+    }
+  },
   "showcase": {
     "eyebrow": "See it in action",
     "title": "From the terminal to the agent floor",
-    "description": "One CLI to set up your repo, and a live dashboard to watch every agent run on your own server.",
+    "description": "One CLI to set up your repo, a terminal panel and a live dashboard to run and watch every agent run on your own server.",
     "enlarge": "Click to enlarge",
     "close": "Close",
     "items": {
@@ -135,29 +171,29 @@
         "cta": "Read the CAF Initiator docs",
         "link": "/docs/caf-initiator"
       },
+      "tui": {
+        "tab": "Terminal UI",
+        "title": "A control panel in your terminal",
+        "description": "pnpm tui starts and stops the server, worker and Cloudflare tunnel, and shows every run live — no browser, no login, no running web server needed.",
+        "points": [
+          "Start and stop server, worker and tunnel",
+          "Runs, Agent Floor and logs in one screen",
+          "Command palette and failed-job retry"
+        ],
+        "alt": "The CAF Orchestrator terminal UI: process status, summary cards, a run list, a text Agent Floor with one card per agent, a controls sidebar with the tunnel URL, and a log drawer",
+        "cta": "Read about the Terminal UI",
+        "link": "/docs/caf-orchestrator#terminal-ui"
+      },
       "dashboard": {
         "tab": "Dashboard",
-        "title": "Every pipeline run, live",
-        "description": "The Orchestrator's dashboard shows each run's PIV phase, retries, real cost and artifacts, updated in real time.",
-        "points": [
-          "Plan · Implement · Verify per run",
-          "Retries and real cost",
-          "Artifact links and PR reviews"
-        ],
-        "alt": "The CAF dashboard: counters for active, completed and needs-attention runs plus a grid of pipeline runs with their phase, retries and cost",
-        "cta": "Read about the dashboard",
-        "link": "/docs/caf-orchestrator#monitoring-dashboard"
-      },
-      "floor": {
-        "tab": "Agent Floor",
         "title": "Watch the agents work",
-        "description": "A read-only, animated office where the Planner, implementation agents, Reviewer and Manager move as a run progresses. Live, replay and demo modes.",
+        "description": "A read-only, animated office where the Planner, implementation agents, Reviewer and Manager move as a run progresses, with total and average cost in the header. Live, replay and demo modes.",
         "points": [
           "Live, replay and demo",
           "Per-agent status and events",
           "No auto-merge at the PR gate"
         ],
-        "alt": "The CAF Agent Floor: a pixel-art office with agents at their desks, a PR gate and a meeting room, with agent status and events panels",
+        "alt": "The CAF Agent Floor: a pixel-art office with agents at their desks, a PR gate and a meeting room, with total cost in the header and agent status and events panels",
         "cta": "Read about the Agent Floor",
         "link": "/docs/caf-orchestrator#monitoring-dashboard"
       }
@@ -272,7 +308,7 @@
     "metaDescription": "Release history for CAF (Coderium Agent Framework).",
     "eyebrow": "Changelog",
     "heading": "Release history",
-    "intro": "CAF Initiator is at v0.1.11, and CAF Orchestrator is deployed from its main branch — this page will keep growing with future releases.",
+    "intro": "CAF Initiator is at v0.1.11, and CAF Orchestrator is at v0.2.0 — this page will keep growing with future releases.",
     "releases": [
       {
         "version": "Unreleased",
@@ -283,9 +319,13 @@
         ]
       },
       {
-        "version": "Orchestrator (main)",
+        "version": "Orchestrator v0.2.0",
         "date": "Oct 2026",
         "items": [
+          "Terminal UI, pnpm tui (pnpm start:tui after a build): starts and stops the web server, worker and Cloudflare tunnel; shows queue and Redis / DB / HTTP health, summary cards, the run list, a text Agent Floor, live logs, a command palette (ctrl+p) and a failed-job list with retry. No browser, login or running web server needed",
+          "Cloudflare tunnel runner, pnpm tunnel, so Linear and GitHub webhooks reach a local machine. TUNNEL_NAME, TUNNEL_URL, TUNNEL_TARGET_URL and CLOUDFLARED_BIN in .env; also controlled from the TUI",
+          "Dashboard login page at /dashboard/login with a signed, HttpOnly session cookie (12 hours) and a Log out button, replacing browser Basic Auth. Same dashboard.basicAuthUser and DASHBOARD_BASIC_AUTH_PASSWORD credentials",
+          "DASHBOARD_DEFAULT_VIEW (dashboard or agent-floor) chooses what /dashboard shows. The Agent Floor moved from /dashboard/agent-floor to /dashboard/floor/*, and its header shows total and average cost per run",
           "Validation gate chosen from the checkout: caf-validator (validate-report.md) when .claude/agents/caf-validator.md exists, otherwise caf-qa. The docs step is skipped, not failed, when there is no caf-documentation agent (SDD-04a)",
           "Acceptance-criteria summary at the top of the PR body, and the rule that a PASS report whose criteria are all UNVERIFIED becomes NEEDS_HUMAN. The gate is stored as validate; a stored qa is still read (SDD-04b, 04d)",
           "Clarify via the ticket: a NEEDS_CLARIFICATION spec, or a DRAFT with an unanswered BLOCKING question, stops the run and asks in a ❓ CAF-CLARIFY comment (SDD-04c, 04d)",

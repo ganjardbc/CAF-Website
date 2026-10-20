@@ -179,7 +179,15 @@ write access to the repo and can open pull requests — see
 **The dashboard returns 404**
 
 It is off by default. Set `dashboard.enabled: true` and `dashboard.basicAuthUser` in
-`caf.config.yaml`, and `DASHBOARD_BASIC_AUTH_PASSWORD` in `.env`.
+`caf.config.yaml`, and `DASHBOARD_BASIC_AUTH_PASSWORD` in `.env`. You sign in on the
+login page at `/dashboard/login`; behind a reverse proxy, proxy that path too, and
+`/dashboard/logout` and `/dashboard/floor/*`.
+
+**The Terminal UI shows a modal of config problems and won't start processes**
+
+The TUI validates `.env` and `caf.config.yaml` the same way the Orchestrator does, but
+opens anyway so it can list what is wrong. Fix the listed fields and reopen it. Redis
+is only shown as up or down — start it yourself.
 
 ## Still stuck?
 

@@ -49,7 +49,9 @@ Accepted values: `true`, `false`, `1`, `0`.
 | Variable | Required | Description |
 |---|---|---|
 | `TELEGRAM_BOT_TOKEN` / `TELEGRAM_CHAT_ID` | Both together, or neither | Pipeline start/completion/failure notifications |
-| `DASHBOARD_BASIC_AUTH_PASSWORD` | If `dashboard.enabled: true` in `caf.config.yaml` | Basic-auth password for the monitoring dashboard at `/dashboard` |
+| `DASHBOARD_BASIC_AUTH_PASSWORD` | If `dashboard.enabled: true` in `caf.config.yaml` | Password for the dashboard login page at `/dashboard/login` |
+| `DASHBOARD_DEFAULT_VIEW` | No | What `/dashboard` shows: `dashboard` (default) or `agent-floor` |
+| `TUNNEL_NAME`, `TUNNEL_URL`, `TUNNEL_TARGET_URL`, `CLOUDFLARED_BIN` | No | Cloudflare tunnel for `pnpm tunnel` and the [Terminal UI](/docs/caf-orchestrator#cloudflare-tunnel): tunnel name, public `https://` hostname, local origin to expose, and the `cloudflared` binary |
 | `NODE_ENV`, `LOG_LEVEL` | No | Runtime environment and log verbosity |
 
 `CAF_HEADLESS` is **not** configurable: the Orchestrator always sets it to `1` on

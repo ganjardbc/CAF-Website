@@ -183,7 +183,16 @@ repo dan bisa membuka pull request — lihat
 **Dashboard mengembalikan 404**
 
 Default-nya mati. Set `dashboard.enabled: true` dan `dashboard.basicAuthUser` di
-`caf.config.yaml`, dan `DASHBOARD_BASIC_AUTH_PASSWORD` di `.env`.
+`caf.config.yaml`, dan `DASHBOARD_BASIC_AUTH_PASSWORD` di `.env`. Login lewat halaman
+`/dashboard/login`; di belakang reverse proxy, proxy juga path itu, serta
+`/dashboard/logout` dan `/dashboard/floor/*`.
+
+**Terminal UI menampilkan modal masalah config dan tidak mau menyalakan proses**
+
+TUI memvalidasi `.env` dan `caf.config.yaml` dengan cara yang sama seperti
+Orchestrator, tetapi tetap terbuka supaya bisa menampilkan apa yang salah. Perbaiki
+field yang tercantum lalu buka lagi. Redis hanya ditampilkan up atau down — nyalakan
+sendiri.
 
 ## Masih mentok?
 

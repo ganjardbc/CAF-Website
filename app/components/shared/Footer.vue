@@ -55,7 +55,23 @@ const links = computed(() => [
         </div>
       </div>
 
-      <p class="mt-lg text-center text-xs text-faint">
+      <div class="mt-lg flex flex-col items-center justify-center gap-xs text-sm text-body sm:flex-row sm:gap-lg">
+        <a href="mailto:coderium.id@gmail.com" class="inline-flex items-center gap-xs hover:text-ink">
+          <Icon name="lucide:mail" class="h-4 w-4" />
+          coderium.id@gmail.com
+        </a>
+        <a
+          href="https://coderium.id"
+          target="_blank"
+          rel="noopener"
+          class="inline-flex items-center gap-xs hover:text-ink"
+        >
+          <Icon name="lucide:globe" class="h-4 w-4" />
+          coderium.id
+        </a>
+      </div>
+
+      <p class="mt-md text-center text-xs text-faint">
         {{ t('footer.copyright', { year: new Date().getFullYear() }) }}
       </p>
     </div>

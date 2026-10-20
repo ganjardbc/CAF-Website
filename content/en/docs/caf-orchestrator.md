@@ -66,7 +66,7 @@ CAF Orchestrator runs as two processes sharing Redis as the queue backend:
   `pr-review` (PR comment → review).
 
 Both must be running for anything to be processed — the web server alone only
-accepts webhooks.
+accepts webhooks. The [Terminal UI](#terminal-ui) can start and stop both for you.
 
 ```bash
 git clone https://github.com/coderiumid/caf-orchestrator.git
@@ -81,6 +81,7 @@ Fill in both files (see [Configuration](#configuration)), then run both processe
 ```bash
 pnpm dev            # web server
 pnpm dev:worker     # worker, separate process
+pnpm tui            # or: one terminal panel that starts/stops both
 ```
 
 Production, without Docker:
@@ -110,7 +111,7 @@ both the Redis connection and a write probe into `workspace.dir` succeed, or
 `503` with `status: "unhealthy"` otherwise.
 
 Other scripts: `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:coverage` and
-`pnpm db:migrate` (creates or upgrades the dashboard's SQLite database).
+`pnpm tunnel` and `pnpm db:migrate` (creates or upgrades the dashboard's SQLite database).
 
 ### Deploying with Docker
 
@@ -156,7 +157,7 @@ Commonly tuned:
 | `queue.workerConcurrency` | Concurrent pipeline jobs per worker | `1` |
 | `queue.jobAttempts` | Whole-job retries after an unexpected failure | `3` |
 | `openai.*`, `agents.modelOverrides` | Model routing (see below) | off |
-| `dashboard.enabled`, `dashboard.basicAuthUser`, `db.path` | Monitoring dashboard | off |
+| `dashboard.enabled`, `dashboard.basicAuthUser`, `db.path` | Monitoring dashboard and its login | off |
 
 ## Webhook configuration
 
@@ -389,15 +390,18 @@ clone you will not reuse, run
 
 A live pipeline-monitoring dashboard is served by the web server at `/dashboard`:
 PIV phase, retry counts per gate, real cost as reported by the `claude` CLI,
-artifact links and PR review runs, updated in real time. A second, read-only page at
-`/dashboard/agent-floor` shows the same runs as an animated office of agents, with
-live, replay and demo modes.
+artifact links and PR review runs, updated in real time. A second, read-only view, the
+Agent Floor, shows the same runs as an animated office of agents, with live, replay
+and demo modes and the total and average cost in its header. `DASHBOARD_DEFAULT_VIEW`
+(`dashboard` or `agent-floor`) in `.env` chooses which one `/dashboard` shows.
 
 ![The CAF dashboard listing pipeline runs with phase, retries and cost](/images/caf-dashboard.webp)
 
 ![The CAF Agent Floor, an animated office of agents](/images/caf-agent-floor.webp)
 
-It is off by default and basic-auth gated. To enable it:
+It is off by default and sits behind a login page at `/dashboard/login`. A successful
+login sets a signed, HttpOnly session cookie that lasts 12 hours, and a **Log out**
+button ends it. To enable it:
 
 ```yaml
 # caf.config.yaml
@@ -406,12 +410,71 @@ dashboard:
   basicAuthUser: admin
 ```
 
-and set `DASHBOARD_BASIC_AUTH_PASSWORD` in `.env`. Run history is stored in a SQLite
+and set `DASHBOARD_BASIC_AUTH_PASSWORD` in `.env`; those two are what you type on the
+login page, and changing either signs everyone out. Run history is stored in a SQLite
 file (`db.path`, default `./data/caf-dashboard.sqlite`); `pnpm db:migrate` creates or
 upgrades it.
 
-Behind a reverse proxy, make sure `/dashboard`, `/api/pipelines*` and
-`/api/events/stream` are all proxied and served over HTTPS only.
+Behind a reverse proxy, make sure `/dashboard`, `/dashboard/login`, `/dashboard/logout`,
+`/dashboard/floor/*`, `/api/pipelines*` and `/api/events/stream` are all proxied, and
+send `X-Forwarded-Proto: https` so the cookie gets the `Secure` flag. Serve it over
+HTTPS only.
+
+## Terminal UI
+
+`pnpm tui` (`pnpm start:tui` after a build) opens a terminal control panel for local
+and ops use. It shows the same run data as the dashboard without a browser, a login or
+a running web server, and it can start and stop the web server, the worker and the
+Cloudflare tunnel for you.
+
+![The CAF Orchestrator terminal UI: process status, summary cards, runs, a text Agent Floor, controls and logs](/images/caf-tui.webp)
+
+- **Header** — process status for server, worker and tunnel (running with uptime,
+  changing, crashed with its exit code, or off), Redis / DB / HTTP health, and the
+  queue counts (waiting, active, delayed, failed).
+- **Summary cards** — active, completed (with success rate), waiting on you, needs
+  attention, and spend with a cost sparkline and the average per run.
+- **Runs and Agent Floor** — the run list on the left, running ones pinned on top; on
+  the right a text version of the Agent Floor for the selected run, with the step line
+  (`plan ─ spec ─ impl ─ validate ─ review ─ PR`), one card per agent with state, cost
+  and duration, the last handoff and the last events. It follows the newest running
+  run; `F` follows live again after you pin another run.
+- **Logs** — live server, worker and tunnel output in a bottom drawer. `` ` `` expands
+  it, and the `all` tab hides cloudflared's info-level chatter.
+- **Controls** — a sidebar of clickable rows for the three processes and `all`,
+  `restart` and `kill`, the failed-job list and help, plus the tunnel route and
+  whether it is reachable. It is dropped below 110 columns; every action stays on its
+  key and in the palette.
+- **Command palette** — `ctrl+p` lists every action: run mode (`dev` or `dist`),
+  restart and kill target, copying the Linear, GitHub or health webhook URL from
+  `TUNNEL_URL` to the clipboard, search, filters, log controls and quit.
+- **Failed jobs** — `u` lists them and `1`–`9` retries one after asking first.
+  Retrying re-runs the whole pipeline from the Planner.
+
+Common keys: `s` / `w` / `n` / `a` start or stop server / worker / tunnel / all, `r`
+restart, `x` force kill, `↑↓` and `Enter` select and inspect a run, `o` opens its PR,
+`/` search, `?` help and `q` quit, which stops the processes it started first.
+
+It needs an interactive terminal, `.env`, `caf.config.yaml` and a reachable Redis
+(`REDIS_URL`). Redis is only shown as up or down, not managed. If the config is
+invalid the TUI still opens, lists the problems in a modal and refuses to start the
+processes. The `dist` mode needs `pnpm build` first, and stopping the worker mid-job
+waits for the job unless you kill it.
+
+### Cloudflare tunnel
+
+`n`, or the tunnel row in the sidebar, runs `cloudflared tunnel run` as a third managed
+process so Linear and GitHub webhooks can reach a local machine. The same tunnel runs
+without the TUI as `pnpm tunnel` (`pnpm start:tunnel` after a build): it prints the
+Linear and GitHub webhook URLs derived from `TUNNEL_URL`, then runs in the foreground.
+Settings are in `.env`, none of them secrets:
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `TUNNEL_NAME` | `ai-code-review` | Tunnel to run |
+| `TUNNEL_URL` | unset | Public `https://` hostname routed to the tunnel; used only to print and probe webhook URLs |
+| `TUNNEL_TARGET_URL` | `http://localhost:<server.port>` | Local origin to expose |
+| `CLOUDFLARED_BIN` | `cloudflared` | Path to the `cloudflared` binary |
 
 ## Optional features (off by default)
 

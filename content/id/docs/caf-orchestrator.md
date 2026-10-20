@@ -67,6 +67,7 @@ CAF Orchestrator berjalan sebagai dua proses yang berbagi Redis sebagai backend 
   PR) dan `pr-review` (komentar PR → review).
 
 Keduanya harus jalan agar sesuatu diproses — web server saja hanya menerima webhook.
+[Terminal UI](#terminal-ui) bisa menyalakan dan mematikan keduanya untuk kamu.
 
 ```bash
 git clone https://github.com/coderiumid/caf-orchestrator.git
@@ -81,6 +82,7 @@ Isi kedua file (lihat [Konfigurasi](#konfigurasi)), lalu jalankan kedua proses:
 ```bash
 pnpm dev            # web server
 pnpm dev:worker     # worker, proses terpisah
+pnpm tui            # atau: satu panel terminal yang menyalakan/mematikan keduanya
 ```
 
 Production, tanpa Docker:
@@ -110,7 +112,7 @@ koneksi Redis dan write probe ke `workspace.dir` sama-sama berhasil, atau `503` 
 `status: "unhealthy"` bila tidak.
 
 Script lain: `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:coverage`, dan
-`pnpm db:migrate` (membuat atau meng-upgrade database SQLite dashboard).
+`pnpm tunnel` dan `pnpm db:migrate` (membuat atau meng-upgrade database SQLite dashboard).
 
 ### Deploy dengan Docker
 
@@ -156,7 +158,7 @@ Yang umum disetel:
 | `queue.workerConcurrency` | Job pipeline bersamaan per worker | `1` |
 | `queue.jobAttempts` | Retry seluruh job setelah kegagalan tak terduga | `3` |
 | `openai.*`, `agents.modelOverrides` | Model routing (lihat di bawah) | mati |
-| `dashboard.enabled`, `dashboard.basicAuthUser`, `db.path` | Dashboard monitoring | mati |
+| `dashboard.enabled`, `dashboard.basicAuthUser`, `db.path` | Dashboard monitoring dan login-nya | mati |
 
 ## Konfigurasi webhook
 
@@ -382,15 +384,18 @@ berikutnya; untuk clone yang tidak akan dipakai ulang, jalankan
 
 Dashboard pemantauan pipeline live disajikan web server di `/dashboard`: fase PIV,
 jumlah retry per gate, biaya nyata sesuai laporan CLI `claude`, link artifact, dan
-run PR review, diperbarui real-time. Halaman kedua yang read-only di
-`/dashboard/agent-floor` menampilkan run yang sama sebagai kantor agent beranimasi,
-dengan mode live, replay, dan demo.
+run PR review, diperbarui real-time. Tampilan kedua yang read-only, Agent Floor,
+menampilkan run yang sama sebagai kantor agent beranimasi, dengan mode live, replay,
+dan demo serta total dan rata-rata biaya di header-nya. `DASHBOARD_DEFAULT_VIEW`
+(`dashboard` atau `agent-floor`) di `.env` menentukan mana yang tampil di `/dashboard`.
 
 ![Dashboard CAF menampilkan run pipeline beserta fase, retry, dan biayanya](/images/caf-dashboard.webp)
 
 ![CAF Agent Floor, kantor agent beranimasi](/images/caf-agent-floor.webp)
 
-Defaultnya mati dan dilindungi basic-auth. Untuk mengaktifkan:
+Defaultnya mati dan berada di balik halaman login di `/dashboard/login`. Login yang
+berhasil menyetel cookie sesi bertanda tangan dan HttpOnly yang berlaku 12 jam, dan
+tombol **Log out** mengakhirinya. Untuk mengaktifkan:
 
 ```yaml
 # caf.config.yaml
@@ -399,12 +404,72 @@ dashboard:
   basicAuthUser: admin
 ```
 
-dan set `DASHBOARD_BASIC_AUTH_PASSWORD` di `.env`. Riwayat run disimpan di file SQLite
+dan set `DASHBOARD_BASIC_AUTH_PASSWORD` di `.env`; keduanya yang kamu ketik di halaman
+login, dan mengubah salah satunya me-logout semua orang. Riwayat run disimpan di file SQLite
 (`db.path`, default `./data/caf-dashboard.sqlite`); `pnpm db:migrate` membuat atau
 meng-upgrade-nya.
 
-Di belakang reverse proxy, pastikan `/dashboard`, `/api/pipelines*`, dan
-`/api/events/stream` semuanya diproxy dan hanya dilayani lewat HTTPS.
+Di belakang reverse proxy, pastikan `/dashboard`, `/dashboard/login`,
+`/dashboard/logout`, `/dashboard/floor/*`, `/api/pipelines*`, dan `/api/events/stream`
+semuanya diproxy, dan kirim `X-Forwarded-Proto: https` supaya cookie mendapat flag
+`Secure`. Layani hanya lewat HTTPS.
+
+## Terminal UI
+
+`pnpm tui` (`pnpm start:tui` setelah build) membuka panel kontrol di terminal untuk
+penggunaan lokal dan ops. Datanya sama dengan dashboard, tanpa browser, login, atau web
+server yang harus jalan, dan panel ini bisa menyalakan dan mematikan web server,
+worker, dan Cloudflare tunnel untuk kamu.
+
+![Terminal UI CAF Orchestrator: status proses, kartu ringkasan, run, Agent Floor versi teks, kontrol, dan log](/images/caf-tui.webp)
+
+- **Header** — status proses server, worker, dan tunnel (jalan beserta uptime, sedang
+  berubah, crash beserta exit code, atau mati), kesehatan Redis / DB / HTTP, dan jumlah
+  antrean (waiting, active, delayed, failed).
+- **Kartu ringkasan** — active, completed (beserta success rate), waiting on you, needs
+  attention, dan spend dengan sparkline biaya serta rata-rata per run.
+- **Run dan Agent Floor** — daftar run di kiri, yang sedang jalan di paling atas; di
+  kanan Agent Floor versi teks untuk run terpilih, lengkap dengan baris langkah
+  (`plan ─ spec ─ impl ─ validate ─ review ─ PR`), satu kartu per agent berisi state,
+  biaya, dan durasi, handoff terakhir, serta event terakhir. Panel mengikuti run
+  terbaru yang berjalan; `F` mengikuti live lagi setelah kamu memilih run lain.
+- **Log** — output server, worker, dan tunnel secara live di laci bawah. `` ` ``
+  memperbesarnya, dan tab `all` menyembunyikan log level info dari cloudflared.
+- **Controls** — sidebar berisi baris yang bisa diklik untuk tiga proses dan `all`,
+  `restart` dan `kill`, daftar job gagal, dan help, plus rute tunnel dan apakah bisa
+  dijangkau. Sidebar hilang di bawah 110 kolom; setiap aksi tetap ada di tombolnya dan
+  di palette.
+- **Command palette** — `ctrl+p` menampilkan semua aksi: mode run (`dev` atau `dist`),
+  target restart dan kill, menyalin URL webhook Linear, GitHub, atau health dari
+  `TUNNEL_URL` ke clipboard, pencarian, filter, kontrol log, dan keluar.
+- **Job gagal** — `u` menampilkannya dan `1`–`9` me-retry satu job setelah konfirmasi.
+  Retry menjalankan ulang seluruh pipeline dari Planner.
+
+Tombol umum: `s` / `w` / `n` / `a` start atau stop server / worker / tunnel / semua,
+`r` restart, `x` force kill, `↑↓` dan `Enter` memilih dan memeriksa run, `o` membuka
+PR-nya, `/` cari, `?` help, dan `q` keluar, yang lebih dulu menghentikan proses yang
+dinyalakannya.
+
+Butuh terminal interaktif, `.env`, `caf.config.yaml`, dan Redis yang terjangkau
+(`REDIS_URL`). Redis hanya ditampilkan up atau down, tidak dikelola. Kalau config
+tidak valid, TUI tetap terbuka, menampilkan masalahnya di modal, dan menolak menyalakan
+proses. Mode `dist` butuh `pnpm build` dulu, dan menghentikan worker saat job berjalan
+akan menunggu job itu selesai kecuali kamu mem-kill-nya.
+
+### Cloudflare tunnel
+
+`n`, atau baris tunnel di sidebar, menjalankan `cloudflared tunnel run` sebagai proses
+ketiga yang dikelola, supaya webhook Linear dan GitHub sampai ke mesin lokal. Tunnel
+yang sama bisa jalan tanpa TUI lewat `pnpm tunnel` (`pnpm start:tunnel` setelah build):
+ia mencetak URL webhook Linear dan GitHub dari `TUNNEL_URL`, lalu jalan di foreground.
+Pengaturannya ada di `.env`, tidak ada yang rahasia:
+
+| Variabel | Default | Arti |
+|---|---|---|
+| `TUNNEL_NAME` | `ai-code-review` | Tunnel yang dijalankan |
+| `TUNNEL_URL` | tidak di-set | Hostname `https://` publik yang di-route ke tunnel; hanya dipakai untuk mencetak dan mengecek URL webhook |
+| `TUNNEL_TARGET_URL` | `http://localhost:<server.port>` | Origin lokal yang diekspos |
+| `CLOUDFLARED_BIN` | `cloudflared` | Path binary `cloudflared` |
 
 ## Fitur opsional (default mati)
 

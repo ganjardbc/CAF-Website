@@ -3,7 +3,7 @@ const { t, tm, rt } = useI18n()
 const localePath = useLocalePath()
 
 type Slide = {
-  key: 'cli' | 'dashboard' | 'floor'
+  key: 'cli' | 'tui' | 'dashboard'
   icon: string
   src: string
   width: number
@@ -13,9 +13,9 @@ type Slide = {
 }
 
 const slides: Slide[] = [
+  { key: 'dashboard', icon: 'lucide:layout-dashboard', src: '/images/caf-agent-floor.webp', width: 2000, height: 1256, chrome: true, url: 'your-vps/dashboard' },
+  { key: 'tui', icon: 'lucide:square-terminal', src: '/images/caf-tui.webp', width: 2000, height: 1390, chrome: false, url: '' },
   { key: 'cli', icon: 'lucide:terminal', src: '/images/caf-cli.webp', width: 2000, height: 1406, chrome: false, url: '' },
-  { key: 'dashboard', icon: 'lucide:layout-dashboard', src: '/images/caf-dashboard.webp', width: 2000, height: 1255, chrome: true, url: 'your-vps/dashboard' },
-  { key: 'floor', icon: 'lucide:building-2', src: '/images/caf-agent-floor.webp', width: 2000, height: 1257, chrome: true, url: 'your-vps/dashboard/agent-floor' },
 ]
 
 const active = ref(0)
@@ -64,10 +64,12 @@ onBeforeUnmount(() => {
         </p>
       </div>
 
+      <div class="grid items-start gap-xl lg:grid-cols-[340px_minmax(0,1fr)] lg:gap-xxl">
+      <div class="min-w-0">
       <div
         role="tablist"
         :aria-label="t('showcase.eyebrow')"
-        class="mx-auto mb-xl flex w-fit max-w-full flex-wrap justify-center gap-xxs rounded-pill border border-hairline bg-canvas-elevated p-xxs"
+        class="mb-lg grid w-full grid-cols-3 gap-xxs rounded-lg border border-hairline bg-canvas-elevated p-xxs sm:mx-auto sm:mb-xl sm:flex sm:w-fit sm:max-w-full sm:flex-wrap sm:justify-center sm:rounded-pill lg:mx-0 lg:mb-lg lg:w-full lg:flex-col lg:flex-nowrap lg:justify-start lg:rounded-lg"
       >
         <button
           v-for="(slide, index) in slides"
@@ -77,7 +79,7 @@ onBeforeUnmount(() => {
           role="tab"
           :aria-selected="active === index"
           :aria-controls="`showcase-panel-${slide.key}`"
-          class="inline-flex items-center gap-xs rounded-pill px-md py-xs text-sm font-medium transition-colors"
+          class="flex min-w-0 flex-col items-center justify-center gap-xxs rounded-md px-xxs py-sm text-center text-xs font-medium leading-tight transition-colors sm:inline-flex sm:flex-row sm:gap-xs sm:rounded-pill sm:px-md sm:py-xs sm:text-sm lg:justify-start lg:rounded-md"
           :class="active === index ? 'bg-ink text-canvas-elevated' : 'text-body hover:text-ink'"
           @click="active = index"
         >
@@ -86,19 +88,14 @@ onBeforeUnmount(() => {
         </button>
       </div>
 
-      <div
-        :id="`showcase-panel-${current.key}`"
-        role="tabpanel"
-        :aria-labelledby="`showcase-tab-${current.key}`"
-      >
-        <div class="mx-auto mb-xl max-w-2xl text-center">
+        <div class="mx-auto max-w-2xl text-center lg:mx-0 lg:text-left">
           <h3 class="text-xl font-semibold text-ink">
             {{ t(`showcase.items.${current.key}.title`) }}
           </h3>
           <p class="mt-xs text-sm text-body sm:text-base">
             {{ t(`showcase.items.${current.key}.description`) }}
           </p>
-          <ul class="mt-md flex flex-wrap justify-center gap-xs">
+          <ul class="mt-md flex flex-wrap justify-center gap-xs lg:justify-start">
             <li
               v-for="point in points"
               :key="point"
@@ -110,6 +107,23 @@ onBeforeUnmount(() => {
           </ul>
         </div>
 
+        <div class="mt-lg text-center lg:text-left">
+          <NuxtLink
+            :to="localePath(t(`showcase.items.${current.key}.link`))"
+            class="inline-flex items-center gap-xxs text-sm font-medium text-link hover:underline"
+          >
+            {{ t(`showcase.items.${current.key}.cta`) }}
+            <Icon name="lucide:arrow-right" class="h-4 w-4" />
+          </NuxtLink>
+        </div>
+      </div>
+
+      <div
+        :id="`showcase-panel-${current.key}`"
+        role="tabpanel"
+        :aria-labelledby="`showcase-tab-${current.key}`"
+        class="min-w-0"
+      >
         <Transition
           mode="out-in"
           enter-active-class="transition duration-300 ease-out"
@@ -119,7 +133,7 @@ onBeforeUnmount(() => {
           leave-from-class="opacity-100"
           leave-to-class="opacity-0"
         >
-          <div :key="current.key" class="mx-auto max-w-[1040px]">
+          <div :key="current.key" class="mx-auto w-full">
             <button
               type="button"
               class="group relative block w-full overflow-hidden rounded-lg border border-hairline bg-canvas-elevated text-left shadow-[0px_2px_2px_rgba(0,0,0,0.04),0px_24px_64px_-12px_rgba(0,0,0,0.18)] transition-transform duration-300 hover:-translate-y-1"
@@ -157,16 +171,7 @@ onBeforeUnmount(() => {
             </button>
           </div>
         </Transition>
-
-        <div class="mt-lg text-center">
-          <NuxtLink
-            :to="localePath(t(`showcase.items.${current.key}.link`))"
-            class="inline-flex items-center gap-xxs text-sm font-medium text-link hover:underline"
-          >
-            {{ t(`showcase.items.${current.key}.cta`) }}
-            <Icon name="lucide:arrow-right" class="h-4 w-4" />
-          </NuxtLink>
-        </div>
+      </div>
       </div>
     </div>
 

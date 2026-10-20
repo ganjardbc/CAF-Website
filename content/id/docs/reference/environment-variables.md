@@ -49,7 +49,9 @@ Nilai yang diterima: `true`, `false`, `1`, `0`.
 | Variable | Wajib | Deskripsi |
 |---|---|---|
 | `TELEGRAM_BOT_TOKEN` / `TELEGRAM_CHAT_ID` | Dua-duanya, atau tidak sama sekali | Notifikasi pipeline mulai/selesai/gagal |
-| `DASHBOARD_BASIC_AUTH_PASSWORD` | Kalau `dashboard.enabled: true` di `caf.config.yaml` | Password basic auth untuk dashboard monitoring di `/dashboard` |
+| `DASHBOARD_BASIC_AUTH_PASSWORD` | Kalau `dashboard.enabled: true` di `caf.config.yaml` | Password untuk halaman login dashboard di `/dashboard/login` |
+| `DASHBOARD_DEFAULT_VIEW` | Tidak | Isi `/dashboard`: `dashboard` (default) atau `agent-floor` |
+| `TUNNEL_NAME`, `TUNNEL_URL`, `TUNNEL_TARGET_URL`, `CLOUDFLARED_BIN` | Tidak | Cloudflare tunnel untuk `pnpm tunnel` dan [Terminal UI](/id/docs/caf-orchestrator#cloudflare-tunnel): nama tunnel, hostname `https://` publik, origin lokal yang diekspos, dan binary `cloudflared` |
 | `NODE_ENV`, `LOG_LEVEL` | Tidak | Environment runtime dan tingkat log |
 
 `CAF_HEADLESS` **tidak** bisa dikonfigurasi: Orchestrator selalu men-set-nya ke `1`
