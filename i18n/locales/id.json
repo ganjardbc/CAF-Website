@@ -52,7 +52,7 @@
     "copyright": "© {year} Coderium. All rights reserved."
   },
   "hero": {
-    "badge": "CAF v0.1.11 — early access",
+    "badge": "CAF v0.1.12 — early access",
     "new": "New",
     "title": "Coderium Agent Framework",
     "description": "CAF mengubah ticket jadi pull request lewat agent AI. Merge selalu kamu yang putuskan.",
@@ -175,7 +175,7 @@
           "Deterministik, tanpa panggilan AI",
           "Dry-run dulu"
         ],
-        "alt": "Command caf-init di terminal, menampilkan daftar command scaffold, export, curate, dan docs",
+        "alt": "Command caf-init di terminal, menampilkan daftar command scaffold, export, dan curate",
         "cta": "Baca docs CAF Initiator",
         "link": "/docs/caf-initiator"
       },
@@ -324,14 +324,22 @@
     "metaDescription": "Histori rilis CAF (Coderium Agent Framework).",
     "eyebrow": "Changelog",
     "heading": "Histori rilis",
-    "intro": "CAF Initiator ada di v0.1.11, dan CAF Orchestrator ada di v0.2.0 — halaman ini akan terus bertambah seiring rilis berikutnya.",
+    "intro": "CAF Initiator ada di v0.1.12, dan CAF Orchestrator ada di v0.2.0 — halaman ini akan terus bertambah seiring rilis berikutnya.",
     "releases": [
       {
-        "version": "Unreleased",
+        "version": "v0.1.12",
         "date": "Okt 2026",
         "items": [
+          "caf-init scaffold kini pintar (CAF-INIT-SMART-01): ia mendeteksi repo lebih dulu, menampilkan satu ringkasan, lalu bertanya Proceed? (Y/n/e) — satu Enter bila tracker hanya punya satu sinyal, tanpa Enter dengan --yes. Flag baru: --yes, --tracker, --apps, --adr, --agents, --no-banner. Tanpa TTY ia tidak pernah bertanya dan keluar dengan kode 1 bila tracker ambigu",
+          "Deteksi tracker lewat sinyal: .linear/, LINEAR_API_KEY, atlassian.yml, JIRA_*, template issue plus git remote yang cocok. README yang menyebut linear atau jira tidak lagi jadi sinyal, dan GitLab Issues adalah pilihan baru. Perubahan perilaku: repo seperti itu kini ditanya, atau memakai --tracker",
+          "scaffold tanpa target kini menjalankan langkah Skills tepat setelah Agents, jadi sembilan skill dan pointer ## Skills-nya tidak butuh scaffold skills terpisah",
+          "scaffold golden-examples memilih beberapa app dalam satu run, dengan --app (boleh diulang) atau --all-apps. App yang layak dipindai tercentang awal; app yang sudah punya RULES.md dilewati",
+          "/caf-run di-generate oleh flow scaffold (default Y bila ditanyakan sendiri). /caf-run, /caf-review, dan /caf-fix-review butuh remote GitHub dan tidak ditawarkan untuk GitLab atau Bitbucket; flow tidak meng-generate dua command review",
+          "Draft ADR bersifat opt-in di scaffold tanpa target (--adr atau editor e) dan idempoten: keputusan yang sudah punya ADR dilewati",
+          "caf-init docs dihapus. Setup tidak lagi menulis .caf/knowledge/INDEX.md atau folder knowledge yang kosong; folder dibuat saat golden-examples atau adr menulis. File docs/ dan INDEX.md yang sudah ada dibiarkan, dan curate mengabaikannya",
           "caf-design dan caf-breakdown ditulis tanpa banner DRAFT (dispatch test-nya lolos), jadi Planner baru langsung diarahkan ke keduanya",
-          "caf-architect tidak lagi ditawarkan di picker agent: Planner yang menulis design.md. caf-architect.md yang sudah ada di repo dibiarkan"
+          "caf-architect tidak lagi ditawarkan di picker agent: Planner yang menulis design.md. caf-architect.md yang sudah ada di repo dibiarkan",
+          "Banner CAF huruf blok di caf-init tanpa subcommand dan di awal scaffold; disembunyikan tanpa TTY, dengan --yes, --no-banner, atau CAF_NO_BANNER"
         ]
       },
       {

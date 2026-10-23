@@ -12,16 +12,13 @@ From your target repo's root:
 # 1. Preview — detects the stack and lists what would be written
 npx -p caf-initiator caf-init scaffold --dry-run
 
-# 2. Generate the drafts (asks before each step)
+# 2. Generate the drafts and the CAF skills (one summary, one Enter)
 npx -p caf-initiator caf-init scaffold
 
-# 3. Optional: add the CAF skills
-npx -p caf-initiator caf-init scaffold skills
-
-# 4. In your AI runner (e.g. Claude Code), fill in the TODOs
+# 3. In your AI runner (e.g. Claude Code), fill in the TODOs
 /caf-complete-drafts
 
-# 5. Check the result, then review the diff and commit
+# 4. Check the result, then review the diff and commit
 npx -p caf-initiator caf-init curate --check-drafts
 ```
 
@@ -34,13 +31,18 @@ caf-init scaffold
 
 `scaffold` will:
 
-1. Detect your project's stack (framework, package manager, repo mode) and tracker
-2. Write the knowledge-base drafts: `CLAUDE.md`, `AGENTS.md`, `.caf/knowledge/`
+1. Detect your project's stack (framework, package manager, repo mode) and tracker,
+   then show one summary and ask `Proceed? (Y/n/e)`. One Enter when the tracker has a
+   single signal; `--yes` asks nothing
+2. Write the drafts: `CLAUDE.md`, `AGENTS.md`, `.caf/tasks/README.md` and the golden
+   examples in `.caf/knowledge/`
 3. Generate the five agents (`caf-planner`, `caf-frontend`, `caf-backend`,
    `caf-validator`, `caf-reviewer`) in `.claude/agents/`, and their companion slash
-   commands (`/caf-plan`, `/caf-run`, `/caf-review`, `/caf-fix-review`)
-4. Draft the Definition of Done, the PIV workflow and the agent-handoff docs
-5. Generate `/caf-complete-drafts`, the command that fills in the remaining `TODO`s
+   commands (`/caf-plan`, `/caf-run`; `scaffold agents` also offers `/caf-review` and
+   `/caf-fix-review`)
+4. Write the nine CAF skills in `.claude/skills/`
+5. Draft the Definition of Done, the PIV workflow and the agent-handoff docs
+6. Generate `/caf-complete-drafts`, the command that fills in the remaining `TODO`s
 
 Everything it writes is a deterministic draft. Review it before your team or agents
 rely on it.
@@ -59,7 +61,7 @@ review in the same session. See [Spec-Driven Development](/docs/sdd) for what th
 contains.
 
 See [CAF Initiator](/docs/caf-initiator) for the full command reference
-(`scaffold`, `curate`, `docs`, `export`).
+(`scaffold`, `curate`, `export`).
 
 ## 3. Connect CAF Orchestrator
 

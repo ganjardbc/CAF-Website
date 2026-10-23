@@ -12,16 +12,13 @@ baru. Dari root repo target kamu:
 # 1. Preview — deteksi stack dan daftar file yang akan ditulis
 npx -p caf-initiator caf-init scaffold --dry-run
 
-# 2. Generate draft (konfirmasi sebelum tiap langkah)
+# 2. Generate draft dan skill CAF (satu ringkasan, satu Enter)
 npx -p caf-initiator caf-init scaffold
 
-# 3. Opsional: tambahkan skill CAF
-npx -p caf-initiator caf-init scaffold skills
-
-# 4. Di AI runner kamu (mis. Claude Code), isi TODO-nya
+# 3. Di AI runner kamu (mis. Claude Code), isi TODO-nya
 /caf-complete-drafts
 
-# 5. Cek hasilnya, lalu review diff dan commit
+# 4. Cek hasilnya, lalu review diff dan commit
 npx -p caf-initiator caf-init curate --check-drafts
 ```
 
@@ -34,13 +31,18 @@ caf-init scaffold
 
 `scaffold` akan:
 
-1. Mendeteksi stack project kamu (framework, package manager, repo mode) dan tracker
-2. Menulis draft knowledge base: `CLAUDE.md`, `AGENTS.md`, `.caf/knowledge/`
+1. Mendeteksi stack project kamu (framework, package manager, repo mode) dan tracker,
+   lalu menampilkan satu ringkasan dan bertanya `Proceed? (Y/n/e)`. Satu Enter bila
+   tracker hanya punya satu sinyal; `--yes` tidak bertanya apa pun
+2. Menulis draft: `CLAUDE.md`, `AGENTS.md`, `.caf/tasks/README.md`, dan golden
+   example di `.caf/knowledge/`
 3. Men-generate lima agent (`caf-planner`, `caf-frontend`, `caf-backend`,
    `caf-validator`, `caf-reviewer`) di `.claude/agents/`, dan slash command
-   pendampingnya (`/caf-plan`, `/caf-run`, `/caf-review`, `/caf-fix-review`)
-4. Menyusun draft Definition of Done, workflow PIV, dan dokumen agent-handoff
-5. Men-generate `/caf-complete-drafts`, command yang mengisi `TODO` yang tersisa
+   pendampingnya (`/caf-plan`, `/caf-run`; `scaffold agents` juga menawarkan
+   `/caf-review` dan `/caf-fix-review`)
+4. Menulis sembilan skill CAF di `.claude/skills/`
+5. Menyusun draft Definition of Done, workflow PIV, dan dokumen agent-handoff
+6. Men-generate `/caf-complete-drafts`, command yang mengisi `TODO` yang tersisa
 
 Semua yang ditulisnya adalah draft deterministik. Review dulu sebelum tim atau agent
 kamu mengandalkannya.
@@ -58,7 +60,7 @@ Review spec-nya, lalu biarkan `/caf-run` membawanya lewat implementasi, validasi
 review di sesi yang sama. Lihat [Spec-Driven Development](/id/docs/sdd) untuk isi spec.
 
 Lihat [CAF Initiator](/id/docs/caf-initiator) untuk referensi command lengkap
-(`scaffold`, `curate`, `docs`, `export`).
+(`scaffold`, `curate`, `export`).
 
 ## 3. Hubungkan CAF Orchestrator
 

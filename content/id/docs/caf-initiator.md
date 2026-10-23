@@ -18,7 +18,7 @@ Validator mengecek hasil kerja terhadap criteria itu, dan tidak ada yang menguba
 yang sudah disetujui. Semua ini adalah instruksi di dalam file yang di-generate;
 `caf-init` tidak mengecek apakah agent mengikutinya.
 
-> CAF Initiator masih pre-1.0 (`v0.1.11`), sudah dipublish ke npm sebagai
+> CAF Initiator masih pre-1.0 (`v0.1.12`), sudah dipublish ke npm sebagai
 > [`caf-initiator`](https://www.npmjs.com/package/caf-initiator). Source:
 > [github.com/coderiumid/caf-initiator](https://github.com/coderiumid/caf-initiator).
 
@@ -28,22 +28,19 @@ yang sudah disetujui. Semua ini adalah instruksi di dalam file yang di-generate;
 # 1. Preview — deteksi stack dan daftar file yang akan ditulis
 npx -p caf-initiator caf-init scaffold --dry-run
 
-# 2. Generate draft (konfirmasi sebelum tiap langkah)
+# 2. Generate draft dan skill CAF (satu ringkasan, satu Enter)
 npx -p caf-initiator caf-init scaffold
 
-# 3. Opsional: tambahkan skill CAF
-npx -p caf-initiator caf-init scaffold skills
-
-# 4. Di AI runner kamu (mis. Claude Code), isi TODO-nya
+# 3. Di AI runner kamu (mis. Claude Code), isi TODO-nya
 /caf-complete-drafts
 
-# 5. Cek hasilnya, lalu review diff dan commit
+# 4. Cek hasilnya, lalu review diff dan commit
 npx -p caf-initiator caf-init curate --check-drafts
 ```
 
 Jalankan dari dalam repository target, atau pakai `--dir <path>`.
 
-![Command caf-init menampilkan scaffold, export, curate, dan docs](/images/caf-cli.webp)
+![Command caf-init menampilkan scaffold, export, dan curate](/images/caf-cli-2.webp)
 
 ## Instalasi
 
@@ -63,10 +60,9 @@ Atau jalankan tanpa install, dengan `npx -p caf-initiator caf-init <command>`.
 ├── AGENTS.md                        # aturan konkret untuk agent (draft)
 ├── .caf/
 │   ├── tasks/README.md              # konvensi artifact per ticket
-│   ├── knowledge/
-│   │   ├── INDEX.md                 # status dokumen referensi opsional
-│   │   ├── golden-examples/         # RULES.md yang menunjuk file terbaik kamu
-│   │   └── decisions/               # draft ADR
+│   ├── knowledge/                   # dibuat saat pertama dipakai, bukan oleh Setup
+│   │   ├── golden-examples/         # RULES.md yang menunjuk file terbaik kamu (`scaffold golden-examples`)
+│   │   └── decisions/               # draft ADR (`scaffold adr`)
 │   ├── workflows/
 │   │   ├── task-completion.md       # Definition of Done
 │   │   ├── piv-workflow.md          # Plan → Implement → Verify
@@ -75,7 +71,7 @@ Atau jalankan tanpa install, dengan `npx -p caf-initiator caf-init <command>`.
 └── .claude/
     ├── agents/caf-*.md              # definisi agent
     ├── commands/caf-*.md            # slash command pendamping
-    └── skills/caf-*/SKILL.md        # hanya dengan `scaffold skills`
+    └── skills/caf-*/SKILL.md        # ditulis oleh langkah Skills di `scaffold`
 ```
 
 Setup juga menambahkan aturan ignore untuk `.caf/discovery/*/` dan `.caf/audits/*/`
@@ -127,41 +123,66 @@ dari desain CAF, dijalankan manual kasus per kasus; hanya saja tidak lagi di-sca
 
 | Command | Fungsinya |
 |---|---|
-| `caf-init scaffold` | Menjalankan seluruh rantai setup, dengan konfirmasi tiap langkah |
+| `caf-init scaffold` | Mendeteksi repo, menampilkan satu ringkasan, lalu menjalankan seluruh rantai setup setelah satu `Proceed?` |
 | `caf-init scaffold <target>` | Menjalankan satu bagian saja |
 | `caf-init curate` | Mengaudit setup CAF yang sudah ada, lalu menawarkan sync section agent dengan template terbaru |
 | `caf-init curate --check-drafts` | Pengecekan read-only atas draft setelah diisi |
 | `caf-init curate baseline` | Mencatat section agent saat ini sebagai baseline tracking |
-| `caf-init docs` | Men-scaffold dokumen referensi opsional di `docs/` |
 | `caf-init export` | Menyalin definisi agent dan command ke AI runner lain |
 
 Setiap command menerima `--dir <path>` (default: direktori saat ini). `--dry-run`
 menampilkan apa yang akan terjadi tanpa menulis.
 
+Command `docs`, yang dulu men-scaffold dokumen referensi opsional di `docs/`, sudah
+dihapus. File `docs/` yang sudah ada di repo tidak disentuh dan `curate` tidak lagi
+mengauditnya. Setup juga tidak lagi menulis `.caf/knowledge/INDEX.md` (tabel status
+dokumen itu) maupun folder kosong `knowledge/decisions/` dan
+`knowledge/golden-examples/`: `scaffold adr` dan `scaffold golden-examples` membuat
+foldernya saat menulis. Repo yang sudah punya `INDEX.md` tetap menyimpannya; `curate`
+mengabaikannya.
+
 ### `caf-init scaffold`
 
-`scaffold` tanpa target menjalankan langkah-langkah ini berurutan, bertanya sebelum
-tiap langkah setelah Setup:
+`scaffold` tanpa target mendeteksi dulu, dan hanya menanyakan apa yang tidak bisa
+disimpulkan:
+
+1. **Detect** (read-only): package manager, monorepo dan app, stack, script, default
+   branch dan git host dari repo target, plus ticket tracker.
+2. **Tracker**: tepat satu tracker yang punya sinyal dipakai dan alasannya
+   ditampilkan; tidak ada atau lebih dari satu membuka picker tanpa pilihan awal.
+   Tracker tidak pernah ditebak.
+3. **Ringkasan** dalam satu layar (repo, tracker dan alasannya, app golden example,
+   agent, file yang dibuat atau dilewati), lalu `Proceed? (Y/n/e)`. Enter lanjut; `e`
+   memungkinkan kamu mengubah tracker, app golden example, atau agent, lalu menampilkan
+   ringkasan lagi; `n` berhenti tanpa menulis apa pun.
+
+Artinya **1 Enter** bila tracker hanya punya satu sinyal, **2** bila ambigu, **0**
+dengan `--yes`. Setelah `Proceed?`, langkah di bawah berjalan tanpa pertanyaan lagi,
+dengan pilihan dari ringkasan. File yang sudah ada tidak pernah ditimpa diam-diam:
+bila ada yang sudah ada dan berbeda, satu pertanyaan tambahan menawarkan *Skip all*
+(default), *Overwrite all*, atau *Choose one by one* (masing-masing default No).
+
+Jalankan langkah satu per satu, dengan pertanyaannya sendiri, lewat
+`scaffold <target>` (nama di tabel).
+
+Langkah-langkahnya, berurutan:
 
 | Langkah | Nama target | Output |
 |---|---|---|
-| Setup | (selalu pertama) | `CLAUDE.md`, `AGENTS.md`, `.caf/tasks/README.md`, `.caf/knowledge/INDEX.md`. Mengecek konfigurasi tool AI yang sudah ada lebih dulu; mendeteksi stack dan tracker |
-| Golden Examples | `golden-examples` | Kamu memilih file referensi; menulis `RULES.md` dengan kerangka do/don't |
+| Setup | (selalu pertama) | `CLAUDE.md`, `AGENTS.md`, `.caf/tasks/README.md`. Tidak menulis apa pun di `.caf/knowledge/`. Mengecek konfigurasi tool AI yang sudah ada lebih dulu; mendeteksi stack dan tracker |
+| Golden Examples | `golden-examples` | Kamu memilih file referensi; menulis `RULES.md` (satu per app) dengan kerangka do/don't. Di monorepo kamu mencentang app yang dipindai (app yang layak dipindai sudah tercentang), dan bisa menjalankan langkah ini lagi nanti untuk app yang belum punya; app yang `RULES.md`-nya sudah ada dilewati |
 | ADR | `adr` | Draft ADR untuk keputusan teknis yang sudah terlihat di repo |
 | Agents | `agents` | Definisi agent yang kamu pilih, plus slash command pendampingnya |
+| Skills | `skills` | `.claude/skills/caf-*/SKILL.md`; menawarkan section pointer `## Skills` untuk definisi agent dari langkah sebelumnya (satu konfirmasi per agent) |
 | Task Completion | `task-completion` | `.caf/workflows/task-completion.md` dari script verify di `package.json` |
 | Workflow | `workflow` | `piv-workflow.md` dan `agent-handoff.md` dari roster agent |
 | AI Draft Completion | `complete-drafts` | Command `/caf-complete-drafts` |
 
-Satu target lagi ada tetapi hanya jalan bila disebut eksplisit:
-
-| Target | Output | Kenapa tidak ada di rantai |
-|---|---|---|
-| `skills` | `.claude/skills/caf-*/SKILL.md` | Ia menawarkan untuk mengedit definisi agent yang sudah ada |
-
 Catatan:
 
 - `scaffold workflow` butuh roster agent; jalankan `scaffold agents` dulu.
+- Langkah Skills berjalan setelah Agents, jadi pointer-nya sampai ke agent yang baru
+  di-generate. Skill yang sudah ada tidak pernah diganti.
 - Agent yang ditawarkan: Planner, Frontend dan Backend, Validator, Reviewer. Di
   monorepo Frontend dan Backend di-assign per app (masing-masing boleh memegang lebih
   dari satu app; agent hasil generate lalu mendaftar semua app di scope-nya dan
@@ -169,18 +190,60 @@ Catatan:
   `- [ ] (apps/web) Fix email validation`). Di `SINGLE_REPO` keduanya dua agent
   seluruh-repo. CAF menyarankan mulai dari Planner plus satu agent implementasi.
 - Command yang ditulis: `/caf-plan` bersama Planner, `/caf-run` (Planner plus satu
-  agent implementasi), `/caf-review` dan `/caf-fix-review` (Reviewer) setelah
-  konfirmasi masing-masing, dan `/caf-complete-drafts` dari langkahnya sendiri.
-- Tracker dideteksi dari `.linear/`, `atlassian.yml`, atau sebutan di README. Kalau
-  tidak ada, kamu ditanya (Linear, Jira, GitHub Issues); tidak pernah di-default diam-diam.
+  agent implementasi, hanya remote GitHub), dan `/caf-complete-drafts` dari langkahnya
+  sendiri. `/caf-review` dan `/caf-fix-review` (Reviewer) tidak di-generate oleh
+  `scaffold` tanpa target, karena keduanya memposting review dan balasan publik di PR;
+  `scaffold agents` menawarkannya, default No.
+- `/caf-run` di-generate oleh flow kapan pun Planner dan satu agent implementasi ada di
+  set. Ringkasan menjelaskan apa yang dilakukannya: bila sukses ia commit, push branch,
+  dan membuka PR tanpa bertanya. Bila ditanyakan sendiri (`scaffold agents`),
+  `Generate /caf-run?` default Yes dan peringatannya tetap ditampilkan dulu.
+- **Hanya GitHub.** `/caf-run` (langkah PR-nya), `/caf-review`, dan `/caf-fix-review`
+  memakai CLI `gh` dan PR GitHub. Bila repo punya remote yang bukan GitHub (GitLab,
+  Bitbucket, ...), ketiganya tidak ditawarkan dan tidak ditulis, dan ringkasan
+  mengatakannya. Repo yang belum punya remote dianggap GitHub.
+- Sinyal tracker, dihitung per tracker (git host saja tidak pernah jadi sinyal):
+  - Linear: `.linear/`, `LINEAR_API_KEY` di `.env*`, atau referensi `linear.app` di
+    dokumen atau konfigurasi repo.
+  - Jira: `atlassian.yml`, `JIRA_*` di `.env*`, atau referensi `atlassian.net`.
+  - GitHub Issues: `.github/ISSUE_TEMPLATE` **dan** remote GitHub.
+  - GitLab Issues: `.gitlab/issue_templates` **dan** remote GitLab.
+
+  README yang menyebut kata "linear" atau "jira" tidak lagi jadi sinyal, dan GitLab
+  Issues adalah pilihan baru. Repo yang mengandalkan sebutan di README kini ditanya,
+  atau memakai `--tracker`.
+- App golden example direkomendasikan bila app itu dijalankan atau di-deploy (script
+  `dev`, `start`, `serve`, atau `preview`), stack-nya dikenali, dan punya file source
+  sungguhan; library `packages/*` bersama dan package yang hanya berisi config tidak.
+  Rekomendasi yang sama dipakai picker (tercentang awal), ringkasan, dan `--yes`.
+  `RULES.md` tetap draft.
+- Draft ADR tidak pernah otomatis di `scaffold` tanpa target: rekomendasi, `--yes`, dan
+  run tanpa TTY semuanya bilang none. Draft dibuat hanya bila kamu mencentang "ADR
+  drafts" di editor `e` atau memberi `--adr`. Keputusan yang sudah punya file ADR
+  dilewati, bukan di-draft lagi dengan nomor berikutnya.
+- Konvensi prompt: setiap prompt punya default, ditandai huruf kapital (`(Y/n)`,
+  `(y/N)`); apa pun yang akan menimpa atau menghapus default-nya No.
+- Banner: `caf-init` tanpa subcommand dan awal `scaffold` mencetak banner "CAF" huruf
+  blok. Banner disembunyikan tanpa TTY, dengan `--yes`, dengan `--no-banner`, dan dengan
+  environment variable `CAF_NO_BANNER`; `NO_COLOR` mencetaknya tanpa warna.
+- Non-interaktif: dengan `--yes`, atau saat stdin atau stdout bukan TTY, tidak ada
+  prompt yang ditampilkan. Bila tracker ambigu, command keluar dengan kode 1 dan
+  menyebut `--tracker`.
 
 Opsi:
 
 | Opsi | Deskripsi | Default |
 |---|---|---|
 | `--dir <path>` | Direktori repo target | direktori saat ini |
-| `--dry-run` | Tampilkan hasil deteksi tanpa menulis apa pun | `false` |
-| `--app <app-path>` | Batasi ke satu app. Dipakai `golden-examples`, `adr`, `agents`, `task-completion` | semua app |
+| `--dry-run` | Tampilkan hasil deteksi dan ringkasan tanpa menulis apa pun | `false` |
+| `--yes` | `scaffold` tanpa target: ambil semua pilihan hasil deteksi atau rekomendasi, tanpa bertanya. Keluar dengan kode 1 (tidak menulis apa pun) bila tracker ambigu. Pada satu target, pertanyaannya memakai default | `false` |
+| `--tracker <linear\|jira\|github\|gitlab>` | `scaffold` tanpa target: set tracker alih-alih mendeteksinya | hasil deteksi |
+| `--apps <a,b>` | `scaffold` tanpa target: app yang dipindai untuk golden example (path atau slug); `--apps none` tidak memindai app mana pun | app yang direkomendasikan |
+| `--adr` | `scaffold` tanpa target: sekaligus men-draft ADR untuk keputusan yang terdeteksi dari stack | off |
+| `--agents <list>` | `scaffold` tanpa target: agent yang di-generate, dari `planner,frontend,backend,validator,reviewer` | agent yang direkomendasikan |
+| `--no-banner` | Jangan cetak banner (atau set `CAF_NO_BANNER=1`) | banner tampil di TTY |
+| `--app <app>` | Batasi ke satu app, lewat path (`apps/api`) atau slug (`api`). Dipakai `golden-examples`, `adr`, `agents`, `task-completion`. Boleh diulang (`--app api --app web`) hanya untuk `scaffold golden-examples`; di tempat lain mengulangnya adalah error | semua app |
+| `--all-apps` | Hanya `scaffold golden-examples`: pindai semua app yang terdeteksi tanpa picker app (pertanyaan file mana yang dipakai tetap jalan per app). Tidak bisa digabung dengan `--app` | off |
 | `--agent-dir <path>` | Tempat definisi agent dibaca dan ditulis | `.claude/agents` |
 | `--command-dir <path>` | Tempat slash command ditulis | `.claude/commands` |
 | `--force` | Timpa file yang sudah ada. Target `agents`: definisi agent dan command-nya. Target `skills`: hanya file `SKILL.md`. Edit manual di file yang ditimpa hilang dan manifest `curate` tidak di-update | `false` |
@@ -190,7 +253,7 @@ Opsi:
 
 ### `caf-init scaffold skills`
 
-Menulis sembilan skill ke `.claude/skills/<name>/SKILL.md`.
+Menulis sembilan skill ke `.claude/skills/<name>/SKILL.md`. Ini juga langkah Skills di `scaffold` tanpa target (tepat setelah Agents); jalankan target-nya sendiri untuk mengulang, misalnya di repo yang di-scaffold lebih awal.
 
 | Skill | Isinya untuk pembaca | Agent yang menunjuknya |
 |---|---|---|
@@ -400,22 +463,6 @@ Pengecekan read-only setelah `/caf-complete-drafts` atau edit manual. Exit code 
 Pengecekan ini mencakup apa yang bisa dibuktikan kode. Apakah isi bisnisnya benar tetap
 kamu yang me-review. Frontmatter agent (`tools:`) tidak tercakup baseline; cek di diff.
 
-### `caf-init docs`
-
-Men-scaffold dokumen referensi opsional. Tidak ada yang wajib untuk pipeline CAF, file
-yang sudah ada tidak pernah ditimpa, dan mode interaktif bertanya per item.
-
-| Item (`--include`) | File |
-|---|---|
-| `product` | `docs/product/prd.md` |
-| `architecture` | `docs/architecture/system-overview.md` |
-| `schema` | `docs/schema/erd.md` |
-| `testing-strategy` | `docs/testing-strategy.md` |
-| `api-contract` | `docs/api-contract.md` (hanya ditawarkan bila frontend dan backend adalah app terpisah di repo yang sama) |
-| `--feature <name...>` | `docs/product/features/<name>.md` |
-
-Juga menerima `--dir`, `--dry-run`, dan `--mode`.
-
 ### `caf-init export`
 
 Menyalin definisi agent Claude Code, slash command, atau keduanya ke AI runner lain,
@@ -592,7 +639,7 @@ Setiap command yang menjalankan deteksi stack lebih dulu menentukan repo mode.
   App-nya adalah package workspace.
 - **`SINGLE_REPO`**: selain itu. Ini bukan error. Root repo adalah satu-satunya app.
 
-`--mode single` atau `--mode mono` meng-override deteksi di `scaffold`, `docs`, dan
+`--mode single` atau `--mode mono` meng-override deteksi di `scaffold` dan
 `curate`. Mode tidak disimpan; berikan lagi di run berikutnya.
 
 Yang berubah di `SINGLE_REPO`:

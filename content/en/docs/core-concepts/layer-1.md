@@ -36,11 +36,12 @@ the spec.
 CLAUDE.md                        # project context for agents
 AGENTS.md                        # concrete rules for agents
 .caf/knowledge/
-  INDEX.md                       # status of the optional reference docs
   golden-examples/               # RULES.md pointing at your best files
   decisions/                     # ADR drafts
-docs/                            # optional reference docs (caf-init docs)
 ```
+
+The `.caf/knowledge/` folders are created on first use (`scaffold golden-examples`,
+`scaffold adr`), not by Setup.
 
 `caf-init scaffold` generates them as **drafts**. CAF Initiator never calls an AI
 model: whatever it could not detect is left as a `TODO`, never guessed. Fill the

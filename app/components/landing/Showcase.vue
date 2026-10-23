@@ -13,7 +13,7 @@ type Slide = {
 }
 
 const slides: Slide[] = [
-  { key: 'cli', icon: 'lucide:terminal', src: '/images/caf-cli.webp', width: 2000, height: 1406, chrome: false, url: '' },
+  { key: 'cli', icon: 'lucide:terminal', src: '/images/caf-cli-2.webp', width: 2000, height: 1417, chrome: false, url: '' },
   { key: 'tui', icon: 'lucide:square-terminal', src: '/images/caf-tui.webp', width: 2000, height: 1390, chrome: false, url: '' },
   { key: 'dashboard', icon: 'lucide:layout-dashboard', src: '/images/caf-agent-floor.webp', width: 2000, height: 1256, chrome: true, url: 'your-vps/dashboard' },
 ]

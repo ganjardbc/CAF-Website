@@ -35,11 +35,12 @@ yang namanya berkaitan dengan ticket dan menyebutnya di `Finding:` pada spec.
 CLAUDE.md                        # konteks proyek untuk agent
 AGENTS.md                        # aturan konkret untuk agent
 .caf/knowledge/
-  INDEX.md                       # status reference docs opsional
   golden-examples/               # RULES.md yang menunjuk file terbaik kamu
   decisions/                     # draft ADR
-docs/                            # reference docs opsional (caf-init docs)
 ```
+
+Folder di `.caf/knowledge/` dibuat saat pertama dipakai (`scaffold golden-examples`,
+`scaffold adr`), bukan oleh Setup.
 
 `caf-init scaffold` men-generate semuanya sebagai **draft**. CAF Initiator tidak
 pernah memanggil model AI: apa pun yang tidak terdeteksi dibiarkan sebagai `TODO`,
